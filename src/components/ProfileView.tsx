@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, Article } from '../types';
-import { Heart, MessageCircle, Send, Bookmark, X } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -85,6 +85,29 @@ const postDetailsMap: Record<number, {
   }
 };
 
+const getCommenterAvatar = (username: string) => {
+  const norm = username.trim().toUpperCase();
+  const avatarMap: Record<string, string> = {
+    "HELVETICA_FAN": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150&h=150",
+    "GRID_SYSTEMS": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150&h=150",
+    "ALEX_M": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150&h=150",
+    "WASM_MASTER": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150&h=150",
+    "M_DOT": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150",
+    "BERN_DESIGN": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=150&h=150",
+    "CUDA_DEV": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150&h=150",
+    "CONTRAST": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150",
+    "STARK_GRAFIK": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150",
+    "ALGO_CURATOR": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150&h=150",
+    "VECTOR_BASE": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150&h=150",
+    "LATENT_SPACE": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150&h=150",
+    "MUELLER_BROCKMANN": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&q=80&w=150&h=150",
+    "ZURICH_TYPO": "https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&q=80&w=150&h=150",
+    "VISITOR": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150&h=150",
+    "ALEX_MORGAN": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150&h=150"
+  };
+  return avatarMap[norm] || `https://api.dicebear.com/7.x/initials/svg?seed=${norm}`;
+};
+
 export default function ProfileView({ 
   user, 
   activeTab, 
@@ -126,14 +149,98 @@ export default function ProfileView({
   const [hacksOpen, setHacksOpen] = useState(false);
 
   const [selectedPost, setSelectedPost] = useState<typeof postsData[number] | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  
   const [customComments, setCustomComments] = useState<Record<number, { user: string; text: string; time: string }[]>>({});
   const [commentInput, setCommentInput] = useState('');
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
   const [savedPosts, setSavedPosts] = useState<Record<number, boolean>>({});
+  const [commentLikes, setCommentLikes] = useState<Record<string, { count: number; userLiked: boolean }>>({});
+  const [shareCopied, setShareCopied] = useState(false);
+
+  // Swipe Carousel logic
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
+  const getCarouselImages = (post: typeof postsData[number]) => {
+    const baseImg = post.img.replace('&w=400&h=400', '&w=1200&h=1200');
+    return [
+      baseImg,
+      `https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=1200&h=1200`,
+      `https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200&h=1200`,
+      `https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=1200&h=1200`
+    ];
+  };
+
+  const handlePrevImage = () => {
+    if (!selectedPost) return;
+    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : prev);
+  };
+  
+  const handleNextImage = () => {
+    if (!selectedPost) return;
+    const images = getCarouselImages(selectedPost);
+    setCurrentImageIndex(prev => prev < images.length - 1 ? prev + 1 : prev);
+  };
+
+  const onTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    setTouchEnd(null);
+    if ('targetTouches' in e) {
+      setTouchStart(e.targetTouches[0].clientX);
+    } else {
+      setTouchStart((e as React.MouseEvent).clientX);
+    }
+  };
+
+  const onTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if ('targetTouches' in e) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    } else if (touchStart !== null) {
+      setTouchEnd((e as React.MouseEvent).clientX);
+    }
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      handleNextImage();
+    }
+    if (isRightSwipe) {
+      handlePrevImage();
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const handleToggleLikeComment = (postId: number, commentIndex: number) => {
+    const key = `${postId}-${commentIndex}`;
+    const baseLikes = (commentIndex * 3 + postId) % 7 + 1;
+    setCommentLikes(prev => {
+      const current = prev[key] || { count: baseLikes, userLiked: false };
+      const nextLiked = !current.userLiked;
+      return {
+        ...prev,
+        [key]: {
+          count: nextLiked ? current.count + 1 : current.count - 1,
+          userLiked: nextLiked
+        }
+      };
+    });
+  };
 
   useEffect(() => {
     if (selectedPost) {
       document.body.style.overflow = 'hidden';
+      setCurrentImageIndex(0);
+      setShowReplies(false);
+      setReplyingTo(null);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -481,168 +588,313 @@ export default function ProfileView({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Dynamic Instagram-style post details modal */}
+      </div>      {/* Dynamic Tech-style post details modal */}
       {selectedPost && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/75 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-lg bg-black/30 animate-fade-in"
           onClick={() => setSelectedPost(null)}
         >
           <div 
-            className="relative w-full max-w-4xl bg-[#111111] text-white border border-neutral-800 rounded-none overflow-hidden shadow-2xl flex flex-col md:flex-row animate-scale-up"
+            className="relative w-full max-w-6xl flex flex-col md:flex-row md:space-x-8 md:items-stretch animate-scale-up md:h-[650px] h-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Tactile Close button with rotation style hover */}
-            <button 
-              onClick={() => setSelectedPost(null)}
-              className="absolute top-4 right-4 z-50 text-white/70 hover:text-white transition-all bg-black/40 hover:bg-black/60 p-2 rounded-full cursor-pointer hover:scale-110 active:scale-95 duration-200"
-              style={{ border: 'none' }}
-            >
-              <X size={18} />
-            </button>
-
-            {/* Left side column: High-resolution full-sized layout image */}
-            <div className="w-full md:w-[55%] bg-[#080808] flex items-center justify-center relative aspect-square md:aspect-auto md:h-[550px] flex-shrink-0">
-              <img 
-                src={selectedPost.img.replace('&w=400&h=400', '&w=1000&h=1000')} 
-                alt={selectedPost.title}
-                className="w-full h-full object-cover grayscale contrast-[1.1] hover:grayscale-0 transition-all duration-700"
-              />
-              <span className="absolute bottom-4 left-4 bg-black/75 border border-neutral-800/80 px-2.5 py-1 text-[9px] font-mono tracking-widest text-[#bbb] uppercase font-bold select-none">
-                // {selectedPost.tag}
-              </span>
-            </div>
-
-            {/* Right side column: Information Curation Panel */}
-            <div className="w-full md:w-[45%] flex flex-col justify-between bg-[#111111] border-t md:border-t-0 md:border-l border-neutral-800 h-[450px] md:h-[550px]">
-              {/* Curator Info header */}
-              <div className="flex items-center space-x-3 p-4 border-b border-neutral-805/80" style={{ borderColor: '#222' }}>
-                <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-[10px] font-mono tracking-widest text-[#eaeaea] font-bold select-none">
-                  AM
-                </div>
-                <div className="text-left">
-                  <span className="font-mono text-xs font-bold text-white uppercase block leading-none">alex_morgan</span>
-                  <span className="text-[9px] font-mono text-neutral-400 tracking-wider uppercase">{selectedPost.tag}</span>
-                </div>
-              </div>
-
-              {/* Feed & comments container block */}
-              <div id="modal-messages-feed" className="flex-1 overflow-y-auto p-4 space-y-4 text-left custom-scrollbar">
-                {/* Main post description caption */}
-                <div className="flex items-start space-x-3 pb-3" style={{ borderBottom: '1px solid #1c1c1c' }}>
-                  <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[9px] font-mono text-white font-bold select-none flex-shrink-0">
-                    AM
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs leading-normal">
-                      <span className="font-mono font-bold text-white mr-2 uppercase">alex_morgan</span>
-                      <span className="text-neutral-300 font-sans">
-                        {postDetailsMap[selectedPost.id]?.caption || selectedPost.title}
-                      </span>
-                    </p>
-                    <span className="text-[9px] font-mono text-neutral-500 uppercase block">1D AGO</span>
-                  </div>
-                </div>
-
-                {/* Prepopulated & dynamic comments */}
-                {((postDetailsMap[selectedPost.id]?.comments || []).concat(customComments[selectedPost.id] || [])).map((comment, idx) => (
-                  <div key={idx} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 rounded-full bg-neutral-850 border border-neutral-700 flex items-center justify-center text-[8px] font-mono text-neutral-300 font-bold select-none flex-shrink-0">
-                      {comment.user.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-xs leading-normal">
-                        <span className="font-mono font-bold text-neutral-100 mr-2 uppercase">{comment.user}</span>
-                        <span className="text-neutral-300 font-sans">{comment.text}</span>
-                      </p>
-                      <div className="flex items-center space-x-2 text-[9px] font-mono text-neutral-500">
-                        <span>{comment.time}</span>
-                        <span>•</span>
-                        <button className="hover:text-white transition-colors cursor-pointer uppercase text-[9px]" style={{ background: 'transparent', border: 'none', padding: 0 }}>REPLY</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Engagement Panel */}
-              <div className="p-4 bg-[#141414] border-t border-neutral-800 flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <button 
-                      onClick={() => setLikedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
-                      className="text-white hover:text-red-500 cursor-pointer transition-all hover:scale-110 active:scale-95 duration-200 bg-transparent border-none p-0"
-                    >
-                      <Heart size={20} fill={likedPosts[selectedPost.id] ? "#ef4444" : "none"} className={likedPosts[selectedPost.id] ? "text-red-500" : ""} />
-                    </button>
-                    <button 
-                      onClick={() => document.getElementById('comment-input-box')?.focus()}
-                      className="text-white hover:text-neutral-300 cursor-pointer transition-all hover:scale-110 active:scale-95 duration-200 bg-transparent border-none p-0"
-                    >
-                      <MessageCircle size={20} />
-                    </button>
-                    <button className="text-white hover:text-neutral-300 cursor-pointer transition-all hover:scale-110 active:scale-95 duration-200 bg-transparent border-none p-0">
-                      <Send size={18} />
-                    </button>
-                  </div>
-                  <button 
-                    onClick={() => setSavedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
-                    className="text-white hover:text-yellow-500 cursor-pointer transition-all hover:scale-110 active:scale-95 duration-200 bg-transparent border-none p-0"
+            {/* Left side column: Tablet-style media container */}
+            <div className="w-full md:w-[58%] flex flex-col justify-start md:h-full flex-shrink-0">
+              {/* Tablet panel with dark grey bezel */}
+              <div 
+                className="w-full flex-1 bg-[#2C2D32] overflow-hidden relative aspect-video md:aspect-auto md:max-h-[580px] select-none rounded-[20px] md:rounded-[32px] p-2 border border-[#40434A]"
+                style={{ 
+                  boxShadow: '0 24px 64px rgba(0, 0, 0, 0.5)'
+                }}
+              >
+                <div 
+                  className="w-full h-full relative rounded-[14px] md:rounded-[24px] overflow-hidden bg-[#1A1C23] touch-pan-y"
+                  onMouseDown={onTouchStart}
+                  onMouseMove={onTouchMove}
+                  onMouseUp={onTouchEnd}
+                  onMouseLeave={onTouchEnd}
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  style={{ cursor: 'grab' }}
+                >
+                  <div 
+                    className="flex w-full h-full transition-transform duration-300 ease-out"
+                    style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
                   >
-                    <Bookmark size={20} fill={savedPosts[selectedPost.id] ? "#eab308" : "none"} className={savedPosts[selectedPost.id] ? "text-yellow-500" : ""} />
+                    {getCarouselImages(selectedPost).map((imgUrl, i) => (
+                      <div key={i} className="flex-shrink-0 w-full h-full">
+                        <img 
+                          src={imgUrl} 
+                          alt={`${selectedPost.title} image ${i + 1}`}
+                          className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
+                          draggable="false"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* Left Chevron */}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  {/* Right Chevron */}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === getCarouselImages(selectedPost).length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                  {/* Pagination Dots */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
+                    {getCarouselImages(selectedPost).map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${currentImageIndex === i ? 'bg-white' : 'bg-white/30'}`}
+                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating Interaction Pill below */}
+              <div className="flex justify-center flex-shrink-0 mt-6 md:mt-8">
+                <div 
+                  className="bg-[#2C2E35]/70 backdrop-blur-xl px-6 py-2.5 rounded-full flex items-center space-x-6 transition-all hover:scale-[1.02] duration-200 select-none cursor-default border border-white/5"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+                  }}
+                >
+                  {/* Like Button */}
+                  <button 
+                    type="button"
+                    onClick={() => setLikedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                  >
+                    <Heart size={14} fill={likedPosts[selectedPost.id] ? "#FFF" : "none"} className={likedPosts[selectedPost.id] ? "text-white" : "text-[#9BA0A8]"} />
+                    <span className="tracking-wide text-[10px]">{likedPosts[selectedPost.id] ? "1,241" : "1,240"}</span>
+                  </button>
+
+                  <span className="h-3 w-[1px] bg-white/10"></span>
+
+                  {/* Save Button */}
+                  <button 
+                    type="button"
+                    onClick={() => setSavedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                  >
+                    <Bookmark size={13} fill={savedPosts[selectedPost.id] ? "#FFF" : "none"} className={savedPosts[selectedPost.id] ? "text-white" : "text-[#9BA0A8]"} />
+                    <span className="tracking-wide text-[10px] uppercase">{savedPosts[selectedPost.id] ? "Saved" : "Save"}</span>
+                  </button>
+
+                  <span className="h-3 w-[1px] bg-white/10"></span>
+
+                  {/* Share Button */}
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const postUrl = `${window.location.origin}${window.location.pathname}?post=${selectedPost.id}`;
+                      navigator.clipboard.writeText(postUrl);
+                      setShareCopied(true);
+                      setTimeout(() => setShareCopied(false), 2000);
+                    }}
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                  >
+                    <Share2 size={13} className={shareCopied ? "text-white" : "text-[#9BA0A8]"} />
+                    <span className="min-w-[40px] text-left uppercase text-[10px] tracking-wide">
+                      {shareCopied ? "COPIED" : "SHARE"}
+                    </span>
                   </button>
                 </div>
-                <div className="text-left">
-                  <p className="text-[11px] font-mono font-bold uppercase text-white leading-none">
-                    {likedPosts[selectedPost.id] ? "1,241 LIKES" : "1,240 LIKES"}
-                  </p>
-                  <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block mt-1">
-                    JUNE 2, 2026 // LOGGED_NODE
+              </div>
+            </div>
+
+            {/* Right side column: Comments Section (Dark Glass) */}
+            <div 
+              className="w-full md:w-[42%] flex flex-col justify-between bg-[#191B21]/80 backdrop-blur-3xl rounded-[20px] md:h-full h-[90vh] overflow-hidden"
+              style={{
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                boxShadow: '0 24px 64px -16px rgba(0, 0, 0, 0.4)'
+              }}
+            >
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 text-left custom-scrollbar animate-fade-in" id="modal-messages-feed" style={{ scrollbarColor: '#3A3D45 transparent', scrollbarWidth: 'thin' }}>
+                
+                {/* Header & Post Wrapper */}
+                <div className="space-y-4">
+                  {/* Profile Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <img 
+                        src={getCommenterAvatar("ALEX_MORGAN")} 
+                        alt="alex_morgan"
+                        className="w-9 h-9 rounded-full object-cover border border-[#3A3D45] flex-shrink-0"
+                      />
+                      <span className="font-sans font-semibold text-[13px] text-[#E4E6EB] tracking-wide block leading-none truncate uppercase">ALEX_MORGAN</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-[#6A6E78] uppercase tracking-widest">1D AGO</span>
+                  </div>
+
+                  {/* Post Caption */}
+                  <div className="mt-4">
+                    <p className="text-[13.5px] md:text-[14px] font-sans text-[#E4E6EB] leading-relaxed font-normal break-words max-w-[65ch]">
+                      {postDetailsMap[selectedPost.id]?.caption || selectedPost.title}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-full h-px bg-[#3A3D45]/40 my-4"></div>
+
+                {/* Comment Section Header */}
+                <div className="pb-1 select-none flex items-center justify-between">
+                  <h3 className="text-[12px] font-mono uppercase tracking-widest text-[#6A6E78] font-extrabold">
+                    // COMMENT SECTION
+                  </h3>
+                  <span className="text-[9px] font-mono text-[#5A5E68] tracking-widest font-semibold uppercase">
+                    {(postDetailsMap[selectedPost.id]?.comments || []).length + (customComments[selectedPost.id] || []).length} ACTIVE LOGS
                   </span>
+                </div>
+
+                {/* Vertical Comment Hierarchy */}
+                <div className="space-y-1 text-white relative">
+                  {((postDetailsMap[selectedPost.id]?.comments || []).concat(customComments[selectedPost.id] || [])).map((comment, idx) => {
+                    const commentKey = `${selectedPost.id}-${idx}`;
+                    const baseLikes = ((idx * 3 + selectedPost.id) % 5) + 1;
+                    const likeState = commentLikes[commentKey] || { count: baseLikes, userLiked: false };
+
+                    if (idx > 0 && !showReplies) return null;
+
+                    return (
+                      <div 
+                        key={idx} 
+                        className={idx === 0 
+                          ? "p-4 bg-[#252830]/40 rounded-[16px] relative z-10 transition-all duration-150 group border border-white/5"
+                          : "pt-3 pb-1 relative z-10 group ml-10"}
+                      >
+                         {/* Threading connector for indented replies */}
+                         {idx > 0 && (
+                            <div className="absolute left-[-20px] top-7 w-[12px] h-px bg-[#4A4E58]"></div>
+                         )}
+                         {idx > 0 && (
+                            <div className="absolute left-[-20px] bottom-0 top-[-20px] w-px bg-[#4A4E58]"></div>
+                         )}
+
+                        <div className="flex items-start justify-between space-x-3">
+                          <div className="flex items-start space-x-3 flex-1 min-w-0">
+                            {/* Tiny circular portrait profile image */}
+                            <img 
+                              src={getCommenterAvatar(comment.user)} 
+                              alt={comment.user}
+                              className="w-7 h-7 rounded-full object-cover border border-[#3A3D45] flex-shrink-0 z-10"
+                            />
+                            <div className="space-y-1 flex-1 text-left min-w-0 pt-0.5">
+                              {/* Username */}
+                              <div className="flex items-baseline space-x-2">
+                                <span className="font-sans font-medium text-[#D0D4DC] text-[12px] tracking-tight uppercase truncate">{comment.user}</span>
+                              </div>
+
+                              {/* Comment text body */}
+                              <p className="text-[13px] md:text-[13.5px] font-sans text-[#A0A5B1] leading-relaxed font-normal break-words mt-0.5 max-w-[62ch]">
+                                {comment.text}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Miniaturized Interaction: Vertically stacked line icons (heart, reply) */}
+                          <div className="flex flex-col items-center justify-center space-y-1.5 flex-shrink-0 ml-2 select-none pt-1">
+                            <button 
+                              type="button" 
+                              onClick={() => handleToggleLikeComment(selectedPost.id, idx)}
+                              className={`text-[#6A6E78] hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer ${likeState.userLiked ? 'text-white' : ''}`}
+                            >
+                              <Heart size={12} fill={likeState.userLiked ? "#FFF" : "none"} className={likeState.userLiked ? "" : ""} />
+                            </button>
+                            <span className="text-[9px] font-mono text-[#6A6E78] leading-none mb-1 font-bold">{likeState.count}</span>
+                            <button 
+                              type="button"
+                              onClick={() => setReplyingTo(comment.user)}
+                              className="text-[#6A6E78] hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer"
+                              title="Reply"
+                            >
+                              <Reply size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* View all replies pseudo-button */}
+                  {((postDetailsMap[selectedPost.id]?.comments || []).concat(customComments[selectedPost.id] || [])).length > 1 && (
+                    <div className="pl-14 pt-2 pb-2">
+                       <button 
+                         type="button"
+                         onClick={() => setShowReplies(!showReplies)}
+                         className="text-[11px] font-sans text-[#4A85F6] hover:text-[#7AA8FF] cursor-pointer transition-colors block bg-transparent border-none p-0"
+                       >
+                         {showReplies ? "Hide replies" : `View all replies (${((postDetailsMap[selectedPost.id]?.comments || []).concat(customComments[selectedPost.id] || [])).length - 1})`}
+                       </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Dynamic Curation Comment input */}
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!commentInput.trim()) return;
-                  const newComment = {
-                    user: "VISITOR",
-                    text: commentInput,
-                    time: "Just now"
-                  };
-                  setCustomComments(prev => ({
-                    ...prev,
-                    [selectedPost.id]: [...(prev[selectedPost.id] || []), newComment]
-                  }));
-                  setCommentInput('');
-                  setTimeout(() => {
-                    const feed = document.getElementById('modal-messages-feed');
-                    if (feed) feed.scrollTop = feed.scrollHeight;
-                  }, 50);
-                }}
-                className="border-t border-neutral-800 p-3 bg-[#0d0d0d] flex items-center justify-between"
-              >
-                <input 
-                  id="comment-input-box"
-                  type="text"
-                  placeholder="Record comment in node logs..."
-                  value={commentInput}
-                  onChange={(e) => setCommentInput(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder-neutral-500 px-2 py-1 font-mono"
-                  autoComplete="off"
-                />
-                <button 
-                  type="submit" 
-                  disabled={!commentInput.trim()}
-                  className="text-xs font-mono font-bold text-white/95 hover:text-white disabled:text-neutral-600 transition-all font-semibold tracking-widest px-2 uppercase cursor-pointer hover:scale-105 active:scale-95 duration-150"
-                  style={{ background: 'transparent', border: 'none' }}
+              {/* Input Area */}
+              <div className="flex flex-col bg-[#191B21] border-t border-white/5 flex-shrink-0">
+                {replyingTo && (
+                  <div className="px-5 pt-3 pb-1 flex justify-between items-center animate-fade-in relative">
+                    <span className="text-[10px] font-sans text-[#8B909A]">Replying to <span className="text-[#E4E6EB] font-medium">@{replyingTo}</span></span>
+                    <button type="button" onClick={() => setReplyingTo(null)} className="text-[#6A6E78] hover:text-white bg-transparent border-none p-0 cursor-pointer absolute right-5"><X size={12} /></button>
+                  </div>
+                )}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!commentInput.trim()) return;
+                    const newComment = {
+                      user: "VISITOR",
+                      text: replyingTo ? `@${replyingTo} ${commentInput}` : commentInput,
+                      time: "Just now"
+                    };
+                    setCustomComments(prev => ({
+                      ...prev,
+                      [selectedPost.id]: [...(prev[selectedPost.id] || []), newComment]
+                    }));
+                    setCommentInput('');
+                    setReplyingTo(null);
+                    setTimeout(() => {
+                      const feed = document.getElementById('modal-messages-feed');
+                      if (feed) feed.scrollTop = feed.scrollHeight;
+                    }, 50);
+                  }}
+                  className="px-5 py-3 flex items-center justify-between gap-3 w-full"
                 >
-                  POST
-                </button>
-              </form>
+                  <div 
+                    className="flex-1 flex items-center bg-[#252830]/80 hover:bg-[#2A2D35] focus-within:bg-[#2A2D35] transition-all duration-200 px-4 py-1.5 rounded-xl border border-white/5"
+                  >
+                    <input 
+                      id="comment-input-box"
+                      type="text"
+                      placeholder="Record comment in node..."
+                      value={commentInput}
+                      onChange={(e) => setCommentInput(e.target.value)}
+                      className="flex-1 bg-transparent border-none outline-none text-[12px] text-white placeholder-[#6A6E78] font-mono py-1"
+                      autoComplete="off"
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={!commentInput.trim()}
+                    className="text-[11px] font-mono font-bold text-[#3FB495] hover:text-[#52D2B0] disabled:text-[#3A4349] transition-colors py-2 pl-2 pr-1 uppercase cursor-pointer hover:scale-105 active:scale-95 duration-150 tracking-widest flex-shrink-0"
+                    style={{ background: 'transparent', border: 'none' }}
+                  >
+                    POST
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
