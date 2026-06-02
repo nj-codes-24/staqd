@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import StudyView from './StudyView';
+import SubscriptionModal from './SubscriptionModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
 
@@ -58,6 +59,7 @@ export default function Dashboard({
   const [isSearching, setIsSearching] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
 
   // Custom Paper Upload Feature States (strictly bound inside Dashboard for Knowledge Hub)
   const [showStudyView, setShowStudyView] = useState(false);
@@ -210,7 +212,15 @@ export default function Dashboard({
           </nav>
 
           {/* Far Right widgets */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4 md:space-x-6">
+            {/* Subscribe Button */}
+            <button 
+              onClick={() => setIsSubscriptionModalOpen(true)}
+              className="px-5 py-1.5 rounded-full border border-neutral-300 hover:border-neutral-400 bg-white shadow-sm hover:shadow-md text-[10px] sm:text-xs font-mono uppercase tracking-widest text-neutral-700 font-bold hover:scale-105 active:scale-95 transition-all duration-200"
+            >
+              Subscribe
+            </button>
+            
             {/* Profile Avatar Trigger */}
             <button 
               id="head-avatar-circle"
@@ -612,6 +622,12 @@ export default function Dashboard({
 
           </div>
         </footer>
+
+        {/* Subscription Modal Render */}
+        <SubscriptionModal 
+          isOpen={isSubscriptionModalOpen} 
+          onClose={() => setIsSubscriptionModalOpen(false)} 
+        />
 
       </div>
     </div>
