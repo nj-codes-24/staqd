@@ -1,0 +1,6 @@
+{
+  "name": "ZID Portal",
+  "description": "ZID is an ultra-minimalist platform where student builders learn, build, and grow together.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
