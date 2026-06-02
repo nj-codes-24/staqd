@@ -14,8 +14,13 @@ import {
   Terminal,
   Activity,
   Filter,
-  CheckCircle2
+  CheckCircle2,
+  X,
+  Plus,
+  UploadCloud
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import StudyView from './StudyView';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
 
@@ -34,6 +39,7 @@ interface DashboardProps {
   articles: Article[];
   onToggleBookmark: (articleId: string) => void;
   onViewSubTopicAll?: (subTopic: string) => void;
+  onPaperGenerated: (newArticle: Article) => void;
 }
 
 export default function Dashboard({ 
@@ -44,12 +50,51 @@ export default function Dashboard({
   onLogout,
   articles,
   onToggleBookmark,
-  onViewSubTopicAll
+  onViewSubTopicAll,
+  onPaperGenerated
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
+
+  // Custom Paper Upload Feature States (strictly bound inside Dashboard for Knowledge Hub)
+  const [showStudyView, setShowStudyView] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const handleFileUpload = () => {
+    setIsUploadModalOpen(false);
+    setShowStudyView(true);
+    setIsGenerating(true);
+    
+    // Simulate generation time
+    setTimeout(() => {
+      setIsGenerating(false);
+      setShowStudyView(false);
+      
+      const newArticle: Article = {
+        id: `custom-paper-${Date.now()}`,
+        title: "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
+        author: {
+          name: "DR. EVELYN MOSS",
+          avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+          role: "AUTHOR"
+        },
+        publishedAt: "MAY 2026",
+        excerpt: "Custom uploaded paper.",
+        content: "Uploaded custom paper full text.",
+        category: "Research",
+        imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
+        likes: 0,
+        readTime: "15 min read",
+        isBookmarked: true
+      };
+      
+      onPaperGenerated(newArticle);
+    }, 6000); // Wait 6 seconds before revealing
+  };
 
   // Hardcoded category list exactly as requested
   const CATEGORIES = [
@@ -97,6 +142,17 @@ export default function Dashboard({
   const currentSubTopics = useMemo(() => {
     return KNOWLEDGE_HUB_DATA[selectedCategory] || [];
   }, [selectedCategory]);
+
+  const searchResults = useMemo(() => {
+    if (!isSearching || !searchQuery.trim()) return null;
+    const query = searchQuery.toLowerCase();
+    return articles.filter(a => 
+      a.title.toLowerCase().includes(query) ||
+      a.category.toLowerCase().includes(query) ||
+      a.author.name.toLowerCase().includes(query) ||
+      getArticleSource(a.id).toLowerCase().includes(query)
+    );
+  }, [isSearching, searchQuery, articles]);
 
   return (
     <div id="magazine-mockup-wrapper" className="min-h-screen bg-[#ded9cf] md:py-8 font-sans antialiased text-[#1c1c1c] selection:bg-[#c2b29f]">
@@ -155,14 +211,6 @@ export default function Dashboard({
 
           {/* Far Right widgets */}
           <div className="flex items-center space-x-6">
-            <button 
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-1.5 text-neutral-500 hover:text-black transition rounded cursor-pointer"
-              title="Search database"
-            >
-              <Search className="h-4.5 w-4.5" />
-            </button>
-
             {/* Profile Avatar Trigger */}
             <button 
               id="head-avatar-circle"
@@ -180,32 +228,6 @@ export default function Dashboard({
           </div>
         </header>
 
-        {/* Dynamic global search drawer */}
-        {isSearchOpen && (
-          <div className="bg-[#f5f1e8] border-b border-[#e5dec9] p-4 px-6 md:px-10 flex items-center justify-between animate-fade-in">
-            <div className="flex items-center space-x-3 w-full max-w-xl">
-              <Search className="h-4.5 w-4.5 text-neutral-600" />
-              <input 
-                type="text" 
-                placeholder="Query articles, sub-topics, authors, formulas..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent outline-none border-b border-[#c2bba8] text-sm text-neutral-900 placeholder-neutral-500 font-serif italic py-1"
-                autoFocus
-              />
-            </div>
-            <button 
-              onClick={() => {
-                setSearchQuery('');
-                setIsSearchOpen(false);
-              }}
-              className="text-xs font-mono uppercase text-neutral-500 hover:text-black ml-4"
-            >
-              Close
-            </button>
-          </div>
-        )}
-
         {/* HERO TITLE SECTION - Dynamic based on active page with scaling support */}
         <div className="pt-12 pb-8 border-b border-[#ece8df]">
           <h1 className="font-serif font-black text-center text-neutral-950 uppercase leading-none tracking-tight select-none px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[8vw] transition-all duration-300">
@@ -215,80 +237,104 @@ export default function Dashboard({
 
         {/* KNOWLEDGE HUB VIEW STAGE */}
         {currentMenuTab === 'hub' ? (
-          <div className="flex-1 flex flex-col">
-            
-            {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
-            <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between gap-4 bg-[#faf9f6]/40">
-              
-              {/* Category horizontal scrolling pills */}
-              <div className="flex-1 overflow-x-auto flex gap-2 py-1 no-scrollbar pr-4">
-                {CATEGORIES.map((cat) => {
-                  const isActive = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-4.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-200 border cursor-pointer flex-shrink-0 ${
-                        isActive 
-                          ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' 
-                          : 'bg-transparent text-[#7c7569] border-[#e1dacb] hover:border-[#1a1a1a] hover:text-black'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* On the far right: Replace entry count with "Filter" action */}
-              <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="flex items-center space-x-1.5 border border-[#e1dacb] hover:border-black text-[10px] font-mono uppercase tracking-widest px-4 py-1.5 rounded-md transition bg-[#fbfaf8]/80 cursor-pointer text-neutral-700 flex-shrink-0"
-              >
-                <Filter className="h-3 w-3" />
-                <span>Filter</span>
-              </button>
-            </div>
-
-            {/* MAIN CONTENT SPACE - POPULATE BY SELECTED CATEGORY'S SUB-TOPICS */}
-            <div className="flex-1 divide-y-2 divide-[#ece8df]/70">
-              
-              {currentSubTopics.length > 0 ? (
-                currentSubTopics.map((subTopic, sIdx) => {
-                  const featured = subTopic.featuredArticle;
-                  const carousel = subTopic.carouselArticles;
-                  const allArticles = [featured, ...carousel];
-
-                  return (
-                    <div key={`${subTopic.name}-${sIdx}`} className="p-6 md:p-10 space-y-6 text-left">
-                      
-                      {/* Sub-topic Section Title Header */}
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3">
-                          {subTopic.name}
-                        </h2>
+          <>
+            {showStudyView ? (
+              <StudyView 
+                isGenerating={isGenerating}
+                onBack={() => setShowStudyView(false)}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col">
+                
+                {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
+                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between gap-4 bg-[#faf9f6]/40 overflow-hidden relative">
+                  
+                  <AnimatePresence mode="wait">
+                    {!isSearching ? (
+                      <motion.div 
+                        key="pills"
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -50, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 overflow-x-auto flex gap-2 py-1 no-scrollbar pr-4 relative z-10"
+                      >
+                        {CATEGORIES.map((cat) => {
+                          const isActive = selectedCategory === cat;
+                          return (
+                            <button
+                              key={cat}
+                              onClick={() => setSelectedCategory(cat)}
+                              className={`px-4.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-200 border cursor-pointer flex-shrink-0 ${
+                                isActive 
+                                  ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' 
+                                  : 'bg-transparent text-[#7c7569] border-[#e1dacb] hover:border-[#1a1a1a] hover:text-black'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="search-input"
+                        initial={{ x: 50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 50, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 flex items-center bg-white border border-[#1a1a1a] rounded-full px-5 h-[42px] mr-2 shadow-sm z-10"
+                      >
+                        <Search className="w-4 h-4 text-neutral-400 mr-3" />
+                        <input 
+                          type="text"
+                          placeholder="Search papers by title, topic, or publisher..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="flex-1 bg-transparent border-none outline-none text-sm font-sans placeholder-neutral-400 text-neutral-900"
+                          autoFocus
+                        />
                         <button 
-                          onClick={() => onViewSubTopicAll?.(subTopic.name)}
-                          className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] hover:text-[#1a1a1a] transition font-bold"
+                          onClick={() => {
+                            setSearchQuery('');
+                            setIsSearching(false);
+                          }}
+                          className="text-neutral-500 hover:text-neutral-900 ml-2"
                         >
-                          View All →
+                          <X className="w-4 h-4" />
                         </button>
-                      </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                      {/* SWIPEABLE ROW OF CAROUSEL ITEMS FOR THIS SUB-TOPIC */}
-                      <div className="space-y-3">
-                        {/* Scrolling Container */}
-                        <div className="overflow-x-auto flex gap-6 pb-4 no-scrollbar snap-x pt-1">
-                          {allArticles.map((article) => (
+                  {/* On the far right: Search action */}
+                  {!isSearching && (
+                    <button 
+                      onClick={() => setIsSearching(true)}
+                      className="flex items-center justify-center border border-[#e1dacb] hover:border-black rounded-full h-[38px] w-[38px] transition bg-[#fbfaf8]/80 cursor-pointer text-neutral-700 flex-shrink-0 z-10"
+                    >
+                      <Search className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* MAIN CONTENT SPACE - POPULATE BY SELECTED CATEGORY'S SUB-TOPICS OR SEARCH */}
+                <div className="flex-1 divide-y-2 divide-[#ece8df]/70 min-h-[400px]">
+                  
+                  {searchResults ? (
+                    searchResults.length > 0 ? (
+                      <div className="p-6 md:p-10">
+                        <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3 mb-6">
+                          Search Results for "{searchQuery}"
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                          {searchResults.map((article) => (
                             <div 
                               key={article.id}
                               onClick={() => onSelectArticle(article)}
-                              className="group w-[280px] sm:w-[320px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+                              className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100"
                             >
-                              {/* Thumbnail */}
-                              <div 
-                                className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative"
-                              >
+                              <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
                                 <img 
                                   src={article.imageUrl} 
                                   alt={article.title}
@@ -296,55 +342,196 @@ export default function Dashboard({
                                   className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
                                 />
                               </div>
-
-                              {/* Title / Description & Widgets */}
-                              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
-                                    <span>{getArticleSource(article.id)} • {article.author.name}</span>
-                                    <span>{article.publishedAt}</span>
-                                  </div>
-                                  <h4 
-                                    className="text-xs sm:text-sm font-serif font-black text-neutral-900 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
-                                  >
-                                    {article.title}
-                                  </h4>
-                                  <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                              <div className="p-5 flex-1 flex flex-col space-y-3">
+                                <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                  <span>{getArticleSource(article.id)}</span>
+                                  <span>{article.readTime}</span>
+                                </div>
+                                <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                                  {article.title}
+                                </h3>
+                                <div className="mt-auto pt-3">
+                                  <p className="text-[11px] font-serif italic text-neutral-600 line-clamp-2 leading-relaxed">
                                     {article.excerpt}
                                   </p>
-                                </div>
-
-                                {/* Bottom widgets bar */}
-                                <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
-                                  <span>{article.readTime}</span>
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onToggleBookmark(article.id);
-                                    }}
-                                    className="p-1 text-neutral-400 hover:text-black transition"
-                                    title="Save index"
-                                  >
-                                    <Bookmark className={`h-3.5 w-3.5 ${article.isBookmarked ? 'fill-black text-black' : ''}`} />
-                                  </button>
                                 </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 pt-16 pb-24">
+                        <div 
+                            className={`w-full max-w-2xl h-80 rounded-[32px] border-2 border-dashed flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-md ${isDragActive ? 'border-indigo-500 bg-indigo-50/50 scale-[1.02]' : 'border-neutral-300 bg-[#f8f7f5] hover:bg-white hover:border-neutral-400 hover:shadow-lg'}`}
+                            onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                            onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                            onClick={handleFileUpload}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <div className={`p-5 rounded-full mb-6 transition-colors ${isDragActive ? 'bg-indigo-100 text-indigo-600' : 'bg-white shadow border border-neutral-200 text-neutral-500'}`}>
+                              <UploadCloud size={32} />
+                            </div>
+                            <p className="text-neutral-900 font-sans font-medium text-[17px] text-center max-w-md px-4 leading-relaxed">
+                              No papers found for '{searchQuery}'.<br/>
+                              <span className="text-neutral-500 text-[14.5px] mt-2 block font-normal">
+                                Drop a PDF here and our AI will generate a summary, audio, and cue cards instantly.
+                              </span>
+                            </p>
+                          </div>
+                      </div>
+                    )
+                  ) : currentSubTopics.length > 0 ? (
+                    currentSubTopics.map((subTopic, sIdx) => {
+                      const featured = subTopic.featuredArticle;
+                      const carousel = subTopic.carouselArticles;
+                      const allArticles = [featured, ...carousel];
 
+                      return (
+                        <div key={`${subTopic.name}-${sIdx}`} className="p-6 md:p-10 space-y-6 text-left">
+                          
+                          {/* Sub-topic Section Title Header */}
+                          <div className="flex items-center justify-between">
+                            <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3">
+                              {subTopic.name}
+                            </h2>
+                            <button 
+                              onClick={() => onViewSubTopicAll?.(subTopic.name)}
+                              className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] hover:text-[#1a1a1a] transition font-bold"
+                            >
+                              View All →
+                            </button>
+                          </div>
+
+                          {/* SWIPEABLE ROW OF CAROUSEL ITEMS FOR THIS SUB-TOPIC */}
+                          <div className="space-y-3">
+                            {/* Scrolling Container */}
+                            <div className="overflow-x-auto flex gap-6 pb-4 no-scrollbar snap-x pt-1">
+                              {allArticles.map((article) => (
+                                <div 
+                                  key={article.id}
+                                  onClick={() => onSelectArticle(article)}
+                                  className="group w-[280px] sm:w-[320px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+                                >
+                                  {/* Thumbnail */}
+                                  <div 
+                                    className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative"
+                                  >
+                                    <img 
+                                      src={article.imageUrl} 
+                                      alt={article.title}
+                                      referrerPolicy="no-referrer"
+                                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                                    />
+                                  </div>
+
+                                  {/* Title / Description & Widgets */}
+                                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                        <span>{getArticleSource(article.id)} • {article.author.name}</span>
+                                        <span>{article.publishedAt}</span>
+                                      </div>
+                                      <h4 
+                                        className="text-xs sm:text-sm font-serif font-black text-neutral-900 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
+                                      >
+                                        {article.title}
+                                      </h4>
+                                      <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                                        {article.excerpt}
+                                      </p>
+                                    </div>
+
+                                    {/* Bottom widgets bar */}
+                                    <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
+                                      <span>{article.readTime}</span>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onToggleBookmark(article.id);
+                                        }}
+                                        className="p-1 text-neutral-400 hover:text-black transition"
+                                        title="Save index"
+                                      >
+                                        <Bookmark className={`h-3.5 w-3.5 ${article.isBookmarked ? 'fill-black text-black' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="p-16 text-center">
+                      <p className="text-sm font-mono text-[#7c7569]">No sub-topics are defined currently for {selectedCategory}.</p>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="p-16 text-center">
-                  <p className="text-sm font-mono text-[#7c7569]">No sub-topics are defined currently for {selectedCategory}.</p>
-                </div>
-              )}
+                  )}
 
-            </div>
-          </div>
+                </div>
+              </div>
+            )}
+
+            {/* FAB Trigger for Custom Paper Upload */}
+            {!showStudyView && (
+              <button 
+                onClick={() => setIsUploadModalOpen(true)}
+                className="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/60 flex items-center justify-center text-slate-800 hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-white"
+              >
+                <Plus size={32} strokeWidth={1.5} />
+              </button>
+            )}
+
+            {/* Custom Paper Upload Modal */}
+            <AnimatePresence>
+              {isUploadModalOpen && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FAF7F2]/60 backdrop-blur-md"
+                  onClick={() => setIsUploadModalOpen(false)}
+                >
+                  <motion.div 
+                    initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-[32px] p-8 shadow-[0_24px_64px_rgba(0,0,0,0.1)] border border-white"
+                  >
+                    <div className="text-center mb-6">
+                      <h2 className="text-2xl font-sans font-bold text-slate-900 tracking-tight">Upload Document</h2>
+                      <p className="text-stone-500 font-medium text-sm mt-2">Drag and drop your PDF or paper to generate a study session.</p>
+                    </div>
+
+                    <div 
+                      className={`w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-colors duration-300 ${isDragActive ? 'border-indigo-500 bg-indigo-50/50' : 'border-stone-300 bg-stone-50/50 hover:bg-stone-100/50 hover:border-stone-400'}`}
+                      onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                      onClick={handleFileUpload}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className={`p-4 rounded-full mb-4 transition-colors ${isDragActive ? 'bg-indigo-100 text-indigo-600' : 'bg-stone-200/50 text-stone-500'}`}>
+                        <UploadCloud size={32} />
+                      </div>
+                      <p className="text-stone-600 font-medium text-sm">
+                        {isDragActive ? "Drop file to upload" : "Click or drag paper here"}
+                      </p>
+                      <p className="text-stone-400 text-xs mt-1">Supports PDF, DOCX, TXT</p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
         ) : (
           
           /* HACKS VIEW STAGE */
