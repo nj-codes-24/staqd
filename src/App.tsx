@@ -5,11 +5,13 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Plus, UploadCloud } from 'lucide-react';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import ArticleView from './components/ArticleView';
 import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
+import StudyView from './components/StudyView';
 import { UserProfile, Article } from './types';
 import { INITIAL_USER, MOCK_ARTICLES } from './data';
 
@@ -20,6 +22,49 @@ export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>(MOCK_ARTICLES);
+  
+  // Custom Paper Upload Feature States
+  const [showStudyView, setShowStudyView] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleFileUpload = () => {
+    setIsUploadModalOpen(false);
+    setShowStudyView(true);
+    setIsGenerating(true);
+    setSelectedArticle(null);
+    setActiveSubTopic(null);
+    
+    // Simulate generation time
+    setTimeout(() => {
+      setIsGenerating(false);
+      setShowStudyView(false);
+      
+      const newArticle: Article = {
+        id: `custom-paper-${Date.now()}`,
+        title: "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
+        authors: ["DR. EVELYN MOSS"],
+        publishedDate: "MAY 2026",
+        source: "SCIENCEDIRECT PUBLICATION",
+        abstract: "Uploaded custom paper.",
+        fullText: "Uploaded custom paper full text.",
+        topics: ["Research", "Jewelry"],
+        saved: true,
+        summary: {
+          points: [
+            "Custom paper summary."
+          ],
+          audioUrl: "mock"
+        },
+        rating: 99,
+        readTimeMinutes: 15
+      };
+      
+      setArticles(prev => [newArticle, ...prev]);
+      setSelectedArticle(newArticle);
+    }, 6000); // Wait 6 seconds before revealing
+  };
 
   // Toggle bookmark function
   const handleToggleBookmark = (articleId: string) => {
@@ -136,8 +181,68 @@ export default function App() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
+            {/* FAB Trigger for Custom Paper Upload */}
+            {!showStudyView && !selectedArticle && (
+              <button 
+                onClick={() => setIsUploadModalOpen(true)}
+                className="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/60 flex items-center justify-center text-slate-800 hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-white"
+              >
+                <Plus size={32} strokeWidth={1.5} />
+              </button>
+            )}
+
+            {/* Custom Paper Upload Modal */}
+            <AnimatePresence>
+              {isUploadModalOpen && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FAF7F2]/60 backdrop-blur-md"
+                  onClick={() => setIsUploadModalOpen(false)}
+                >
+                  <motion.div 
+                    initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-[32px] p-8 shadow-[0_24px_64px_rgba(0,0,0,0.1)] border border-white"
+                  >
+                    <div className="text-center mb-6">
+                      <h2 className="text-2xl font-sans font-bold text-slate-900 tracking-tight">Upload Document</h2>
+                      <p className="text-stone-500 font-medium text-sm mt-2">Drag and drop your PDF or paper to generate a study session.</p>
+                    </div>
+
+                    <div 
+                      className={`w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-colors duration-300 ${isDragActive ? 'border-indigo-500 bg-indigo-50/50' : 'border-stone-300 bg-stone-50/50 hover:bg-stone-100/50 hover:border-stone-400'}`}
+                      onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                      onClick={handleFileUpload}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className={`p-4 rounded-full mb-4 transition-colors ${isDragActive ? 'bg-indigo-100 text-indigo-600' : 'bg-stone-200/50 text-stone-500'}`}>
+                        <UploadCloud size={32} />
+                      </div>
+                      <p className="text-stone-600 font-medium text-sm">
+                        {isDragActive ? "Drop file to upload" : "Click or drag paper here"}
+                      </p>
+                      <p className="text-stone-400 text-xs mt-1">Supports PDF, DOCX, TXT</p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Conditional Subtree Routing */}
-            {selectedArticle ? (
+            {showStudyView ? (
+              <StudyView 
+                isGenerating={isGenerating}
+                onBack={() => setShowStudyView(false)}
+              />
+            ) : selectedArticle ? (
               <ArticleView 
                 article={selectedArticle}
                 user={userProfile}
