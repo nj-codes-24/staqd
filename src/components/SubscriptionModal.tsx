@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CreditCard, X, ChevronRight } from 'lucide-react';
+import { CreditCard, X, ChevronRight, Lock } from 'lucide-react';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isBookOpen: boolean;
+  setIsBookOpen: (open: boolean) => void;
+  isCheckRevealed: boolean;
+  setIsCheckRevealed: (revealed: boolean) => void;
 }
 
 const PerforatedEdge = ({ position = 'top' }: { position?: 'top' | 'bottom' }) => (
@@ -22,27 +26,53 @@ const PerforatedEdge = ({ position = 'top' }: { position?: 'top' | 'bottom' }) =
         : 'radial-gradient(circle at 6px 100%, transparent 4px, black 4.5px)',
       WebkitMaskSize: '12px 100%',
       WebkitMaskRepeat: 'repeat-x',
+      WebkitMaskRepeatX: 'repeat',
     }}
   />
 );
 
-export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
-  const [isBookOpen, setIsBookOpen] = useState(false);
-  const [isCheckRevealed, setIsCheckRevealed] = useState(false);
+export default function SubscriptionModal({ 
+  isOpen, 
+  onClose,
+  isBookOpen,
+  setIsBookOpen,
+  isCheckRevealed,
+  setIsCheckRevealed
+}: SubscriptionModalProps) {
+  const [checkoutStep, setCheckoutStep] = useState<'pitch' | 'payment'>('pitch');
+  const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
+  const [fullName, setFullName] = useState('');
+  const [country, setCountry] = useState('IN');
+  const [gstNumber, setGstNumber] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvc, setCvc] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
       setIsBookOpen(false); // Reset to closed when re-opened
       setIsCheckRevealed(false); // Reset to unrevealed
+      setCheckoutStep('pitch'); // Reset to pitch
+      setPlanType('monthly');
+      setFullName('');
+      setCountry('IN');
+      setGstNumber('');
+      setCardNumber('');
+      setExpiry('');
+      setCvc('');
+      setIsSubmitting(false);
+      setSubmitSuccess(false);
     }
-  }, [isOpen]);
+  }, [isOpen, setIsBookOpen, setIsCheckRevealed]);
 
   // When book is closed, keep check unrevealed as well
   useEffect(() => {
     if (!isBookOpen) {
       setIsCheckRevealed(false);
     }
-  }, [isBookOpen]);
+  }, [isBookOpen, setIsCheckRevealed]);
 
   return (
     <AnimatePresence>
@@ -54,6 +84,112 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
           className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-md overflow-hidden"
           onClick={onClose}
         >
+          {/* Custom style block for smooth animations and technical texture */}
+          <style>{`
+            @keyframes shimmer-sweep {
+              0% {
+                background-position: -200% 0;
+              }
+              100% {
+                background-position: 200% 0;
+              }
+            }
+            .shimmer-text-dark {
+              background: linear-gradient(90deg, #7A8A99 0%, #E8E0D2 25%, #7A8A99 50%, #E8E0D2 75%, #7A8A99 100%);
+              background-size: 200% auto;
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              color: transparent;
+              animation: shimmer-sweep 3s linear infinite;
+            }
+            .shimmer-text-gold {
+              background: linear-gradient(90deg, rgb(222, 204, 179) 0%, rgb(255, 244, 220) 25%, rgb(222, 204, 179) 50%, rgb(255, 244, 220) 75%, rgb(222, 204, 179) 100%);
+              background-size: 200% auto;
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              color: transparent;
+              animation: shimmer-sweep 2.5s linear infinite;
+            }
+            @keyframes pulse-glow {
+              0%, 100% {
+                box-shadow: 0 0 12px rgba(212, 175, 55, 0.25), 0 20px 45px rgba(0, 0, 0, 0.6);
+              }
+              50% {
+                box-shadow: 0 0 24px rgba(212, 175, 55, 0.55), 0 20px 45px rgba(0, 0, 0, 0.6);
+              }
+            }
+            .button-pulse-glow {
+              animation: pulse-glow 2s infinite ease-in-out;
+            }
+            .workspace-grid {
+              background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+              background-size: 24px 24px;
+            }
+            .strike-through {
+              position: relative;
+            }
+            .strike-through::after {
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 50%;
+              width: 0;
+              height: 1.5px;
+              background: #000;
+              transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+            }
+            .strike-through.active::after {
+              width: 100%;
+            }
+            .paper-input {
+              width: 100%;
+              background: transparent !important;
+              border: none;
+              border-bottom: 1px solid rgba(130, 120, 100, 0.4);
+              height: 48px;
+              line-height: 24px;
+              padding: 22px 4px 1px 4px;
+              font-family: inherit;
+              font-size: 14.5px;
+              outline: none;
+              color: #1a1a1a;
+              font-weight: 550;
+              border-radius: 0;
+              transition: all 0.2s ease-in-out;
+            }
+            .paper-input:focus {
+              border-bottom: 2px solid #000000;
+              background: transparent !important;
+              box-shadow: none;
+              outline: none;
+            }
+            .paper-select {
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              cursor: pointer;
+            }
+            .paper-select-arrow {
+              pointer-events: none;
+              position: absolute;
+              right: 12px;
+              top: calc(50% + 8px);
+              transform: translateY(-50%);
+              width: 0;
+              height: 0;
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              border-top: 5px solid #1a1a1a;
+            }
+            .debossed-card {
+              box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+            }
+          `}</style>
+
           {/* Global Close Button */}
           <button 
             onClick={onClose}
@@ -80,37 +216,38 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             >
               
               {/* === RIGHT INSIDE PAGE (THE BASE POCKET FOLDER) === */}
-              <div className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-r-[24px] shadow-[inset_15px_0_40px_rgba(0,0,0,0.06)] border-y border-r border-[#d3ccbc] overflow-hidden flex flex-col z-10">
+              <div className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-r-[24px] shadow-[inset_15px_0_40px_rgba(0,0,0,0.06)] border-y border-r border-[#d3ccbc] overflow-hidden flex flex-col z-10 workspace-grid">
                 
-                {/* Elegant Background Texture / Text */}
-                <div className="absolute top-16 left-1/2 -translate-x-1/2 opacity-[0.07] font-serif text-5xl font-black tracking-[0.4em] uppercase whitespace-nowrap z-0 select-none">
+                {/* Legible high-contrast CHECK header at the top right */}
+                <div className="absolute top-6 right-8 text-neutral-800 font-mono text-xs font-bold tracking-[0.3em] uppercase z-0 select-none">
                   CHECK
                 </div>
 
                 {/* LAYER 2: CHOREOGRAPHED SKEUOMORPHIC RECEIPT */}
                 <motion.div
-                  className="absolute left-[8%] right-[8%] z-10 filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.15)] origin-top select-none pointer-events-none"
+                  className="absolute left-[8%] right-[8%] filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.15)] origin-top select-none pointer-events-none"
                   style={{ top: '65px' }}
-                  initial={{ y: 260 }}
-                  animate={{ y: isCheckRevealed ? -42 : 260 }}
-                  transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                  initial={{ y: 205, zIndex: 10, opacity: 0.9 }}
+                  animate={{
+                    y: isCheckRevealed ? -16 : 205,
+                    zIndex: isCheckRevealed ? 25 : 10,
+                    opacity: isCheckRevealed ? 1 : 0.9
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 110,
+                    damping: 15
+                  }}
                 >
                   <div className="w-full relative z-10">
                     <PerforatedEdge position="top" />
 
-                    <div className="px-6 py-6 md:px-7 bg-[#fefcf8] text-[#1a1a1a] font-mono text-[13px] shadow-[inset_0_0_40px_rgba(0,0,0,0.02)] border-x border-[#f5f1e8]">
+                    <div className="px-6 py-6 md:px-7 bg-[#fefcf8] text-[#1a1a1a] font-mono text-[13px] shadow-[inset_0_0_40px_rgba(0,0,0,0.02)] border-x border-[#f5f1e8] rounded-t-sm">
                       
-                      {/* Dotted pull indicator & PULL UP microcopy */}
-                      <div className="text-center pt-1 mb-3">
-                        <div className="text-[10px] font-bold text-neutral-400/80 tracking-[0.25em] select-none">
-                          ::: PULL UP :::
-                        </div>
-                        <div className="border-t border-dashed border-stone-200 mt-2 mx-auto w-10"></div>
-                      </div>
-
-                      <div className="text-center mb-4">
+                      {/* Tightened header with clear spacing */}
+                      <div className="text-center mb-4 mt-2">
                         <h3 className="font-bold text-base tracking-widest uppercase mb-1 text-neutral-900 border-b-[3px] border-black pb-1 inline-block">ZID HUB CHECK</h3>
-                        <p className="text-neutral-500 text-[10px] mt-1">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                        <p className="text-neutral-500 text-[10px] mt-1 pr-1">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                       </div>
 
                       <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
@@ -118,36 +255,59 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       <ul className="space-y-2.5 font-medium leading-relaxed mb-4 text-neutral-700 text-xs">
                         <li className="flex justify-between items-end">
                           <span className="leading-tight pr-4">01. Unlimited AI Synthetics</span>
-                          <span className="font-bold">$40.00</span>
+                          <span className="font-bold">${planType === 'monthly' ? '40.00' : '33.20'}</span>
                         </li>
                         <li className="flex justify-between items-end">
                           <span className="leading-tight pr-4">02. Auto-Cue Card Decks</span>
-                          <span className="font-bold">$25.00</span>
+                          <span className="font-bold">${planType === 'monthly' ? '25.00' : '20.75'}</span>
                         </li>
                         <li className="flex justify-between items-end">
                           <span className="leading-tight pr-4">03. Voice Synthesis Module</span>
-                          <span className="font-bold">$35.00</span>
+                          <span className="font-bold">${planType === 'monthly' ? '35.00' : '29.05'}</span>
                         </li>
                         <li className="flex justify-between items-end">
                           <span className="leading-tight pr-4">04. Scholar Network Access</span>
-                          <span className="font-bold">$30.00</span>
+                          <span className="font-bold">${planType === 'monthly' ? '30.00' : '24.90'}</span>
                         </li>
                       </ul>
 
                       <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
 
-                      <div className="space-y-1.5 mt-3 font-bold text-xs">
+                      <div className="space-y-1.5 mt-3 font-bold text-xs relative">
                         <div className="flex justify-between text-neutral-500 font-normal">
                           <span>Subtotal</span>
-                          <span>$130.00</span>
+                          <div className="flex flex-col items-end">
+                            <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400' : ''}`}>$130.00</span>
+                            {planType === 'yearly' && (
+                              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-black font-bold">$107.90</motion.span>
+                            )}
+                          </div>
                         </div>
+                        
+                        {planType === 'yearly' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }} 
+                            animate={{ opacity: 1, height: 'auto' }} 
+                            className="flex justify-between text-amber-700/80 font-bold italic text-[10px]"
+                          >
+                            <span>Annual Discount Applied</span>
+                            <span>-17%</span>
+                          </motion.div>
+                        )}
+
                         <div className="flex justify-between text-neutral-500 font-normal">
                           <span>Tax (8%)</span>
-                          <span>$10.40</span>
+                          <span>${planType === 'monthly' ? '10.40' : '8.63'}</span>
                         </div>
+                        
                         <div className="flex justify-between text-base mt-3 pt-3 border-t-[3px] border-black text-black">
                           <span>TOTAL</span>
-                          <span>$140.40</span>
+                          <div className="flex flex-col items-end">
+                            <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400 text-xs' : ''}`}>$140.40</span>
+                            {planType === 'yearly' && (
+                              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-black">$116.53</motion.span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -159,16 +319,16 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
                 {/* LAYER 3: THE SLEEVE POCKET (CONVERTED TO INTERACTIVE BUTTON WITH HOVER STATE) */}
                 <button 
-                  onClick={() => setIsCheckRevealed(prev => !prev)}
+                  onClick={() => setIsCheckRevealed(!isCheckRevealed)}
                   className="absolute bottom-0 left-0 right-0 h-[45%] z-20 bg-[#2C3742] rounded-br-[24px] shadow-[0_-15px_40px_rgba(0,0,0,0.4)] border-t border-white/10 flex flex-col items-center justify-between p-6 pointer-events-auto cursor-pointer group text-left select-none outline-none focus:outline-none"
                   style={{
                     clipPath: 'polygon(0 20%, 100% 0, 100% 100%, 0% 100%)',
                     backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 100%)'
                   }}
                 >
-                  {/* Subtle Centered "TAP TO REVEAL" Debossed Text */}
+                  {/* Subtle Centered "TAP TO REVEAL" / "TAP TO COLLAPSE" text featuring custom gold shimmer */}
                   <div className="absolute inset-0 flex items-center justify-center pt-8 pointer-events-none">
-                    <span className="font-mono text-xs font-black uppercase tracking-[0.3em] text-[#DECCB3]/40 group-hover:text-[#FFF4DC] group-hover:brightness-110 transition-all duration-300 select-none">
+                    <span className="font-mono text-xs font-black uppercase tracking-[0.3em] select-none shimmer-text-gold group-hover:brightness-125 group-hover:scale-102 transition-all duration-300">
                       {isCheckRevealed ? "TAP TO COLLAPSE" : "TAP TO REVEAL"}
                     </span>
                   </div>
@@ -181,21 +341,21 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                   </div>
                 </button>
 
-                {/* SMOOTH FADE-IN "PAY NOW" BUTTON */}
+                {/* SMOOTH FADE-IN PULSING "PAY NOW" BUTTON */}
                 <AnimatePresence>
-                  {isCheckRevealed && (
+                  {isCheckRevealed && checkoutStep === 'pitch' && (
                     <motion.button 
-                      initial={{ opacity: 0, y: 30 }}
+                      initial={{ opacity: 0, y: 25 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 30 }}
-                      transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+                      exit={{ opacity: 0, y: 25 }}
+                      transition={{ type: 'spring', stiffness: 120, damping: 16 }}
                       whileHover={{ y: -2, scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={onClose}
-                      className="absolute bottom-12 left-[12%] right-[12%] h-14 bg-zinc-950 border border-[rgba(212,175,55,0.45)] text-amber-200/90 font-sans font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center space-x-3 transition-all duration-300 shadow-[0_20px_45px_rgba(0,0,0,0.6),_inset_0_1px_2px_rgba(255,255,255,0.12)] hover:shadow-[0_25px_55px_rgba(212,175,55,0.18),_0_20px_45px_rgba(0,0,0,0.6)] rounded-xl z-30 group cursor-pointer pointer-events-auto hover:bg-zinc-900"
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => setCheckoutStep('payment')}
+                      className="absolute bottom-12 left-[12%] right-[12%] h-14 bg-zinc-950 border border-[#D4AF37]/50 text-[#E5C158] font-sans font-bold uppercase tracking-[0.25em] text-xs flex items-center justify-center space-x-3 transition-all duration-300 rounded-xl z-50 group cursor-pointer pointer-events-auto hover:bg-zinc-900 shadow-2xl button-pulse-glow"
                     >
                       <span>PAY NOW</span>
-                      <CreditCard className="w-5 h-5 text-amber-200/80 group-hover:scale-115 group-hover:text-amber-200 transition-all duration-300" />
+                      <CreditCard className="w-5 h-5 text-[#E5C158] group-hover:scale-110 group-hover:text-amber-200 transition-all duration-300" />
                     </motion.button>
                   )}
                 </AnimatePresence>
@@ -233,37 +393,204 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       <div className="w-14 h-14 rounded-full bg-[#2A3641] border border-[#485B6C] flex items-center justify-center text-[#F4EFE6] group-hover:scale-110 group-hover:bg-[#3E4F5E] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300">
                         <ChevronRight className="w-6 h-6" />
                       </div>
-                      <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#7A8A99] group-hover:text-[#DECCB3] transition-colors font-bold">Tap to Open</span>
+                      <span className="font-mono text-[9px] uppercase tracking-[0.3em] font-bold shimmer-text-dark">TAP TO OPEN</span>
                     </div>
                   </div>
                 </div>
 
                 {/* INSIDE COVER (The Left Page Pitch, visible when open) */}
                 <div 
-                  className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-l-[24px] border-y border-l border-[#d3ccbc] shadow-[inset_-20px_0_40px_rgba(0,0,0,0.07)] flex flex-col pointer-events-auto"
+                  className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-l-[24px] border-y border-l border-[#d3ccbc] shadow-[inset_-20px_0_40px_rgba(0,0,0,0.07)] flex flex-col pointer-events-auto workspace-grid"
                   style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
                 >
-                  <div className="p-10 lg:p-14 flex flex-col h-full relative text-left">
-                    
-                    {/* Visual Polish: Clean, perfect left alignment & vertical balance */}
-                    <h2 className="text-4xl font-serif font-black uppercase text-[#1a1a1a] leading-[1.1] tracking-tight mb-8">
-                      SCALE YOUR KNOWLEDGE,<br />SEAMLESSLY.
-                    </h2>
-                    
-                    <div className="w-[40px] h-[3px] bg-[#1a1a1a] mb-8"></div>
+                  <AnimatePresence mode="wait">
+                    {checkoutStep === 'pitch' ? (
+                      <motion.div 
+                        key="pitch"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="p-10 lg:p-14 flex flex-col h-full relative text-left"
+                      >
+                        {/* Visual Polish: Clean, perfect left alignment & vertical balance */}
+                        <h2 className="text-4xl font-serif font-black uppercase text-[#1a1a1a] leading-[1.1] tracking-tight mb-8">
+                          SCALE YOUR KNOWLEDGE,<br />SEAMLESSLY.
+                        </h2>
+                        
+                        <div className="w-[40px] h-[3px] bg-[#1a1a1a] mb-8"></div>
+                        
+                        <div className="flex-1 w-full relative mt-auto flex flex-col justify-end">
+                          {/* Visual Polish: Embedded-looking Ink Grayscale Illustration */}
+                          <div className="w-full h-[220px] bg-[url('https://images.unsplash.com/photo-1544006659-f0b21884ce1d?auto=format&fit=crop&q=80&w=800')] bg-contain bg-bottom bg-no-repeat mix-blend-multiply opacity-60 grayscale contrast-[1.2] mb-6 filter drop-shadow-sm border border-stone-400/20 shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] rounded-[4px] p-0.5 bg-stone-100">
+                          </div>
 
-                    <div className="flex-1 w-full relative mt-auto flex flex-col justify-end">
-                      
-                      {/* Visual Polish: Embedded-looking Ink Grayscale Illustration */}
-                      <div className="w-full h-[220px] bg-[url('https://images.unsplash.com/photo-1544006659-f0b21884ce1d?auto=format&fit=crop&q=80&w=800')] bg-contain bg-bottom bg-no-repeat mix-blend-multiply opacity-60 grayscale contrast-[1.2] mb-6 filter drop-shadow-sm border border-black/10 rounded-[4px] p-0.5 bg-stone-100">
-                      </div>
+                          <p className="font-mono text-[11px] text-[#4A4740] uppercase font-bold tracking-[0.12em] leading-relaxed w-full mt-4">
+                            Unlock deep architectures, auto-generated cues, & audio synthesis.
+                          </p>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        key="payment"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        className="p-8 lg:p-10 flex flex-col h-full relative text-left overflow-y-auto"
+                      >
+                        <h3 className="text-2xl font-serif font-black uppercase text-[#1a1a1a] mb-6">Checkout</h3>
+                        
+                        {/* Plan Selection */}
+                        <div className="grid grid-cols-2 gap-3 mb-8">
+                          <button 
+                            onClick={() => setPlanType('monthly')}
+                            className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${planType === 'monthly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
+                          >
+                            <span className="block font-mono text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Monthly</span>
+                            <span className="block font-serif text-xl font-bold text-black">$130/mo</span>
+                          </button>
+                          
+                          <button 
+                            onClick={() => setPlanType('yearly')}
+                            className={`p-4 rounded-xl border text-left transition-all relative cursor-pointer ${planType === 'yearly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
+                          >
+                            <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-[#D4AF37] text-white text-[8px] font-bold rounded uppercase tracking-tighter">Save 17%</div>
+                            <span className="block font-mono text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Yearly</span>
+                            <span className="block font-serif text-xl font-bold text-black">$107/mo</span>
+                            <span className="block text-[9px] text-neutral-400 font-mono">*billed annually</span>
+                          </button>
+                        </div>
 
-                      <p className="font-mono text-[11px] text-[#4A4740] uppercase font-bold tracking-[0.15em] leading-relaxed border-l-[3px] border-amber-800/40 pl-4 w-full">
-                        Unlock deep architectures, auto-generated cues, & audio synthesis.
-                      </p>
-                    </div>
+                        {/* Payment Fields */}
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Full Name</label>
+                            <input 
+                              type="text" 
+                              className="paper-input font-serif italic text-zinc-900" 
+                              placeholder="Enter your name" 
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              disabled={isSubmitting || submitSuccess}
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Country or region</label>
+                              <div className="relative">
+                                <select 
+                                  className="paper-input paper-select bg-transparent rounded-none pr-8 cursor-pointer font-serif italic text-zinc-900"
+                                  value={country}
+                                  onChange={(e) => setCountry(e.target.value)}
+                                  disabled={isSubmitting || submitSuccess}
+                                >
+                                  <option value="IN">India</option>
+                                  <option value="US">United States</option>
+                                  <option value="UK">United Kingdom</option>
+                                  <option value="CA">Canada</option>
+                                  <option value="DE">Germany</option>
+                                  <option value="FR">France</option>
+                                </select>
+                                <div className="paper-select-arrow" />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Indian GST Number</label>
+                              <input 
+                                type="text" 
+                                className="paper-input font-serif italic text-zinc-900" 
+                                placeholder="Optional" 
+                                value={gstNumber}
+                                onChange={(e) => setGstNumber(e.target.value)}
+                                disabled={isSubmitting || submitSuccess}
+                              />
+                            </div>
+                          </div>
 
-                  </div>
+                          <div>
+                            <label className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">
+                              <span>Card Information</span>
+                              <Lock className="w-2.5 h-2.5 text-stone-500 mb-0.5" />
+                            </label>
+                            <div className="relative flex items-center">
+                              <input 
+                                type="text" 
+                                className="paper-input pr-24 font-serif italic text-zinc-900" 
+                                placeholder="1234 5678 1234 5678" 
+                                value={cardNumber}
+                                onChange={(e) => setCardNumber(e.target.value)}
+                                disabled={isSubmitting || submitSuccess}
+                              />
+                              <div className="absolute right-3 flex items-center space-x-1.5 pointer-events-none">
+                                {/* Visa */}
+                                <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
+                                  <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
+                                  <path d="M11 15.5l1.3-8h2.1l-1.3 8h-2.1zm7.5-8c-.5-.2-1.2-.4-2-.4-2.2 0-3.7 1.2-3.7 2.8 0 1.3 1.1 1.9 2 2.3.9.4 1.2.7 1.2 1.1 0 .6-.7.9-1.4.9-.8 0-1.5-.2-2.1-.5l-.3-.1-.4 2.2c.6.3 1.7.5 2.8.5 2.3 0 3.8-1.1 3.8-2.8 0-.9-.5-1.6-1.8-2.3-.8-.4-1.4-.7-1.4-1.2 0-.4.5-.8 1.4-.8.7 0 1.4.2 1.8.4l.2.1.2-2.3zm5 5.3l.5-2.7c.1-.4.3-.5.5-.5h1.8c.1 0 .2 0 .2.1 0 0 .1.1 0 .2l-1.1 5.2h-2.2l.3-2.3zm-10.4-.1l1.3-3.4.7 3.4h-2zm-1.8-.6l-2.2-4.6h2.3l1.5 3.6 1-3.6h2.3l-3.5 8h-2.2l.8-1.9c-.2-.5-.7-1.1-.8-1.1z" fill="#2C3742"/>
+                                </svg>
+                                {/* Mastercard */}
+                                <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
+                                  <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
+                                  <circle cx="15.5" cy="11" r="5.2" fill="#E24A26" fillOpacity="0.8"/>
+                                  <circle cx="20.5" cy="11" r="5.2" fill="#F9A01B" fillOpacity="0.8"/>
+                                </svg>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mt-2">
+                              <input 
+                                type="text" 
+                                className="paper-input font-serif italic text-zinc-900" 
+                                placeholder="MM / YY" 
+                                value={expiry}
+                                onChange={(e) => setExpiry(e.target.value)}
+                                disabled={isSubmitting || submitSuccess}
+                              />
+                              <input 
+                                type="text" 
+                                className="paper-input font-serif italic text-zinc-900" 
+                                placeholder="CVC" 
+                                value={cvc}
+                                onChange={(e) => setCvc(e.target.value)}
+                                disabled={isSubmitting || submitSuccess}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="pt-4">
+                            <motion.button 
+                              whileHover={(!isSubmitting && !submitSuccess) ? { scale: 1.01 } : {}}
+                              whileTap={(!isSubmitting && !submitSuccess) ? { scale: 0.95 } : {}}
+                              onClick={() => {
+                                if (isSubmitting || submitSuccess) return;
+                                setIsSubmitting(true);
+                                setTimeout(() => {
+                                  setSubmitSuccess(true);
+                                  setTimeout(() => {
+                                    onClose();
+                                  }, 1200);
+                                }, 1800);
+                              }}
+                              disabled={isSubmitting || submitSuccess}
+                              className={`w-full h-12 text-[#E5C158] font-sans font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center space-x-2 transition-all duration-300 rounded-xl shadow-xl ${
+                                submitSuccess 
+                                  ? 'bg-[#10B981] text-white' 
+                                  : isSubmitting 
+                                    ? 'bg-zinc-850 opacity-75 cursor-not-allowed' 
+                                    : 'bg-zinc-950 hover:bg-zinc-900 cursor-pointer'
+                              }`}
+                            >
+                              <span>
+                                {submitSuccess 
+                                  ? '✓ Payment Successful' 
+                                  : isSubmitting 
+                                    ? 'Processing Secure Connection...' 
+                                    : 'Confirm Subscription'}
+                              </span>
+                            </motion.button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
               </motion.div>

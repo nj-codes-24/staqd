@@ -60,6 +60,8 @@ export default function Dashboard({
   const [isDragActive, setIsDragActive] = useState(false);
   const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
+  const [isCheckRevealed, setIsCheckRevealed] = useState(false);
 
   // Custom Paper Upload Feature States (strictly bound inside Dashboard for Knowledge Hub)
   const [showStudyView, setShowStudyView] = useState(false);
@@ -96,6 +98,12 @@ export default function Dashboard({
       
       onPaperGenerated(newArticle);
     }, 6000); // Wait 6 seconds before revealing
+  };
+
+  const handleOpenSubscriptionModal = () => {
+    setIsBookOpen(false);
+    setIsCheckRevealed(false);
+    setIsSubscriptionModalOpen(true);
   };
 
   // Hardcoded category list exactly as requested
@@ -215,7 +223,7 @@ export default function Dashboard({
           <div className="flex items-center space-x-4 md:space-x-6">
             {/* Subscribe Button */}
             <button 
-              onClick={() => setIsSubscriptionModalOpen(true)}
+              onClick={handleOpenSubscriptionModal}
               className="px-5 py-1.5 rounded-full border border-neutral-300 hover:border-neutral-400 bg-white shadow-sm hover:shadow-md text-[10px] sm:text-xs font-mono uppercase tracking-widest text-neutral-700 font-bold hover:scale-105 active:scale-95 transition-all duration-200"
             >
               Subscribe
@@ -627,6 +635,10 @@ export default function Dashboard({
         <SubscriptionModal 
           isOpen={isSubscriptionModalOpen} 
           onClose={() => setIsSubscriptionModalOpen(false)} 
+          isBookOpen={isBookOpen}
+          setIsBookOpen={setIsBookOpen}
+          isCheckRevealed={isCheckRevealed}
+          setIsCheckRevealed={setIsCheckRevealed}
         />
 
       </div>
