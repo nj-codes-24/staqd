@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
+import StudyView from './components/StudyView';
 import ArticleView from './components/ArticleView';
 import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
@@ -22,7 +23,22 @@ export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>(MOCK_ARTICLES);
+  const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
   
+
+  React.useEffect(() => {
+    if (processingArticle) {
+      const timer = setTimeout(() => {
+        setArticles(prev => [processingArticle, ...prev]);
+        setProcessingArticle(null);
+        setSelectedArticle(processingArticle);
+        setActiveSubTopic(null);
+        setActiveTab('hud');
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [processingArticle]);
+
   // Toggle bookmark function
   const handleToggleBookmark = (articleId: string) => {
     setArticles(prevArticles => 
@@ -141,7 +157,21 @@ export default function App() {
             className="w-full"
           >
             {/* Conditional Subtree Routing */}
-            {selectedArticle ? (
+            {processingArticle ? (
+              <motion.div
+                key="processing"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-full"
+              >
+                <StudyView 
+                  isGenerating={true}
+                  onBack={() => setProcessingArticle(null)}
+                />
+              </motion.div>
+            ) : selectedArticle ? (
               <ArticleView 
                 article={selectedArticle}
                 user={userProfile}
@@ -197,10 +227,8 @@ export default function App() {
                   setActiveSubTopic(subTopic);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onPaperGenerated={(newArticle) => {
-                  setArticles(prev => [newArticle, ...prev]);
-                  setSelectedArticle(newArticle);
-                  setActiveSubTopic(null);
+                onStartProcessing={(newArticle) => {
+                  setProcessingArticle(newArticle);
                 }}
               />
             )}

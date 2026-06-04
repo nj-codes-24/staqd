@@ -22,7 +22,6 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import StudyView from './StudyView';
 import SubscriptionModal from './SubscriptionModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
@@ -43,7 +42,7 @@ interface DashboardProps {
   articles: Article[];
   onToggleBookmark: (articleId: string) => void;
   onViewSubTopicAll?: (subTopic: string) => void;
-  onPaperGenerated: (newArticle: Article) => void;
+  onStartProcessing: (newArticle: Article) => void;
 }
 
 export default function Dashboard({ 
@@ -55,7 +54,7 @@ export default function Dashboard({
   articles,
   onToggleBookmark,
   onViewSubTopicAll,
-  onPaperGenerated
+  onStartProcessing
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
@@ -68,41 +67,31 @@ export default function Dashboard({
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
 
-  // Custom Paper Upload Feature States (strictly bound inside Dashboard for Knowledge Hub)
-  const [showStudyView, setShowStudyView] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  // Custom Paper Upload Feature States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const handleFileUpload = () => {
     setIsUploadModalOpen(false);
-    setShowStudyView(true);
-    setIsGenerating(true);
     
-    // Simulate generation time
-    setTimeout(() => {
-      setIsGenerating(false);
-      setShowStudyView(false);
-      
-      const newArticle: Article = {
-        id: `custom-paper-${Date.now()}`,
-        title: "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
-        author: {
-          name: "DR. EVELYN MOSS",
-          avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
-          role: "AUTHOR"
-        },
-        publishedAt: "MAY 2026",
-        excerpt: "Custom uploaded paper.",
-        content: "Uploaded custom paper full text.",
-        category: "Research",
-        imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
-        likes: 0,
-        readTime: "15 min read",
-        isBookmarked: true
-      };
-      
-      onPaperGenerated(newArticle);
-    }, 6000); // Wait 6 seconds before revealing
+    const newArticle: Article = {
+      id: `custom-paper-${Date.now()}`,
+      title: "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
+      author: {
+        name: "DR. EVELYN MOSS",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+        role: "AUTHOR"
+      },
+      publishedAt: "MAY 2026",
+      excerpt: "Custom uploaded paper.",
+      content: "Uploaded custom paper full text.",
+      category: "Research",
+      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
+      likes: 0,
+      readTime: "15 min read",
+      isBookmarked: true
+    };
+    
+    onStartProcessing(newArticle);
   };
 
   const handleOpenSubscriptionModal = () => {
@@ -261,13 +250,7 @@ export default function Dashboard({
         {/* KNOWLEDGE HUB VIEW STAGE */}
         {currentMenuTab === 'hub' ? (
           <>
-            {showStudyView ? (
-              <StudyView 
-                isGenerating={isGenerating}
-                onBack={() => setShowStudyView(false)}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col">
                 
                 {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
                 <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 relative z-[50]">
@@ -719,17 +702,13 @@ export default function Dashboard({
 
                 </div>
               </div>
-            )}
-
             {/* FAB Trigger for Custom Paper Upload */}
-            {!showStudyView && (
-              <button 
-                onClick={() => setIsUploadModalOpen(true)}
-                className="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/60 flex items-center justify-center text-slate-800 hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-white"
-              >
-                <Plus size={32} strokeWidth={1.5} />
-              </button>
-            )}
+            <button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/60 flex items-center justify-center text-slate-800 hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-white"
+            >
+              <Plus size={32} strokeWidth={1.5} />
+            </button>
 
             {/* Custom Paper Upload Modal */}
             <AnimatePresence>
