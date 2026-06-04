@@ -17,7 +17,9 @@ import {
   CheckCircle2,
   X,
   Plus,
-  UploadCloud
+  UploadCloud,
+  SlidersHorizontal,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import StudyView from './StudyView';
@@ -58,6 +60,8 @@ export default function Dashboard({
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
   const [isSearching, setIsSearching] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
   const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
@@ -265,7 +269,7 @@ export default function Dashboard({
               <div className="flex-1 flex flex-col">
                 
                 {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
-                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 relative">
+                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 relative z-[50]">
                   
                   <AnimatePresence mode="wait">
                     {!isSearching ? (
@@ -314,26 +318,148 @@ export default function Dashboard({
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 50, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-1 flex items-center bg-white border border-transparent rounded-full px-5 h-[42px] mr-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] z-10"
+                        className="w-full relative z-50 flex items-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                       >
-                        <Search className="w-4 h-4 text-neutral-400 mr-3" />
-                        <input 
-                          type="text"
-                          placeholder="Search papers by title, topic, or publisher..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="flex-1 bg-transparent border-none outline-none text-sm font-sans placeholder-neutral-400 text-neutral-900"
-                          autoFocus
-                        />
-                        <button 
-                          onClick={() => {
-                            setSearchQuery('');
-                            setIsSearching(false);
-                          }}
-                          className="text-neutral-500 hover:text-neutral-900 ml-2"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                        <div className="flex-grow flex items-center bg-white border border-transparent rounded-full px-5 h-[42px] shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+                          <Search className="w-4 h-4 text-neutral-400 mr-3" />
+                          <input 
+                            type="text"
+                            placeholder="Search papers by title, topic, or publisher..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="flex-1 bg-transparent border-none outline-none text-sm font-sans placeholder-neutral-400 text-neutral-900"
+                            autoFocus
+                          />
+                          <button 
+                            onClick={() => {
+                              setSearchQuery('');
+                              setIsSearching(false);
+                              setIsFilterOpen(false);
+                            }}
+                            className="text-neutral-500 hover:text-neutral-900 ml-2"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <AnimatePresence>
+                          {searchQuery.trim().length > 0 && (
+                            <motion.button 
+                              initial={{ opacity: 0, x: 10, width: 0, marginLeft: 0 }}
+                              animate={{ opacity: 1, x: 0, width: 120, marginLeft: 16 }}
+                              exit={{ opacity: 0, x: 10, width: 0, marginLeft: 0 }}
+                              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                              onClick={() => setIsFilterOpen(!isFilterOpen)}
+                              className={`flex items-center justify-center space-x-2 h-[42px] rounded-full transition-colors text-sm font-medium shadow-sm flex-shrink-0 border overflow-hidden whitespace-nowrap ${
+                                isFilterOpen 
+                                  ? 'bg-[#111827] text-white border-[#111827]' 
+                                  : 'bg-white text-[#111827] border-[#E5E7EB] hover:bg-[#F9FAFB]'
+                              }`}
+                            >
+                              <SlidersHorizontal size={14} strokeWidth={2} />
+                              <span>Filter</span>
+                            </motion.button>
+                          )}
+                        </AnimatePresence>
+
+                        {/* MEGA PANEL DROPDOWN */}
+                        <AnimatePresence>
+                          {isFilterOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute right-0 w-full z-[9999] flex flex-col overflow-hidden"
+                              style={{ 
+                                top: 'calc(100% + 16px)', 
+                                backgroundColor: '#F9FAFB',
+                                border: '1px solid #E5E7EB',
+                                borderRadius: '16px',
+                                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.12)'
+                              }}
+                            >
+                              <div className="p-8 flex flex-col">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                  {/* SORT BY */}
+                                  <div>
+                                    <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Sort By</h3>
+                                    <div className="space-y-4">
+                                      {['Relevance', 'Newest First', 'Most Cited'].map(option => (
+                                        <label key={option} className="flex items-center space-x-3 cursor-pointer group">
+                                          <div className="w-4 h-4 rounded-full border border-[#D1D5DB] flex items-center justify-center group-hover:border-[#111827] transition-colors">
+                                            {option === 'Relevance' && <div className="w-2 h-2 rounded-full bg-[#111827]" />}
+                                          </div>
+                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* PUBLISHER / SOURCE */}
+                                  <div>
+                                    <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Publisher / Source</h3>
+                                    <div className="space-y-4">
+                                      {['arXiv', 'IEEE', 'Nature', 'ScienceDirect'].map(option => (
+                                        <label key={option} className="flex items-center space-x-3 cursor-pointer group">
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'arXiv' ? 'bg-[#111827] border-[#111827]' : 'border-[#D1D5DB] group-hover:border-[#111827]'}`}>
+                                            {option === 'arXiv' && <Check size={12} color="white" strokeWidth={3} />}
+                                          </div>
+                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* SUB-TOPICS */}
+                                  <div>
+                                    <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Sub-Topics</h3>
+                                    <div className="space-y-4">
+                                      {['Computer Sciences', 'Electrical', 'Mechanical', 'Aerospace'].map(option => (
+                                        <label key={option} className="flex items-center space-x-3 cursor-pointer group">
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'Computer Sciences' ? 'bg-[#111827] border-[#111827]' : 'border-[#D1D5DB] group-hover:border-[#111827]'}`}>
+                                            {option === 'Computer Sciences' && <Check size={12} color="white" strokeWidth={3} />}
+                                          </div>
+                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* ATTRIBUTES */}
+                                  <div>
+                                    <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Attributes</h3>
+                                    <div className="space-y-5">
+                                      {['Includes Code', 'Includes Dataset'].map((asset) => (
+                                        <label key={asset} className="flex items-center justify-between cursor-pointer group">
+                                          <span className="text-[13px] text-[#374151] font-mono">{asset}</span>
+                                          <div className={`w-8 h-4 rounded-full relative transition-colors ${asset === 'Includes Code' ? 'bg-[#111827]' : 'bg-[#D1D5DB]'}`}>
+                                            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all ${asset === 'Includes Code' ? 'right-0.5' : 'left-0.5'}`} />
+                                          </div>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="border-t border-[#E5E7EB] pt-6 mt-6 flex justify-between items-center">
+                                  <button 
+                                    onClick={() => {}}
+                                    className="text-[11px] font-mono uppercase underline text-[#9CA3AF] hover:text-[#374151] transition-colors"
+                                  >
+                                    Clear All
+                                  </button>
+                                  <button 
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="px-6 py-2.5 bg-[#111827] text-white rounded-full font-sans font-bold text-[11px] uppercase hover:bg-black transition-colors"
+                                  >
+                                    Apply Filters
+                                  </button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -341,7 +467,7 @@ export default function Dashboard({
 
                 {/* MAIN CONTENT SPACE - POPULATE BY SELECTED CATEGORY'S SUB-TOPICS OR SEARCH */}
                 <div 
-                  className={`flex-1 divide-y-2 divide-[#ece8df]/70 relative flex flex-col ${
+                  className={`flex-1 divide-y-2 divide-[#ece8df]/70 relative flex flex-col z-[1] ${
                     searchQuery.trim().length > 0 && searchResults && searchResults.length === 0 
                       ? 'h-[calc(100vh-160px)] overflow-hidden' 
                       : 'min-h-[calc(100vh-160px)]'
