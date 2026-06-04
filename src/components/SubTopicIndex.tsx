@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
   Search, 
@@ -11,7 +12,8 @@ import {
   RefreshCw,
   ArrowUpRight,
   ChevronDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  X
 } from 'lucide-react';
 import { UserProfile, Article } from '../types';
 
@@ -139,6 +141,9 @@ export default function SubTopicIndex({
   setActiveTab
 }: SubTopicIndexProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const isSearching = searchQuery.trim().length > 0;
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Popover Filter Dropdown visibility
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -375,10 +380,11 @@ export default function SubTopicIndex({
       {/* Main Container Sheet */}
       <div 
         id="magazine-page-sheet" 
-        className="max-w-[1240px] mx-auto w-full bg-[#fbfaf8] shadow-2xl flex flex-col relative border border-[#c2bba8] min-h-screen transition-all duration-300"
+        className={`max-w-[1240px] mx-auto w-full bg-[#fbfaf8] shadow-2xl flex flex-col relative border border-[#c2bba8] min-h-screen transition-all duration-300 ${(isFocused || isSearching) && allSubTopicArticles.length === 0 ? 'overflow-hidden' : ''}`}
+        style={(isFocused || isSearching) && allSubTopicArticles.length === 0 ? { minHeight: 'calc(100vh - 64px)' } : {}}
       >
         {/* Minimal header */}
-        <header className="h-16 border-b border-[#ece8df] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8]/95 backdrop-blur-md z-20">
+        <header className="h-16 px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8]/95 backdrop-blur-md z-20">
           
           {/* Back button */}
           <button 
@@ -420,7 +426,7 @@ export default function SubTopicIndex({
         <div className="p-6 md:p-12 space-y-10" style={{ paddingBottom: '120px' }}>
           
           {/* REFERENCE MOCKUP HEADER: Responsive text size aligned of metadata directly beneath title */}
-          <div className="border-b-2 border-neutral-900/10 pb-4 text-left space-y-1.5">
+          <div className="text-left space-y-1.5 mb-12">
             <h1 className="font-serif font-black uppercase text-2xl sm:text-4xl md:text-5xl tracking-tight text-[#111] leading-none">
               {subTopic}
             </h1>
@@ -431,44 +437,77 @@ export default function SubTopicIndex({
             </div>
           </div>
 
-          {/* REFERENCE MOCKUP SEARCH: Simple flat line border layout with search input */}
-          <div className="relative border-b border-neutral-400 pb-2 text-left flex items-center space-x-3">
-            <Search className="h-5 w-5 text-neutral-800" />
-            <span className="text-xs font-mono font-bold text-neutral-500 uppercase shrink-0">Q</span>
-            <input 
-              type="text" 
-              placeholder="Search papers, authors, or topics..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent outline-none text-sm md:text-base font-sans font-normal text-neutral-900 placeholder-neutral-400 py-1"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="text-[10px] font-mono text-neutral-500 hover:text-black uppercase cursor-pointer mr-2 shrink-0"
-              >
-                Clear
-              </button>
-            )}
-
-            {/* Clickable Filter Toggle Button */}
-            <button 
-              onClick={handleOpenFilters}
-              className={`flex items-center space-x-2 text-xs font-mono uppercase tracking-widest font-extrabold px-4 py-2 border shadow-xs transition duration-200 cursor-pointer rounded-md shrink-0 focus:outline-none ${
-                isFilterOpen || activeSources.length > 0 || activeSubTopics.length > 0 || activeAttributes.hasCode || activeAttributes.hasDataset || activeAttributes.peerReviewed
-                  ? 'bg-neutral-950 text-white border-neutral-950 hover:bg-neutral-900' 
-                  : 'text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 border-neutral-300 hover:border-neutral-400'
-              }`}
-              title="Filter Research Catalog"
+          {/* COMMAND CENTER TOOLBAR */}
+          <div className="relative flex gap-4 items-center w-full z-50">
+            <div 
+              className="flex-1 relative flex items-center space-x-3 transition-colors duration-300 bg-white rounded-full h-[48px] px-6 focus-within:border-[#111827] group"
+              style={{
+                border: '1px solid #E5E7EB',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+              }}
             >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              <span>Filter</span>
-            </button>
+              <Search className="h-5 w-5 text-neutral-800 shrink-0" />
+              <input 
+                ref={inputRef}
+                type="text" 
+                placeholder="Search papers by title, topic, or publisher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className="w-full bg-transparent outline-none text-[13px] md:text-[14px] font-sans font-normal text-[#111827] placeholder-[#9CA3AF] m-0 p-0"
+                style={{ letterSpacing: '0.02em' }}
+              />
+              {(isFocused || searchQuery.length > 0) && (
+                <button
+                  onMouseDown={(e) => {
+                    // Prevent blur before click registers
+                    e.preventDefault();
+                  }}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsFocused(false);
+                    inputRef.current?.blur();
+                  }}
+                  className="group flex items-center justify-center p-2 rounded-full text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all duration-200 cursor-pointer shrink-0 focus:outline-none ml-3"
+                  title="Close Search"
+                >
+                  <X size={20} strokeWidth={2} />
+                </button>
+              )}
+            </div>
+
+            <AnimatePresence>
+              {isSearching && (
+                <motion.div
+                  initial={{ opacity: 0, x: 10, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, x: 10, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <button 
+                    onClick={handleOpenFilters}
+                    className={`flex items-center justify-center space-x-2 text-[13px] font-sans font-medium px-6 h-[48px] border transition duration-200 cursor-pointer rounded-full shrink-0 focus:outline-none ${
+                      isFilterOpen || activeSources.length > 0 || activeSubTopics.length > 0 || activeAttributes.hasCode || activeAttributes.hasDataset || activeAttributes.peerReviewed
+                        ? 'bg-[#111827] text-white border-[#111827]' 
+                        : 'text-[#111827] bg-white hover:bg-[#F9FAFB] border-[#E5E7EB] hover:border-[#D1D5DB]'
+                    }`}
+                    style={{
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    }}
+                    title="Filter Research Catalog"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                    <span>Filter</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Popover Dropdown Modal */}
             {isFilterOpen && (
               <div 
-                className="absolute top-full left-0 right-0 mt-2 bg-[#fbfaf8] border border-neutral-200 shadow-2xl rounded-xl z-30 p-6 md:p-8 text-left transition-all duration-300"
+                className="absolute top-[calc(100%+16px)] left-0 right-0 bg-[#FFFFFF] border border-neutral-200 shadow-[0_48px_100px_rgba(0,0,0,0.15)] rounded-xl z-[9999] p-6 md:p-8 text-left transition-all duration-300 backdrop-blur-3xl"
                 style={{ contentVisibility: 'auto' }}
               >
                 {/* Grid Layout inside Popover */}
@@ -632,203 +671,315 @@ export default function SubTopicIndex({
             )}
           </div>
 
-          {/* RESEARCH ROWS LIST - GROUPED EDITORIALLY LIKE THE IMAGE */}
+          {/* RESEARCH ROWS LIST / SEARCH CANVAS SWAP */}
           <div className="space-y-12">
             
-            {groupedArticles.length > 0 ? (
-              groupedArticles.map((group) => {
-                const expanded = isMonthExpanded(group.headingName);
-                const loadedRemaining = isLoadedRemaining(group.headingName);
-                const maxVisible = loadedRemaining ? group.items.length : 10;
-                const displayedItems = group.items.slice(0, maxVisible);
-                const showLoadRemainingButton = group.items.length > maxVisible;
+            {(!isFocused && !isSearching) ? (
+              groupedArticles.length > 0 ? (
+                groupedArticles.map((group) => {
+                  const expanded = isMonthExpanded(group.headingName);
+                  const loadedRemaining = isLoadedRemaining(group.headingName);
+                  const maxVisible = loadedRemaining ? group.items.length : 10;
+                  const displayedItems = group.items.slice(0, maxVisible);
+                  const showLoadRemainingButton = group.items.length > maxVisible;
 
-                return (
-                  <div key={group.headingName} className="space-y-6">
-                    
-                    {/* Collapsible Monthly Separator Bar (Clickable Accordion Header) */}
-                    <div className="pt-6" style={{ marginTop: '32px' }}>
-                      <button
-                        onClick={() => toggleMonth(group.headingName)}
-                        className="w-full pb-2.5 flex items-center justify-start cursor-pointer transition-colors focus:outline-none"
-                        style={{
-                          gap: '8px',
-                          borderBottom: '1px solid #111',
-                          justifyContent: 'flex-start',
-                        }}
-                      >
-                        <span 
+                  return (
+                    <div key={group.headingName} className="space-y-6">
+                      
+                      {/* Collapsible Monthly Separator Bar (Clickable Accordion Header) */}
+                      <div className="pt-6" style={{ marginTop: '32px' }}>
+                        <button
+                          onClick={() => toggleMonth(group.headingName)}
+                          className="w-full pb-2.5 flex items-center justify-start cursor-pointer transition-colors focus:outline-none"
                           style={{
-                            fontWeight: 700,
-                            letterSpacing: '0.05em',
-                            fontSize: '14px',
-                            color: '#111',
-                          }}
-                          className="font-sans uppercase"
-                        >
-                          {group.headingName}
-                        </span>
-                        <svg 
-                          className={`h-4 w-4 text-[#111] transition-transform duration-300 transform ${expanded ? 'rotate-180' : 'rotate-0'}`} 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Accordion Content Block */}
-                    {expanded && (
-                      <div className="transition-all duration-300">
-                        {/* List Rows - Styled as a production-grade strict flush CSS grid */}
-                        <div 
-                          className="bg-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
-                          style={{
-                            gap: '0px',
-                            borderLeft: '1px solid #EAEAEA',
-                            borderTop: '1px solid #EAEAEA',
+                            gap: '8px',
+                            borderBottom: '1px solid #E5E7EB',
+                            justifyContent: 'flex-start',
                           }}
                         >
-                          {displayedItems.map((article, idx) => {
-                             // Realistic dates for this month's publications
-                            const daysList = ['28', '25', '22', '20', '18', '15', '12', '09', '06', '03'];
-                            const dayNum = daysList[idx % daysList.length];
-
-                            return (
-                              <div 
-                                key={article.id}
-                                onClick={() => onSelectArticle(article)}
-                                className="group bg-white hover:bg-[#F4F4F5] transition-colors duration-200 cursor-pointer text-left flex flex-col"
-                                style={{
-                                  height: '100%',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  justifyContent: 'flex-start',
-                                  borderRight: '1px solid #EAEAEA',
-                                  borderBottom: '1px solid #EAEAEA',
-                                  padding: '24px 20px',
-                                  transition: 'background-color 0.2s ease',
-                                }}
-                              >
-                                {/* The Accent Line */}
-                                <div style={{ width: '24px', borderTop: '3px solid #111', marginBottom: '12px' }}></div>
-
-                                {/* The Date */}
-                                <div 
-                                  className="font-sans"
-                                  style={{
-                                    fontSize: '32px',
-                                    fontWeight: 800,
-                                    lineHeight: 1,
-                                    color: '#111',
-                                    marginBottom: '16px',
-                                  }}
-                                >
-                                  {dayNum}
-                                </div>
-
-                                {/* The Title */}
-                                <h3 
-                                  className="font-sans text-[#111]"
-                                  style={{
-                                    fontSize: '15px',
-                                    fontWeight: 600,
-                                    lineHeight: 1.4,
-                                    marginBottom: '8px',
-                                  }}
-                                >
-                                  {article.title}
-                                </h3>
-
-                                {/* The Description */}
-                                <p 
-                                  className="font-sans text-[#71717A]"
-                                  style={{
-                                    fontSize: '12px',
-                                    lineHeight: 1.4,
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 4,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                  }}
-                                >
-                                  {article.excerpt}
-                                </p>
-
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Centered pagination load more button directly below the grid container */}
-                        {showLoadRemainingButton && (
-                          <div 
-                            className="!flex justify-center items-center w-full !my-[64px] clear-both relative z-[100] !visible"
+                          <span 
                             style={{
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              width: '100%',
-                              marginTop: '64px',
-                              marginBottom: '64px',
-                              clear: 'both',
-                              position: 'relative',
-                              zIndex: 100,
-                              visibility: 'visible',
+                              fontWeight: 700,
+                              letterSpacing: '0.05em',
+                              fontSize: '14px',
+                              color: '#111',
+                            }}
+                            className="font-sans uppercase"
+                          >
+                            {group.headingName}
+                          </span>
+                          <svg 
+                            className={`h-4 w-4 text-[#111] transition-transform duration-300 transform ${expanded ? 'rotate-180' : 'rotate-0'}`} 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Accordion Content Block */}
+                      {expanded && (
+                        <div className="transition-all duration-300">
+                          {/* List Rows - Styled as a production-grade strict flush CSS grid */}
+                          <div 
+                            className="bg-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+                            style={{
+                              gap: '32px',
                             }}
                           >
-                            <button
-                              onClick={() => {
-                                handleLoadRemaining(group.headingName);
-                                if (typeof (window as any).triggerToast === 'function') {
-                                  (window as any).triggerToast('Loaded remaining papers.');
-                                }
-                              }}
-                              className="hover:bg-[#333] transition duration-200 !bg-[#111] !text-white !rounded-none !shadow-none"
+                            {displayedItems.map((article, idx) => {
+                               // Realistic dates for this month's publications
+                              const daysList = ['28', '25', '22', '20', '18', '15', '12', '09', '06', '03'];
+                              const dayNum = daysList[idx % daysList.length];
+
+                              return (
+                                <div 
+                                  key={article.id}
+                                  onClick={() => onSelectArticle(article)}
+                                  className="group bg-white hover:bg-[#F4F4F5] transition-colors duration-200 cursor-pointer text-left flex flex-col"
+                                  style={{
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'flex-start',
+                                    padding: '24px 20px',
+                                    transition: 'background-color 0.2s ease',
+                                  }}
+                                >
+
+
+                                  {/* The Date */}
+                                  <div 
+                                    className="font-sans"
+                                    style={{
+                                      fontSize: '32px',
+                                      fontWeight: 800,
+                                      lineHeight: 1,
+                                      color: '#111',
+                                      marginBottom: '16px',
+                                    }}
+                                  >
+                                    {dayNum}
+                                  </div>
+
+                                  {/* The Title */}
+                                  <h3 
+                                    className="font-sans text-[#111]"
+                                    style={{
+                                      fontSize: '15px',
+                                      fontWeight: 600,
+                                      lineHeight: 1.4,
+                                      marginBottom: '8px',
+                                    }}
+                                  >
+                                    {article.title}
+                                  </h3>
+
+                                  {/* The Description */}
+                                  <p 
+                                    className="font-sans text-[#71717A]"
+                                    style={{
+                                      fontSize: '12px',
+                                      lineHeight: 1.4,
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 4,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                    }}
+                                  >
+                                    {article.excerpt}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          
+                          {/* Centered pagination load more button directly below the grid container */}
+                          {showLoadRemainingButton && (
+                            <div 
+                              className="!flex justify-center items-center w-full !my-[64px] clear-both relative z-[100] !visible"
                               style={{
-                                backgroundColor: '#111',
-                                color: '#FFF',
-                                padding: '16px 36px',
-                                borderRadius: '0px',
-                                boxShadow: 'none',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
-                                fontWeight: 700,
-                                fontSize: '11px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                transition: 'transform 0.2s ease, background-color 0.2s ease',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'none';
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: '100%',
+                                marginTop: '64px',
+                                marginBottom: '64px',
+                                clear: 'both',
+                                position: 'relative',
+                                zIndex: 100,
+                                visibility: 'visible',
                               }}
                             >
-                              ↓ SEE MORE PAPERS
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })
+                              <button
+                                onClick={() => {
+                                  handleLoadRemaining(group.headingName);
+                                  if (typeof (window as any).triggerToast === 'function') {
+                                    (window as any).triggerToast('Loaded remaining papers.');
+                                  }
+                                }}
+                                className="hover:bg-[#333] transition duration-200 !bg-[#111] !text-white !rounded-none !shadow-none"
+                                style={{
+                                  backgroundColor: '#111',
+                                  color: '#FFF',
+                                  padding: '16px 36px',
+                                  borderRadius: '0px',
+                                  boxShadow: 'none',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.1em',
+                                  fontWeight: 700,
+                                  fontSize: '11px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  transition: 'transform 0.2s ease, background-color 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'none';
+                                }}
+                              >
+                                ↓ SEE MORE PAPERS
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-20 text-center space-y-3 bg-white/40 border border-dashed border-[#e1dacb] rounded-lg">
+                  <span className="text-3xl">🔍</span>
+                  <p className="text-sm font-mono text-neutral-500">No matching technical research papers found</p>
+                </div>
+              )
             ) : (
-              <div className="py-20 text-center space-y-3 bg-white/40 border border-dashed border-[#e1dacb] rounded-lg">
-                <span className="text-3xl">🔍</span>
-                <p className="text-sm font-mono text-neutral-500">No matching technical research papers found inside {subTopic}.</p>
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs font-mono font-bold text-[#1e2329] underline uppercase"
-                >
-                  Clear Search Filter
-                </button>
+              /* SEARCH CANVAS */
+              <div className="w-full animate-fade-in">
+                {(isFocused && !isSearching) ? (
+                  // Blank Canvas / Search Suggestions
+                  <div className="w-full h-full min-h-[400px]" style={{ marginTop: '48px' }}>
+                    <h4 className="font-mono text-neutral-400" style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '24px', fontWeight: 700 }}>
+                      SUGGESTED SEARCHES
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      {["Support Vector Machines", "Algorithm Implementations", "Causal Logic Networks", "Dimensionality Reduction"].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          onMouseDown={(e) => {
+                            // Use onMouseDown to prevent the blur event from firing before the click registers
+                            e.preventDefault(); 
+                            setSearchQuery(suggestion);
+                          }}
+                          className="hover:bg-[#111827] hover:text-white hover:border-[#111827] transition-all duration-200 focus:outline-none"
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid #E5E7EB',
+                            color: '#374151',
+                            borderRadius: '9999px',
+                            padding: '8px 16px',
+                            fontSize: '13px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : allSubTopicArticles.length > 0 ? (
+                  // Flat Grid
+                  <div 
+                    style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(3, 1fr)', 
+                      gap: '24px',
+                      paddingTop: '32px'
+                    }}
+                  >
+                    {allSubTopicArticles.map((article, idx) => {
+                      const daysList = ['28', '25', '22', '20', '18', '15', '12', '09', '06', '03'];
+                      const dayNum = daysList[idx % daysList.length];
+
+                      return (
+                        <div 
+                          key={article.id}
+                          onClick={() => onSelectArticle(article)}
+                          className="group bg-white hover:bg-[#F4F4F5] transition-colors duration-200 cursor-pointer text-left flex flex-col"
+                          style={{
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'flex-start',
+                            padding: '24px 20px',
+                            transition: 'background-color 0.2s ease',
+                          }}
+                        >
+
+                          
+                          <div 
+                            className="font-sans"
+                            style={{
+                              fontSize: '32px',
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              color: '#111',
+                              marginBottom: '16px',
+                            }}
+                          >
+                            {dayNum}
+                          </div>
+
+                          <h3 
+                            className="font-sans text-[#111]"
+                            style={{
+                              fontSize: '15px',
+                              fontWeight: 600,
+                              lineHeight: 1.4,
+                              marginBottom: '8px',
+                            }}
+                          >
+                            {article.title}
+                          </h3>
+
+                          <p 
+                            className="font-sans text-[#71717A]"
+                            style={{
+                              fontSize: '12px',
+                              lineHeight: 1.4,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 4,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              marginBottom: '24px',
+                              flexGrow: 1,
+                            }}
+                          >
+                            {article.excerpt}
+                          </p>
+
+                          <div className="flex items-center justify-between text-[#71717A]" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            <span className="font-mono">{getArticleSource(article.id)}</span>
+                            <ArrowUpRight className="w-3.5 h-3.5 group-hover:text-black transition-colors" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // No Results
+                  <div className="w-full pt-8">
+                    <div className="py-20 text-center space-y-3 bg-white/40 border border-dashed border-[#e1dacb] rounded-lg">
+                      <span className="text-3xl">🔍</span>
+                      <p className="text-sm font-mono text-neutral-500">No matching technical research papers found</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
