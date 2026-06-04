@@ -41,6 +41,7 @@ export default function SubscriptionModal({
 }: SubscriptionModalProps) {
   const [checkoutStep, setCheckoutStep] = useState<'pitch' | 'payment'>('pitch');
   const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
+  const [paymentMethod, setPaymentMethod] = useState<'CARD' | 'UPI'>('CARD');
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('IN');
   const [gstNumber, setGstNumber] = useState('');
@@ -56,6 +57,7 @@ export default function SubscriptionModal({
       setIsCheckRevealed(false); // Reset to unrevealed
       setCheckoutStep('pitch'); // Reset to pitch
       setPlanType('monthly');
+      setPaymentMethod('CARD');
       setFullName('');
       setCountry('IN');
       setGstNumber('');
@@ -150,9 +152,9 @@ export default function SubscriptionModal({
               background: transparent !important;
               border: none;
               border-bottom: 1px solid rgba(130, 120, 100, 0.4);
-              height: 48px;
+              height: 40px;
               line-height: 24px;
-              padding: 22px 4px 1px 4px;
+              padding: 16px 4px 1px 4px;
               font-family: inherit;
               font-size: 14.5px;
               outline: none;
@@ -192,7 +194,14 @@ export default function SubscriptionModal({
 
           {/* Global Close Button */}
           <button 
-            onClick={onClose}
+            onClick={() => {
+              if (isBookOpen) {
+                setIsBookOpen(false);
+                setTimeout(() => onClose(), 600); // Wait for the book to close before unmounting
+              } else {
+                onClose();
+              }
+            }}
             className="absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer"
           >
             <X size={20} strokeWidth={2} />
@@ -218,10 +227,7 @@ export default function SubscriptionModal({
               {/* === RIGHT INSIDE PAGE (THE BASE POCKET FOLDER) === */}
               <div className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-r-[24px] shadow-[inset_15px_0_40px_rgba(0,0,0,0.06)] border-y border-r border-[#d3ccbc] overflow-hidden flex flex-col z-10 workspace-grid">
                 
-                {/* Legible high-contrast CHECK header at the top right */}
-                <div className="absolute top-6 right-8 text-neutral-800 font-mono text-xs font-bold tracking-[0.3em] uppercase z-0 select-none">
-                  CHECK
-                </div>
+                {/* CHECK header removed per new flow */}
 
                 {/* LAYER 2: CHOREOGRAPHED SKEUOMORPHIC RECEIPT */}
                 <motion.div
@@ -314,12 +320,65 @@ export default function SubscriptionModal({
                     </div>
 
                     <PerforatedEdge position="bottom" />
+                    
+                    {/* THE SUCCESS STAMP ANIMATION */}
+                    <AnimatePresence>
+                      {submitSuccess && (
+                        <motion.div
+                          initial={{ scale: 3, opacity: 0, rotate: 0 }}
+                          animate={{ scale: 1, opacity: 0.85, rotate: -5 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none w-56 h-56"
+                        >
+                          <svg viewBox="0 0 200 200" className="w-full h-full text-green-600 mix-blend-multiply drop-shadow-sm">
+                            {/* Outer and Inner Circles */}
+                            <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" strokeWidth="5" strokeDasharray="12 3 4 2 8 2" />
+                            <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="20 1 10 1" />
+                            
+                            {/* Curved Text */}
+                            <path id="top-curve" d="M 28,100 A 72,72 0 0,1 172,100" fill="none" />
+                            <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
+                              <textPath href="#top-curve" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
+                            </text>
+                            
+                            <path id="bottom-curve" d="M 172,100 A 72,72 0 0,1 28,100" fill="none" />
+                            <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
+                              <textPath href="#bottom-curve" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
+                            </text>
+                            
+                            {/* Stars */}
+                            <g fill="currentColor" transform="translate(100, 68)">
+                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
+                              <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
+                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
+                            </g>
+                            <g fill="currentColor" transform="translate(100, 132) rotate(180)">
+                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
+                              <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
+                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
+                            </g>
+                            
+                            {/* Center Banner */}
+                            <g transform="rotate(-8, 100, 100)">
+                              <rect x="8" y="76" width="184" height="48" rx="6" fill="#fefcf8" stroke="currentColor" strokeWidth="4" />
+                              <text x="100" y="110" fill="currentColor" fontSize="30" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="3">
+                                CONFIRMED
+                              </text>
+                            </g>
+                          </svg>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
 
                 {/* LAYER 3: THE SLEEVE POCKET (CONVERTED TO INTERACTIVE BUTTON WITH HOVER STATE) */}
                 <button 
-                  onClick={() => setIsCheckRevealed(!isCheckRevealed)}
+                  onClick={() => {
+                    const newRevealed = !isCheckRevealed;
+                    setIsCheckRevealed(newRevealed);
+                    setCheckoutStep(newRevealed ? 'payment' : 'pitch');
+                  }}
                   className="absolute bottom-0 left-0 right-0 h-[45%] z-20 bg-[#2C3742] rounded-br-[24px] shadow-[0_-15px_40px_rgba(0,0,0,0.4)] border-t border-white/10 flex flex-col items-center justify-between p-6 pointer-events-auto cursor-pointer group text-left select-none outline-none focus:outline-none"
                   style={{
                     clipPath: 'polygon(0 20%, 100% 0, 100% 100%, 0% 100%)',
@@ -341,25 +400,6 @@ export default function SubscriptionModal({
                   </div>
                 </button>
 
-                {/* SMOOTH FADE-IN PULSING "PAY NOW" BUTTON */}
-                <AnimatePresence>
-                  {isCheckRevealed && checkoutStep === 'pitch' && (
-                    <motion.button 
-                      initial={{ opacity: 0, y: 25 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 25 }}
-                      transition={{ type: 'spring', stiffness: 120, damping: 16 }}
-                      whileHover={{ y: -2, scale: 1.02 }}
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setCheckoutStep('payment')}
-                      className="absolute bottom-12 left-[12%] right-[12%] h-14 bg-zinc-950 border border-[#D4AF37]/50 text-[#E5C158] font-sans font-bold uppercase tracking-[0.25em] text-xs flex items-center justify-center space-x-3 transition-all duration-300 rounded-xl z-50 group cursor-pointer pointer-events-auto hover:bg-zinc-900 shadow-2xl button-pulse-glow"
-                    >
-                      <span>PAY NOW</span>
-                      <CreditCard className="w-5 h-5 text-[#E5C158] group-hover:scale-110 group-hover:text-amber-200 transition-all duration-300" />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
-
               </div>
 
               {/* === FRONT COVER (SWINGS LEFT) === */}
@@ -373,9 +413,9 @@ export default function SubscriptionModal({
                 
                 {/* OUTSIDE COVER (Visible when closed) */}
                 <div 
-                  className="absolute inset-0 w-full h-full bg-[#1E272E] rounded-r-[24px] shadow-2xl border border-[#34424F] flex flex-col items-center justify-center cursor-pointer group pointer-events-auto"
+                  className={`absolute inset-0 w-full h-full bg-[#1E272E] rounded-r-[24px] shadow-2xl border border-[#34424F] flex flex-col items-center justify-center group ${isBookOpen ? 'pointer-events-none' : 'pointer-events-auto cursor-pointer'}`}
                   style={{ backfaceVisibility: 'hidden', backgroundImage: 'radial-gradient(circle at 70% 30%, #2A3641 0%, transparent 80%)' }}
-                  onClick={() => setIsBookOpen(true)}
+                  onClick={() => !isBookOpen && setIsBookOpen(true)}
                 >
                   {/* Spine effect */}
                   <div className="absolute left-0 top-0 bottom-0 w-[8px] bg-[#141A1F] rounded-l-[2px] shadow-[inset_-2px_0_10px_rgba(0,0,0,0.5)] z-0"></div>
@@ -435,127 +475,174 @@ export default function SubscriptionModal({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
-                        className="p-8 lg:p-10 flex flex-col h-full relative text-left overflow-y-auto"
+                        className="px-6 py-5 flex flex-col h-full relative text-left z-50 pointer-events-auto"
                       >
-                        <h3 className="text-2xl font-serif font-black uppercase text-[#1a1a1a] mb-6">Checkout</h3>
+                        <h3 className="text-2xl font-serif font-black uppercase text-[#1a1a1a] mb-4">Checkout</h3>
                         
                         {/* Plan Selection */}
-                        <div className="grid grid-cols-2 gap-3 mb-8">
+                        <div className="grid grid-cols-2 gap-3 mb-3">
                           <button 
+                            type="button"
                             onClick={() => setPlanType('monthly')}
-                            className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${planType === 'monthly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
+                            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${planType === 'monthly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
                           >
-                            <span className="block font-mono text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Monthly</span>
-                            <span className="block font-serif text-xl font-bold text-black">$130/mo</span>
+                            <span className="block font-mono text-[9px] uppercase tracking-widest font-bold text-neutral-500 mb-0.5">Monthly</span>
+                            <span className="block font-serif text-lg font-bold text-black">$130/mo</span>
                           </button>
                           
                           <button 
+                            type="button"
                             onClick={() => setPlanType('yearly')}
-                            className={`p-4 rounded-xl border text-left transition-all relative cursor-pointer ${planType === 'yearly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
+                            className={`p-2.5 rounded-xl border text-left transition-all relative cursor-pointer ${planType === 'yearly' ? 'border-[#1a1a1a] bg-black/5 debossed-card' : 'border-stone-300 bg-transparent'}`}
                           >
-                            <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-[#D4AF37] text-white text-[8px] font-bold rounded uppercase tracking-tighter">Save 17%</div>
-                            <span className="block font-mono text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Yearly</span>
-                            <span className="block font-serif text-xl font-bold text-black">$107/mo</span>
-                            <span className="block text-[9px] text-neutral-400 font-mono">*billed annually</span>
+                            <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-[#D4AF37] text-white text-[8px] font-bold rounded uppercase tracking-tighter">Save 17%</div>
+                            <span className="block font-mono text-[9px] uppercase tracking-widest font-bold text-neutral-500 mb-0.5">Yearly</span>
+                            <span className="block font-serif text-lg font-bold text-black">$107/mo</span>
+                            <span className="block text-[8px] text-neutral-400 font-mono">*billed annually</span>
                           </button>
                         </div>
 
-                        {/* Payment Fields */}
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Full Name</label>
-                            <input 
-                              type="text" 
-                              className="paper-input font-serif italic text-zinc-900" 
-                              placeholder="Enter your name" 
-                              value={fullName}
-                              onChange={(e) => setFullName(e.target.value)}
-                              disabled={isSubmitting || submitSuccess}
-                            />
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Country or region</label>
-                              <div className="relative">
-                                <select 
-                                  className="paper-input paper-select bg-transparent rounded-none pr-8 cursor-pointer font-serif italic text-zinc-900"
-                                  value={country}
-                                  onChange={(e) => setCountry(e.target.value)}
+                        {/* Payment Method Toggle (CARD vs UPI) */}
+                        <div className="flex p-1 bg-black/5 rounded-lg border border-black/10 mb-4">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod('CARD')}
+                            className={`flex-1 py-1.5 text-xs font-bold tracking-widest uppercase transition-all rounded-md cursor-pointer ${paymentMethod === 'CARD' ? 'bg-white shadow-sm border border-black/10 debossed-card text-black' : 'text-neutral-500 hover:text-neutral-700'}`}
+                          >
+                            CARD
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod('UPI')}
+                            className={`flex-1 py-1.5 text-xs font-bold tracking-widest uppercase transition-all rounded-md cursor-pointer ${paymentMethod === 'UPI' ? 'bg-white shadow-sm border border-black/10 debossed-card text-black' : 'text-neutral-500 hover:text-neutral-700'}`}
+                          >
+                            UPI
+                          </button>
+                        </div>
+
+                        {/* Payment Fields Container */}
+                        <div className="space-y-3 flex-1 flex flex-col">
+                          {paymentMethod === 'CARD' ? (
+                            <>
+                              <div>
+                                <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-0.5">Full Name</label>
+                                <input 
+                                  type="text" 
+                                  className="paper-input font-serif italic text-zinc-900 bg-transparent" 
+                                  placeholder="Enter your name" 
+                                  value={fullName}
+                                  onChange={(e) => setFullName(e.target.value)}
                                   disabled={isSubmitting || submitSuccess}
-                                >
-                                  <option value="IN">India</option>
-                                  <option value="US">United States</option>
-                                  <option value="UK">United Kingdom</option>
-                                  <option value="CA">Canada</option>
-                                  <option value="DE">Germany</option>
-                                  <option value="FR">France</option>
-                                </select>
-                                <div className="paper-select-arrow" />
+                                />
                               </div>
-                            </div>
-                            <div>
-                              <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">Indian GST Number</label>
-                              <input 
-                                type="text" 
-                                className="paper-input font-serif italic text-zinc-900" 
-                                placeholder="Optional" 
-                                value={gstNumber}
-                                onChange={(e) => setGstNumber(e.target.value)}
-                                disabled={isSubmitting || submitSuccess}
-                              />
-                            </div>
-                          </div>
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-0.5">Country or region</label>
+                                  <div className="relative">
+                                    <select 
+                                      className="paper-input paper-select bg-transparent rounded-none pr-8 cursor-pointer font-serif italic text-zinc-900"
+                                      value={country}
+                                      onChange={(e) => setCountry(e.target.value)}
+                                      disabled={isSubmitting || submitSuccess}
+                                    >
+                                      <option value="IN">India</option>
+                                      <option value="US">United States</option>
+                                      <option value="UK">United Kingdom</option>
+                                      <option value="CA">Canada</option>
+                                      <option value="DE">Germany</option>
+                                      <option value="FR">France</option>
+                                    </select>
+                                    <div className="paper-select-arrow" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-0.5">Indian GST Number</label>
+                                  <input 
+                                    type="text" 
+                                    className="paper-input font-serif italic text-zinc-900 bg-transparent" 
+                                    placeholder="Optional" 
+                                    value={gstNumber}
+                                    onChange={(e) => setGstNumber(e.target.value)}
+                                    disabled={isSubmitting || submitSuccess}
+                                  />
+                                </div>
+                              </div>
 
-                          <div>
-                            <label className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-1">
-                              <span>Card Information</span>
-                              <Lock className="w-2.5 h-2.5 text-stone-500 mb-0.5" />
-                            </label>
-                            <div className="relative flex items-center">
-                              <input 
-                                type="text" 
-                                className="paper-input pr-24 font-serif italic text-zinc-900" 
-                                placeholder="1234 5678 1234 5678" 
-                                value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value)}
-                                disabled={isSubmitting || submitSuccess}
-                              />
-                              <div className="absolute right-3 flex items-center space-x-1.5 pointer-events-none">
-                                {/* Visa */}
-                                <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
-                                  <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
-                                  <path d="M11 15.5l1.3-8h2.1l-1.3 8h-2.1zm7.5-8c-.5-.2-1.2-.4-2-.4-2.2 0-3.7 1.2-3.7 2.8 0 1.3 1.1 1.9 2 2.3.9.4 1.2.7 1.2 1.1 0 .6-.7.9-1.4.9-.8 0-1.5-.2-2.1-.5l-.3-.1-.4 2.2c.6.3 1.7.5 2.8.5 2.3 0 3.8-1.1 3.8-2.8 0-.9-.5-1.6-1.8-2.3-.8-.4-1.4-.7-1.4-1.2 0-.4.5-.8 1.4-.8.7 0 1.4.2 1.8.4l.2.1.2-2.3zm5 5.3l.5-2.7c.1-.4.3-.5.5-.5h1.8c.1 0 .2 0 .2.1 0 0 .1.1 0 .2l-1.1 5.2h-2.2l.3-2.3zm-10.4-.1l1.3-3.4.7 3.4h-2zm-1.8-.6l-2.2-4.6h2.3l1.5 3.6 1-3.6h2.3l-3.5 8h-2.2l.8-1.9c-.2-.5-.7-1.1-.8-1.1z" fill="#2C3742"/>
-                                </svg>
-                                {/* Mastercard */}
-                                <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
-                                  <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
-                                  <circle cx="15.5" cy="11" r="5.2" fill="#E24A26" fillOpacity="0.8"/>
-                                  <circle cx="20.5" cy="11" r="5.2" fill="#F9A01B" fillOpacity="0.8"/>
+                              <div>
+                                <label className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-[#7c725e] mb-0.5">
+                                  <span>Card Information</span>
+                                  <Lock className="w-2.5 h-2.5 text-stone-500 mb-0.5" />
+                                </label>
+                                <div className="relative flex items-center">
+                                  <input 
+                                    type="text" 
+                                    className="paper-input pr-24 font-serif italic text-zinc-900 bg-transparent" 
+                                    placeholder="1234 5678 1234 5678" 
+                                    value={cardNumber}
+                                    onChange={(e) => setCardNumber(e.target.value)}
+                                    disabled={isSubmitting || submitSuccess}
+                                  />
+                                  <div className="absolute right-3 flex items-center space-x-1.5 pointer-events-none">
+                                    {/* Visa */}
+                                    <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
+                                      <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
+                                      <path d="M11 15.5l1.3-8h2.1l-1.3 8h-2.1zm7.5-8c-.5-.2-1.2-.4-2-.4-2.2 0-3.7 1.2-3.7 2.8 0 1.3 1.1 1.9 2 2.3.9.4 1.2.7 1.2 1.1 0 .6-.7.9-1.4.9-.8 0-1.5-.2-2.1-.5l-.3-.1-.4 2.2c.6.3 1.7.5 2.8.5 2.3 0 3.8-1.1 3.8-2.8 0-.9-.5-1.6-1.8-2.3-.8-.4-1.4-.7-1.4-1.2 0-.4.5-.8 1.4-.8.7 0 1.4.2 1.8.4l.2.1.2-2.3zm5 5.3l.5-2.7c.1-.4.3-.5.5-.5h1.8c.1 0 .2 0 .2.1 0 0 .1.1 0 .2l-1.1 5.2h-2.2l.3-2.3zm-10.4-.1l1.3-3.4.7 3.4h-2zm-1.8-.6l-2.2-4.6h2.3l1.5 3.6 1-3.6h2.3l-3.5 8h-2.2l.8-1.9c-.2-.5-.7-1.1-.8-1.1z" fill="#2C3742"/>
+                                    </svg>
+                                    {/* Mastercard */}
+                                    <svg className="w-7 h-4 grayscale opacity-55" viewBox="0 0 36 22" fill="none">
+                                      <rect width="36" height="22" rx="2" fill="#faf6ec" stroke="#d1caa2" strokeWidth="0.5"/>
+                                      <circle cx="15.5" cy="11" r="5.2" fill="#E24A26" fillOpacity="0.8"/>
+                                      <circle cx="20.5" cy="11" r="5.2" fill="#F9A01B" fillOpacity="0.8"/>
+                                    </svg>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 mt-1">
+                                  <input 
+                                    type="text" 
+                                    className="paper-input font-serif italic text-zinc-900 bg-transparent" 
+                                    placeholder="MM / YY" 
+                                    value={expiry}
+                                    onChange={(e) => setExpiry(e.target.value)}
+                                    disabled={isSubmitting || submitSuccess}
+                                  />
+                                  <input 
+                                    type="text" 
+                                    className="paper-input font-serif italic text-zinc-900 bg-transparent" 
+                                    placeholder="CVC" 
+                                    value={cvc}
+                                    onChange={(e) => setCvc(e.target.value)}
+                                    disabled={isSubmitting || submitSuccess}
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center py-2">
+                              <div className="w-36 h-36 border-2 border-neutral-800 p-2 bg-transparent relative flex items-center justify-center opacity-80 mix-blend-multiply">
+                                <svg className="w-full h-full text-black" viewBox="0 0 100 100" fill="currentColor">
+                                  <path d="M0,0 h30 v30 h-30 z m5,5 h20 v20 h-20 z m5,5 h10 v10 h-10 z" />
+                                  <path d="M70,0 h30 v30 h-30 z m5,5 h20 v20 h-20 z m5,5 h10 v10 h-10 z" />
+                                  <path d="M0,70 h30 v30 h-30 z m5,5 h20 v20 h-20 z m5,5 h10 v10 h-10 z" />
+                                  <rect x="40" y="10" width="10" height="10" />
+                                  <rect x="55" y="0" width="10" height="10" />
+                                  <rect x="40" y="25" width="20" height="10" />
+                                  <rect x="80" y="40" width="20" height="10" />
+                                  <rect x="0" y="40" width="30" height="10" />
+                                  <rect x="40" y="45" width="30" height="10" />
+                                  <rect x="40" y="60" width="10" height="40" />
+                                  <rect x="55" y="60" width="20" height="10" />
+                                  <rect x="85" y="60" width="15" height="15" />
+                                  <rect x="60" y="80" width="20" height="20" />
+                                  <rect x="85" y="85" width="10" height="10" />
+                                  <rect x="15" y="55" width="10" height="10" />
                                 </svg>
                               </div>
+                              <p className="mt-3 font-mono text-[9px] uppercase tracking-widest font-bold text-neutral-600">Scan to pay via any UPI app</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-4 mt-2">
-                              <input 
-                                type="text" 
-                                className="paper-input font-serif italic text-zinc-900" 
-                                placeholder="MM / YY" 
-                                value={expiry}
-                                onChange={(e) => setExpiry(e.target.value)}
-                                disabled={isSubmitting || submitSuccess}
-                              />
-                              <input 
-                                type="text" 
-                                className="paper-input font-serif italic text-zinc-900" 
-                                placeholder="CVC" 
-                                value={cvc}
-                                onChange={(e) => setCvc(e.target.value)}
-                                disabled={isSubmitting || submitSuccess}
-                              />
-                            </div>
-                          </div>
+                          )}
 
-                          <div className="pt-4">
+                          <div className="pt-2 mt-auto">
                             <motion.button 
                               whileHover={(!isSubmitting && !submitSuccess) ? { scale: 1.01 } : {}}
                               whileTap={(!isSubmitting && !submitSuccess) ? { scale: 0.95 } : {}}
@@ -563,11 +650,9 @@ export default function SubscriptionModal({
                                 if (isSubmitting || submitSuccess) return;
                                 setIsSubmitting(true);
                                 setTimeout(() => {
+                                  setIsSubmitting(false);
                                   setSubmitSuccess(true);
-                                  setTimeout(() => {
-                                    onClose();
-                                  }, 1200);
-                                }, 1800);
+                                }, 1500);
                               }}
                               disabled={isSubmitting || submitSuccess}
                               className={`w-full h-12 text-[#E5C158] font-sans font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center space-x-2 transition-all duration-300 rounded-xl shadow-xl ${
