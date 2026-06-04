@@ -265,35 +265,48 @@ export default function Dashboard({
               <div className="flex-1 flex flex-col">
                 
                 {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
-                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between gap-4 bg-[#faf9f6]/40 overflow-hidden relative">
+                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 relative">
                   
                   <AnimatePresence mode="wait">
                     {!isSearching ? (
-                      <motion.div 
-                        key="pills"
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -50, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex-1 overflow-x-auto flex gap-2 py-1 no-scrollbar pr-4 relative z-10"
-                      >
-                        {CATEGORIES.map((cat) => {
-                          const isActive = selectedCategory === cat;
-                          return (
-                            <button
-                              key={cat}
-                              onClick={() => setSelectedCategory(cat)}
-                              className={`px-4.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-200 border cursor-pointer flex-shrink-0 ${
-                                isActive 
-                                  ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' 
-                                  : 'bg-transparent text-[#7c7569] border-[#e1dacb] hover:border-[#1a1a1a] hover:text-black'
-                              }`}
-                            >
-                              {cat}
-                            </button>
-                          );
-                        })}
-                      </motion.div>
+                      <React.Fragment key="default-search-header">
+                        <motion.div 
+                          key="pills"
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: -50, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex-1 relative z-10 overflow-x-auto flex gap-2 py-1 no-scrollbar mr-4"
+                          style={{ WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)', maskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)' }}
+                        >
+                            {CATEGORIES.map((cat) => {
+                              const isActive = selectedCategory === cat;
+                              return (
+                                <button
+                                  key={cat}
+                                  onClick={() => setSelectedCategory(cat)}
+                                  className={`px-4.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-200 border cursor-pointer flex-shrink-0 ${
+                                    isActive 
+                                      ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' 
+                                      : 'bg-transparent text-[#7c7569] border-[#e1dacb] hover:border-[#1a1a1a] hover:text-black'
+                                  }`}
+                                >
+                                  {cat}
+                                </button>
+                              );
+                            })}
+                        </motion.div>
+                        
+                        <div className="bg-[#fbfaf8] flex items-center justify-end flex-shrink-0 z-20 w-[40px]">
+                          <button 
+                            key="search-btn"
+                            onClick={() => setIsSearching(true)}
+                            className="flex items-center justify-center text-black hover:scale-110 transition-transform cursor-pointer bg-transparent border-none"
+                          >
+                            <Search className="h-5 w-5" strokeWidth={1.5} />
+                          </button>
+                        </div>
+                      </React.Fragment>
                     ) : (
                       <motion.div
                         key="search-input"
@@ -301,7 +314,7 @@ export default function Dashboard({
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 50, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-1 flex items-center bg-white border border-[#1a1a1a] rounded-full px-5 h-[42px] mr-2 shadow-sm z-10"
+                        className="flex-1 flex items-center bg-white border border-transparent rounded-full px-5 h-[42px] mr-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] z-10"
                       >
                         <Search className="w-4 h-4 text-neutral-400 mr-3" />
                         <input 
@@ -324,119 +337,76 @@ export default function Dashboard({
                       </motion.div>
                     )}
                   </AnimatePresence>
-
-                  {/* On the far right: Search action */}
-                  {!isSearching && (
-                    <button 
-                      onClick={() => setIsSearching(true)}
-                      className="flex items-center justify-center border border-[#e1dacb] hover:border-black rounded-full h-[38px] w-[38px] transition bg-[#fbfaf8]/80 cursor-pointer text-neutral-700 flex-shrink-0 z-10"
-                    >
-                      <Search className="h-4 w-4" />
-                    </button>
-                  )}
                 </div>
 
                 {/* MAIN CONTENT SPACE - POPULATE BY SELECTED CATEGORY'S SUB-TOPICS OR SEARCH */}
-                <div className="flex-1 divide-y-2 divide-[#ece8df]/70 min-h-[400px]">
+                <div className="flex-1 divide-y-2 divide-[#ece8df]/70 min-h-[400px] relative">
                   
-                  {searchResults ? (
-                    searchResults.length > 0 ? (
-                      <div className="p-6 md:p-10">
-                        <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3 mb-6">
-                          Search Results for "{searchQuery}"
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          {searchResults.map((article) => (
-                            <div 
-                              key={article.id}
-                              onClick={() => onSelectArticle(article)}
-                              className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100"
-                            >
-                              <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                                <img 
-                                  src={article.imageUrl} 
-                                  alt={article.title}
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
-                                />
-                              </div>
-                              <div className="p-5 flex-1 flex flex-col space-y-3">
-                                <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
-                                  <span>{getArticleSource(article.id)}</span>
-                                  <span>{article.readTime}</span>
-                                </div>
-                                <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
-                                  {article.title}
-                                </h3>
-                                <div className="mt-auto pt-3">
-                                  <p className="text-[11px] font-serif italic text-neutral-600 line-clamp-2 leading-relaxed">
-                                    {article.excerpt}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 pt-16 pb-24">
-                        <div 
-                            className={`w-full max-w-2xl h-80 rounded-[32px] border-2 border-dashed flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-md ${isDragActive ? 'border-indigo-500 bg-indigo-50/50 scale-[1.02]' : 'border-neutral-300 bg-[#f8f7f5] hover:bg-white hover:border-neutral-400 hover:shadow-lg'}`}
-                            onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
-                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                            onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
-                            onClick={handleFileUpload}
-                            style={{ cursor: 'pointer' }}
+                  {/* The Solid Overlay for Search Focus Mode */}
+                  <AnimatePresence>
+                    {isSearching && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 z-40"
+                        style={{ backgroundColor: '#fbfaf8' }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Search Results Rendered ON TOP of the blur */}
+                  <AnimatePresence>
+                    {isSearching && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 z-50 overflow-y-auto"
+                      >
+                        {!searchQuery.trim() ? (
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                            className="mt-[40px] px-6 md:px-10 w-full"
                           >
-                            <div className={`p-5 rounded-full mb-6 transition-colors ${isDragActive ? 'bg-indigo-100 text-indigo-600' : 'bg-white shadow border border-neutral-200 text-neutral-500'}`}>
-                              <UploadCloud size={32} />
+                            <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
+                              TRENDING TOPICS
+                            </h3>
+                            <div className="flex flex-col space-y-6">
+                              {[
+                                "Autonomous Decision Systems",
+                                "PPO Agents in Synthetics",
+                                "Causal Deduction",
+                                "Generative Architecture"
+                              ].map((suggestion, i) => (
+                                <button 
+                                  key={i}
+                                  onClick={() => setSearchQuery(suggestion)}
+                                  className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black transition-colors"
+                                >
+                                  <span className="text-neutral-400 mr-4 font-sans text-sm">↳</span>
+                                  {suggestion}
+                                </button>
+                              ))}
                             </div>
-                            <p className="text-neutral-900 font-sans font-medium text-[17px] text-center max-w-md px-4 leading-relaxed">
-                              No papers found for '{searchQuery}'.<br/>
-                              <span className="text-neutral-500 text-[14.5px] mt-2 block font-normal">
-                                Drop a PDF here and our AI will generate a summary, audio, and cue cards instantly.
-                              </span>
-                            </p>
-                          </div>
-                      </div>
-                    )
-                  ) : currentSubTopics.length > 0 ? (
-                    currentSubTopics.map((subTopic, sIdx) => {
-                      const featured = subTopic.featuredArticle;
-                      const carousel = subTopic.carouselArticles;
-                      const allArticles = [featured, ...carousel];
-
-                      return (
-                        <div key={`${subTopic.name}-${sIdx}`} className="p-6 md:p-10 space-y-6 text-left">
-                          
-                          {/* Sub-topic Section Title Header */}
-                          <div className="flex items-center justify-between">
-                            <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3">
-                              {subTopic.name}
+                          </motion.div>
+                        ) : searchResults && searchResults.length > 0 ? (
+                          <div className="p-6 md:p-10">
+                            <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3 mb-6">
+                              Search Results for "{searchQuery}"
                             </h2>
-                            <button 
-                              onClick={() => onViewSubTopicAll?.(subTopic.name)}
-                              className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] hover:text-[#1a1a1a] transition font-bold"
-                            >
-                              View All →
-                            </button>
-                          </div>
-
-                          {/* SWIPEABLE ROW OF CAROUSEL ITEMS FOR THIS SUB-TOPIC */}
-                          <div className="space-y-3">
-                            {/* Scrolling Container */}
-                            <div className="overflow-x-auto flex gap-6 pb-4 no-scrollbar snap-x pt-1">
-                              {allArticles.map((article) => (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                              {searchResults.map((article) => (
                                 <div 
                                   key={article.id}
                                   onClick={() => onSelectArticle(article)}
-                                  className="group w-[280px] sm:w-[320px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+                                  className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100"
                                 >
-                                  {/* Thumbnail */}
-                                  <div 
-                                    className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative"
-                                  >
+                                  <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
                                     <img 
                                       src={article.imageUrl} 
                                       alt={article.title}
@@ -444,52 +414,146 @@ export default function Dashboard({
                                       className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
                                     />
                                   </div>
-
-                                  {/* Title / Description & Widgets */}
-                                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                                    <div className="space-y-2">
-                                      <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
-                                        <span>{getArticleSource(article.id)} • {article.author.name}</span>
-                                        <span>{article.publishedAt}</span>
-                                      </div>
-                                      <h4 
-                                        className="text-xs sm:text-sm font-serif font-black text-neutral-900 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
-                                      >
-                                        {article.title}
-                                      </h4>
-                                      <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                                  <div className="p-5 flex-1 flex flex-col space-y-3">
+                                    <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                      <span>{getArticleSource(article.id)}</span>
+                                      <span>{article.readTime}</span>
+                                    </div>
+                                    <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                                      {article.title}
+                                    </h3>
+                                    <div className="mt-auto pt-3">
+                                      <p className="text-[11px] font-serif italic text-neutral-600 line-clamp-2 leading-relaxed">
                                         {article.excerpt}
                                       </p>
-                                    </div>
-
-                                    {/* Bottom widgets bar */}
-                                    <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
-                                      <span>{article.readTime}</span>
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onToggleBookmark(article.id);
-                                        }}
-                                        className="p-1 text-neutral-400 hover:text-black transition"
-                                        title="Save index"
-                                      >
-                                        <Bookmark className={`h-3.5 w-3.5 ${article.isBookmarked ? 'fill-black text-black' : ''}`} />
-                                      </button>
                                     </div>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
+                        ) : (
+                          <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 h-full min-h-[400px]">
+                            <div 
+                                className={`max-w-xl w-full p-12 rounded-2xl border-[1.5px] border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer ${
+                                  isDragActive 
+                                    ? 'border-[#9CA3AF] bg-[#f0efec] scale-[1.02]' 
+                                    : 'border-[#D1D5DB] bg-[#f8f7f5] hover:border-[#9CA3AF] hover:bg-[#f3f2ee]'
+                                }`}
+                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                                onClick={handleFileUpload}
+                              >
+                                <div className="mb-5 text-neutral-400">
+                                  <UploadCloud size={36} strokeWidth={1} />
+                                </div>
+                                <h3 className="font-serif font-bold text-xl text-neutral-700 mb-2">
+                                  No such document found.
+                                </h3>
+                                <p className="text-[#6B7280] text-sm tracking-wide">
+                                  If you have the document, drop it here and we will process it.
+                                </p>
+                              </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="p-16 text-center">
-                      <p className="text-sm font-mono text-[#7c7569]">No sub-topics are defined currently for {selectedCategory}.</p>
-                    </div>
-                  )}
+                  {/* Sub Topics always rendered in background */}
+                  <div className="relative z-0 h-full">
+                    {currentSubTopics.length > 0 ? (
+                      currentSubTopics.map((subTopic, sIdx) => {
+                        const featured = subTopic.featuredArticle;
+                        const carousel = subTopic.carouselArticles;
+                        const allArticles = [featured, ...carousel];
+
+                        return (
+                          <div key={`${subTopic.name}-${sIdx}`} className="p-6 md:p-10 space-y-6 text-left">
+                            
+                            {/* Sub-topic Section Title Header */}
+                            <div className="flex items-center justify-between">
+                              <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3">
+                                {subTopic.name}
+                              </h2>
+                              <button 
+                                onClick={() => onViewSubTopicAll?.(subTopic.name)}
+                                className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] hover:text-[#1a1a1a] transition font-bold"
+                              >
+                                View All →
+                              </button>
+                            </div>
+
+                            {/* SWIPEABLE ROW OF CAROUSEL ITEMS FOR THIS SUB-TOPIC */}
+                            <div className="space-y-3">
+                              {/* Scrolling Container */}
+                              <div className="overflow-x-auto flex gap-6 pb-4 no-scrollbar snap-x pt-1">
+                                {allArticles.map((article) => (
+                                  <div 
+                                    key={article.id}
+                                    onClick={() => onSelectArticle(article)}
+                                    className="group w-[280px] sm:w-[320px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+                                  >
+                                    {/* Thumbnail */}
+                                    <div 
+                                      className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative"
+                                    >
+                                      <img 
+                                        src={article.imageUrl} 
+                                        alt={article.title}
+                                        referrerPolicy="no-referrer"
+                                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                                      />
+                                    </div>
+
+                                    {/* Title / Description & Widgets */}
+                                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                          <span>{getArticleSource(article.id)} • {article.author.name}</span>
+                                          <span>{article.publishedAt}</span>
+                                        </div>
+                                        <h4 
+                                          className="text-xs sm:text-sm font-serif font-black text-neutral-900 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
+                                        >
+                                          {article.title}
+                                        </h4>
+                                        <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                                          {article.excerpt}
+                                        </p>
+                                      </div>
+
+                                      {/* Bottom widgets bar */}
+                                      <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
+                                        <span>{article.readTime}</span>
+                                        <button 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            onToggleBookmark(article.id);
+                                          }}
+                                          className="p-1 text-neutral-400 hover:text-black transition"
+                                          title="Save index"
+                                        >
+                                          <Bookmark className={`h-3.5 w-3.5 ${article.isBookmarked ? 'fill-black text-black' : ''}`} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="p-16 text-center">
+                        <p className="text-sm font-mono text-[#7c7569]">No sub-topics are defined currently for {selectedCategory}.</p>
+                      </div>
+                    )}
+                  </div>
 
                 </div>
               </div>
