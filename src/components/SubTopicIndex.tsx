@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { UserProfile, Article } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SubTopicIndexProps {
   subTopic: string;
@@ -38,9 +39,9 @@ function PaperThumbnail({ src, alt }: { src: string; alt: string }) {
 
   if (failed || !src) {
     return (
-      <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200/50 flex flex-col items-center justify-center text-neutral-400 select-none p-2 border border-neutral-200/30 rounded">
-        <span className="text-[11px] font-mono font-black tracking-widest text-[#7c7569] uppercase">ZID</span>
-        <span className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 font-bold mt-0.5">RESEARCH</span>
+      <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200/50 flex flex-col items-center justify-center text-neutral-400 dark:text-[#9CA3AF] select-none p-2 border border-neutral-200/30 rounded">
+        <span className="text-[11px] font-mono font-black tracking-widest text-[#7c7569] dark:text-[#9CA3AF] uppercase">ZID</span>
+        <span className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 dark:text-[#9CA3AF] font-bold mt-0.5">RESEARCH</span>
       </div>
     );
   }
@@ -147,6 +148,7 @@ export default function SubTopicIndex({
   
   // Popover Filter Dropdown visibility
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { isDarkMode } = useTheme();
 
   // Active filter states in use
   const [activeSortBy, setActiveSortBy] = useState('newest');
@@ -368,10 +370,10 @@ export default function SubTopicIndex({
   };
 
   return (
-    <div id="subtopic-catalog-wrapper" className="min-h-screen bg-[#ded9cf] md:py-8 font-sans antialiased text-[#1c1c1c] selection:bg-[#c2b29f]">
+    <div id="subtopic-catalog-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] md:py-8 font-sans antialiased text-[#1c1c1c] selection:bg-[#c2b29f]">
       
       {/* Behance Presentation Header bar */}
-      <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] border-[#ccc5b6] mb-4">
+      <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] dark:text-gray-400 border-[#ccc5b6] mb-4">
         <span>02 / TECHNICAL CATALOG INDEX</span>
         <span className="uppercase text-center">ZID SUB-TOPIC PORTAL</span>
         <span className="uppercase">COMPILER LEVEL {user.level}</span>
@@ -380,16 +382,16 @@ export default function SubTopicIndex({
       {/* Main Container Sheet */}
       <div 
         id="magazine-page-sheet" 
-        className={`max-w-[1240px] mx-auto w-full bg-[#fbfaf8] shadow-2xl flex flex-col relative border border-[#c2bba8] min-h-screen transition-all duration-300 ${(isFocused || isSearching) && allSubTopicArticles.length === 0 ? 'overflow-hidden' : ''}`}
+        className={`max-w-[1240px] mx-auto w-full bg-[#fbfaf8] dark:bg-[#121214] shadow-2xl dark:shadow-none flex flex-col relative border border-[#c2bba8] dark:border-[rgba(255,255,255,0.08)] min-h-screen transition-all duration-300 ${(isFocused || isSearching) && allSubTopicArticles.length === 0 ? 'overflow-hidden' : ''}`}
         style={(isFocused || isSearching) && allSubTopicArticles.length === 0 ? { minHeight: 'calc(100vh - 64px)' } : {}}
       >
         {/* Minimal header */}
-        <header className="h-16 px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8]/95 backdrop-blur-md z-20">
+        <header className="h-16 px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8]/95 dark:bg-[rgba(18,20,23,0.75)] backdrop-blur-md dark:backdrop-blur-2xl dark:border-b dark:border-[rgba(255,255,255,0.05)] z-20">
           
           {/* Back button */}
           <button 
             onClick={onBack}
-            className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-neutral-900 font-extrabold bg-neutral-100 hover:bg-neutral-200/80 px-4 py-2 border border-neutral-300 shadow-xs hover:border-neutral-400 rounded-md transition duration-200 cursor-pointer"
+            className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-neutral-900 dark:text-gray-300 font-extrabold bg-neutral-100 dark:bg-transparent hover:bg-neutral-200/80 dark:hover:bg-white/5 dark:hover:text-white px-4 py-2 border border-neutral-300 dark:border-white/10 shadow-xs hover:border-neutral-400 rounded-md transition-colors duration-200 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4 stroke-[2.5]" />
             <span className="hidden sm:inline">Back to Hub</span>
@@ -398,7 +400,7 @@ export default function SubTopicIndex({
           {/* Logo element replacement - centered */}
           <div 
             onClick={onBack}
-            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 cursor-pointer select-none absolute left-1/2 -translate-x-1/2"
+            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-[#F3F4F6] cursor-pointer select-none absolute left-1/2 -translate-x-1/2"
           >
             ZID
           </div>
@@ -427,11 +429,11 @@ export default function SubTopicIndex({
           
           {/* REFERENCE MOCKUP HEADER: Responsive text size aligned of metadata directly beneath title */}
           <div className="text-left space-y-1.5 mb-12">
-            <h1 className="font-serif font-black uppercase text-2xl sm:text-4xl md:text-5xl tracking-tight text-[#111] leading-none">
+            <h1 className="font-serif font-black uppercase text-2xl sm:text-4xl md:text-5xl tracking-tight text-[#111] dark:text-gray-100 leading-none">
               {subTopic}
             </h1>
             <div>
-              <span className="text-[10px] md:text-xs font-mono tracking-widest text-[#7c7569] uppercase font-bold block">
+              <span className="text-[10px] md:text-xs font-mono tracking-widest text-[#7c7569] dark:text-[#9CA3AF] uppercase font-bold block">
                 Updated Daily • Curated API Feed • {allSubTopicArticles.length} PAPERS ACTIVE
               </span>
             </div>
@@ -440,13 +442,13 @@ export default function SubTopicIndex({
           {/* COMMAND CENTER TOOLBAR */}
           <div className="relative flex gap-4 items-center w-full z-50">
             <div 
-              className="flex-1 relative flex items-center space-x-3 transition-colors duration-300 bg-white rounded-full h-[48px] px-6 focus-within:border-[#111827] group"
+              className="flex-1 relative flex items-center space-x-3 transition-colors duration-300 bg-white dark:bg-[#1C1C1E] rounded-full h-[48px] px-6 focus-within:border-[#111827] dark:focus-within:border-[#F3F4F6] group dark:border-[rgba(255,255,255,0.1)]"
               style={{
                 border: '1px solid #E5E7EB',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}
             >
-              <Search className="h-5 w-5 text-neutral-800 shrink-0" />
+              <Search className="h-5 w-5 text-neutral-800 dark:text-[#F3F4F6] shrink-0" />
               <input 
                 ref={inputRef}
                 type="text" 
@@ -455,7 +457,7 @@ export default function SubTopicIndex({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className="w-full bg-transparent outline-none text-[13px] md:text-[14px] font-sans font-normal text-[#111827] placeholder-[#9CA3AF] m-0 p-0"
+                className="w-full bg-transparent outline-none text-[13px] md:text-[14px] font-sans font-normal text-[#111827] dark:text-[#F3F4F6] placeholder-[#9CA3AF] dark:placeholder-gray-400 m-0 p-0"
                 style={{ letterSpacing: '0.02em' }}
               />
               {(isFocused || searchQuery.length > 0) && (
@@ -469,7 +471,7 @@ export default function SubTopicIndex({
                     setIsFocused(false);
                     inputRef.current?.blur();
                   }}
-                  className="group flex items-center justify-center p-2 rounded-full text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all duration-200 cursor-pointer shrink-0 focus:outline-none ml-3"
+                  className="group flex items-center justify-center p-2 rounded-full text-[#6B7280] hover:text-[#111827] dark:text-[#F3F4F6] hover:bg-[#F3F4F6] transition-all duration-200 cursor-pointer shrink-0 focus:outline-none ml-3"
                   title="Close Search"
                 >
                   <X size={20} strokeWidth={2} />
@@ -490,7 +492,7 @@ export default function SubTopicIndex({
                     className={`flex items-center justify-center space-x-2 text-[13px] font-sans font-medium px-6 h-[48px] border transition duration-200 cursor-pointer rounded-full shrink-0 focus:outline-none ${
                       isFilterOpen || activeSources.length > 0 || activeSubTopics.length > 0 || activeAttributes.hasCode || activeAttributes.hasDataset || activeAttributes.peerReviewed
                         ? 'bg-[#111827] text-white border-[#111827]' 
-                        : 'text-[#111827] bg-white hover:bg-[#F9FAFB] border-[#E5E7EB] hover:border-[#D1D5DB]'
+                        : 'text-[#111827] dark:text-[#F3F4F6] bg-white dark:bg-transparent hover:bg-[#F9FAFB] dark:hover:bg-[#F3F4F6] dark:hover:text-[#0A0A0B] border-[#E5E7EB] dark:border-[rgba(255,255,255,0.1)] hover:border-[#D1D5DB]'
                     }`}
                     style={{
                       boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
@@ -507,7 +509,7 @@ export default function SubTopicIndex({
             {/* Popover Dropdown Modal */}
             {isFilterOpen && (
               <div 
-                className="absolute top-[calc(100%+16px)] left-0 right-0 bg-[#FFFFFF] border border-neutral-200 shadow-[0_48px_100px_rgba(0,0,0,0.15)] rounded-xl z-[9999] p-6 md:p-8 text-left transition-all duration-300 backdrop-blur-3xl"
+                className="absolute top-[calc(100%+16px)] left-0 right-0 bg-[#FFFFFF] dark:bg-[#121214]/80 backdrop-blur-[16px] border border-neutral-200 dark:border-white/10 shadow-[0_48px_100px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.6)] rounded-xl z-[9999] p-6 md:p-8 text-left transition-all duration-300"
                 style={{ contentVisibility: 'auto' }}
               >
                 {/* Grid Layout inside Popover */}
@@ -515,7 +517,7 @@ export default function SubTopicIndex({
                   
                   {/* Section 1: Sort By (Radio Buttons) */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 uppercase">SORT BY</h4>
+                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 dark:text-gray-300 uppercase">SORT BY</h4>
                     <div className="space-y-2.5">
                       {[
                         { id: 'newest', label: 'Newest First' },
@@ -523,13 +525,13 @@ export default function SubTopicIndex({
                         { id: 'relevant', label: 'Most Relevant' },
                         { id: 'cited', label: 'High Impact' }
                       ].map(opt => (
-                        <label key={opt.id} className="flex items-center space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 hover:text-black cursor-pointer select-none">
+                        <label key={opt.id} className="flex items-center space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 cursor-pointer select-none">
                           <input 
                             type="radio" 
                             name="sortBy"
                             checked={draftSortBy === opt.id}
                             onChange={() => setDraftSortBy(opt.id)}
-                            className="accent-neutral-950 h-3.5 w-3.5 cursor-pointer text-neutral-950" 
+                            className="appearance-none w-4 h-4 rounded-full cursor-pointer bg-white dark:bg-white/10 border border-neutral-300 dark:border-white/20 checked:bg-neutral-950 dark:checked:bg-gray-100 checked:border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/20 dark:focus:ring-offset-[#121214] relative before:absolute before:inset-0 before:w-1.5 before:h-1.5 before:m-auto before:bg-white dark:before:bg-black before:rounded-full before:opacity-0 checked:before:opacity-100"
                           />
                           <span>{opt.label}</span>
                         </label>
@@ -539,12 +541,12 @@ export default function SubTopicIndex({
 
                   {/* Section 2: Publisher / Source (Checkboxes) */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 uppercase">PUBLISHER / SOURCE</h4>
+                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 dark:text-gray-300 uppercase">PUBLISHER / SOURCE</h4>
                     <div className="space-y-2.5">
                       {['arXiv', 'IEEE Xplore', 'ACM Library', 'Nature', 'ScienceDirect'].map(src => {
                         const isChecked = draftSources.includes(src);
                         return (
-                          <label key={src} className="flex items-center space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 hover:text-black cursor-pointer select-none">
+                          <label key={src} className="flex items-center space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 cursor-pointer select-none">
                             <input 
                               type="checkbox" 
                               checked={isChecked}
@@ -555,7 +557,7 @@ export default function SubTopicIndex({
                                   setDraftSources([...draftSources, src]);
                                 }
                               }}
-                              className="accent-neutral-950 rounded border-neutral-300 h-3.5 w-3.5 cursor-pointer" 
+                              className="appearance-none w-4 h-4 rounded-sm cursor-pointer bg-white dark:bg-white/10 border border-neutral-300 dark:border-white/20 checked:bg-neutral-950 dark:checked:bg-gray-100 checked:border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/20 dark:focus:ring-offset-[#121214] relative before:absolute before:inset-0 before:bg-[url('data:image/svg+xml;utf8,<svg viewBox=%220 0 16 16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M4 8L7 11L12 5%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] dark:before:bg-[url('data:image/svg+xml;utf8,<svg viewBox=%220 0 16 16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M4 8L7 11L12 5%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] before:bg-no-repeat before:bg-center before:bg-[length:10px_10px] before:opacity-0 checked:before:opacity-100"
                             />
                             <span>{src}</span>
                           </label>
@@ -566,12 +568,12 @@ export default function SubTopicIndex({
 
                   {/* Section 3: Sub-Topics (Checkboxes) */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 uppercase">SUB-TOPICS</h4>
+                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 dark:text-gray-300 uppercase">SUB-TOPICS</h4>
                     <div className="space-y-2.5">
                       {['Large Language Models', 'Computer Vision', 'Reinforcement Learning', 'Neural Networks'].map(topic => {
                         const isChecked = draftSubTopics.includes(topic);
                         return (
-                          <label key={topic} className="flex items-start space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 hover:text-black cursor-pointer select-none">
+                          <label key={topic} className="flex items-start space-x-2.5 text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 cursor-pointer select-none">
                             <input 
                               type="checkbox" 
                               checked={isChecked}
@@ -582,7 +584,7 @@ export default function SubTopicIndex({
                                   setDraftSubTopics([...draftSubTopics, topic]);
                                 }
                               }}
-                              className="accent-neutral-950 rounded border-neutral-300 h-3.5 w-3.5 mt-0.5 shrink-0 cursor-pointer" 
+                              className="appearance-none w-4 h-4 mt-0.5 shrink-0 rounded-sm cursor-pointer bg-white dark:bg-white/10 border border-neutral-300 dark:border-white/20 checked:bg-neutral-950 dark:checked:bg-gray-100 checked:border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/20 dark:focus:ring-offset-[#121214] relative before:absolute before:inset-0 before:bg-[url('data:image/svg+xml;utf8,<svg viewBox=%220 0 16 16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M4 8L7 11L12 5%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] dark:before:bg-[url('data:image/svg+xml;utf8,<svg viewBox=%220 0 16 16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M4 8L7 11L12 5%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] before:bg-no-repeat before:bg-center before:bg-[length:10px_10px] before:opacity-0 checked:before:opacity-100"
                             />
                             <span className="leading-tight">{topic}</span>
                           </label>
@@ -593,12 +595,12 @@ export default function SubTopicIndex({
 
                   {/* Section 4: Attributes (Toggle Switches) */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 uppercase">ATTRIBUTES</h4>
+                    <h4 className="text-[10px] font-mono tracking-widest font-black text-neutral-400 dark:text-gray-300 uppercase">ATTRIBUTES</h4>
                     <div className="space-y-3.5">
                       
                       {/* Includes Code/GitHub Repo */}
                       <div className="flex items-center justify-between text-left gap-2">
-                        <span className="text-xs font-mono tracking-wide text-neutral-700">Includes Code/GitHub Repo</span>
+                        <span className="text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-300">Includes Code/GitHub Repo</span>
                         <button 
                           type="button"
                           onClick={() => setDraftAttributes(prev => ({ ...prev, hasCode: !prev.hasCode }))}
@@ -614,7 +616,7 @@ export default function SubTopicIndex({
 
                       {/* Includes Dataset */}
                       <div className="flex items-center justify-between text-left gap-2">
-                        <span className="text-xs font-mono tracking-wide text-neutral-700">Includes Dataset</span>
+                        <span className="text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-300">Includes Dataset</span>
                         <button 
                           type="button"
                           onClick={() => setDraftAttributes(prev => ({ ...prev, hasDataset: !prev.hasDataset }))}
@@ -630,7 +632,7 @@ export default function SubTopicIndex({
 
                       {/* Peer Reviewed Only */}
                       <div className="flex items-center justify-between text-left gap-2">
-                        <span className="text-xs font-mono tracking-wide text-neutral-700">Peer Reviewed Only</span>
+                        <span className="text-xs font-mono tracking-wide text-neutral-700 dark:text-gray-300">Peer Reviewed Only</span>
                         <button 
                           type="button"
                           onClick={() => setDraftAttributes(prev => ({ ...prev, peerReviewed: !prev.peerReviewed }))}
@@ -654,14 +656,14 @@ export default function SubTopicIndex({
                   <button 
                     type="button"
                     onClick={handleClearAll}
-                    className="text-xs font-mono font-bold tracking-widest text-neutral-500 hover:text-black uppercase underline transition cursor-pointer"
+                    className="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 uppercase underline transition cursor-pointer"
                   >
                     Clear All
                   </button>
                   <button 
                     type="button"
                     onClick={handleApplyFilters}
-                    className="bg-neutral-950 hover:bg-neutral-800 text-white font-mono text-xs uppercase tracking-widest px-6 py-2.5 rounded-full shadow-md transition cursor-pointer font-bold"
+                    className="bg-neutral-950 dark:bg-gray-100 hover:bg-neutral-800 dark:hover:bg-white text-white dark:text-black font-mono text-xs uppercase tracking-widest px-6 py-2.5 rounded-full shadow-md transition-all dark:hover:scale-105 cursor-pointer font-bold"
                   >
                     Apply Filters
                   </button>
@@ -690,10 +692,9 @@ export default function SubTopicIndex({
                       <div className="pt-6" style={{ marginTop: '32px' }}>
                         <button
                           onClick={() => toggleMonth(group.headingName)}
-                          className="w-full pb-2.5 flex items-center justify-start cursor-pointer transition-colors focus:outline-none"
+                          className="w-full pb-2.5 flex items-center justify-start cursor-pointer transition-colors focus:outline-none border-b border-[#E5E7EB] dark:border-white/10"
                           style={{
                             gap: '8px',
-                            borderBottom: '1px solid #E5E7EB',
                             justifyContent: 'flex-start',
                           }}
                         >
@@ -702,14 +703,14 @@ export default function SubTopicIndex({
                               fontWeight: 700,
                               letterSpacing: '0.05em',
                               fontSize: '14px',
-                              color: '#111',
+                              color: isDarkMode ? "#F3F4F6" : "#111",
                             }}
                             className="font-sans uppercase"
                           >
                             {group.headingName}
                           </span>
                           <svg 
-                            className={`h-4 w-4 text-[#111] transition-transform duration-300 transform ${expanded ? 'rotate-180' : 'rotate-0'}`} 
+                            className={`h-4 w-4 text-[#111] dark:text-[#F3F4F6] transition-transform duration-300 transform ${expanded ? 'rotate-180' : 'rotate-0'}`} 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             stroke="currentColor"
@@ -725,7 +726,7 @@ export default function SubTopicIndex({
                         <div className="transition-all duration-300">
                           {/* List Rows - Styled as a production-grade strict flush CSS grid */}
                           <div 
-                            className="bg-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+                            className="bg-white dark:bg-transparent grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
                             style={{
                               gap: '32px',
                             }}
@@ -739,7 +740,7 @@ export default function SubTopicIndex({
                                 <div 
                                   key={article.id}
                                   onClick={() => onSelectArticle(article)}
-                                  className="group bg-white hover:bg-[#F4F4F5] transition-colors duration-200 cursor-pointer text-left flex flex-col"
+                                  className="group bg-white dark:bg-[#1C1C1E] hover:bg-[#F4F4F5] dark:hover:bg-[#22262B] transition-colors duration-200 cursor-pointer text-left flex flex-col"
                                   style={{
                                     height: '100%',
                                     display: 'flex',
@@ -758,7 +759,7 @@ export default function SubTopicIndex({
                                       fontSize: '32px',
                                       fontWeight: 800,
                                       lineHeight: 1,
-                                      color: '#111',
+                                      color: isDarkMode ? "#F3F4F6" : "#111",
                                       marginBottom: '16px',
                                     }}
                                   >
@@ -767,7 +768,7 @@ export default function SubTopicIndex({
 
                                   {/* The Title */}
                                   <h3 
-                                    className="font-sans text-[#111]"
+                                    className="font-sans text-[#111] dark:text-[#F3F4F6]"
                                     style={{
                                       fontSize: '15px',
                                       fontWeight: 600,
@@ -780,7 +781,7 @@ export default function SubTopicIndex({
 
                                   {/* The Description */}
                                   <p 
-                                    className="font-sans text-[#71717A]"
+                                    className="font-sans text-[#71717A] dark:text-[#9CA3AF]"
                                     style={{
                                       fontSize: '12px',
                                       lineHeight: 1.4,
@@ -853,9 +854,9 @@ export default function SubTopicIndex({
                   );
                 })
               ) : (
-                <div className="py-20 text-center space-y-3 bg-white/40 border border-dashed border-[#e1dacb] rounded-lg">
+                <div className="py-20 text-center space-y-3 bg-white/40 dark:bg-transparent border border-dashed border-[#e1dacb] rounded-lg">
                   <span className="text-3xl">🔍</span>
-                  <p className="text-sm font-mono text-neutral-500">No matching technical research papers found</p>
+                  <p className="text-sm font-mono text-neutral-500 dark:text-[#9CA3AF]">No matching technical research papers found</p>
                 </div>
               )
             ) : (
@@ -864,7 +865,7 @@ export default function SubTopicIndex({
                 {(isFocused && !isSearching) ? (
                   // Blank Canvas / Search Suggestions
                   <div className="w-full h-full min-h-[400px]" style={{ marginTop: '48px' }}>
-                    <h4 className="font-mono text-neutral-400" style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '24px', fontWeight: 700 }}>
+                    <h4 className="font-mono text-neutral-400 dark:text-[#9CA3AF]" style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '24px', fontWeight: 700 }}>
                       SUGGESTED SEARCHES
                     </h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
@@ -876,16 +877,7 @@ export default function SubTopicIndex({
                             e.preventDefault(); 
                             setSearchQuery(suggestion);
                           }}
-                          className="hover:bg-[#111827] hover:text-white hover:border-[#111827] transition-all duration-200 focus:outline-none"
-                          style={{
-                            background: 'transparent',
-                            border: '1px solid #E5E7EB',
-                            color: '#374151',
-                            borderRadius: '9999px',
-                            padding: '8px 16px',
-                            fontSize: '13px',
-                            cursor: 'pointer'
-                          }}
+                          className="bg-transparent border border-[#E5E7EB] dark:border-white/20 rounded-full px-4 py-2 text-[13px] text-[#374151] dark:text-gray-300 hover:bg-[#111827] hover:text-white hover:border-[#111827] dark:hover:bg-white/10 dark:hover:border-white/30 dark:hover:text-white transition-colors duration-200 focus:outline-none cursor-pointer"
                         >
                           {suggestion}
                         </button>
@@ -910,7 +902,7 @@ export default function SubTopicIndex({
                         <div 
                           key={article.id}
                           onClick={() => onSelectArticle(article)}
-                          className="group bg-white hover:bg-[#F4F4F5] transition-colors duration-200 cursor-pointer text-left flex flex-col"
+                          className="group bg-white dark:bg-[#1C1C1E] hover:bg-[#F4F4F5] dark:hover:bg-[#22262B] transition-colors duration-200 cursor-pointer text-left flex flex-col"
                           style={{
                             height: '100%',
                             display: 'flex',
@@ -928,7 +920,7 @@ export default function SubTopicIndex({
                               fontSize: '32px',
                               fontWeight: 800,
                               lineHeight: 1,
-                              color: '#111',
+                              color: isDarkMode ? "#F3F4F6" : "#111",
                               marginBottom: '16px',
                             }}
                           >
@@ -936,7 +928,7 @@ export default function SubTopicIndex({
                           </div>
 
                           <h3 
-                            className="font-sans text-[#111]"
+                            className="font-sans text-[#111] dark:text-[#F3F4F6]"
                             style={{
                               fontSize: '15px',
                               fontWeight: 600,
@@ -948,7 +940,7 @@ export default function SubTopicIndex({
                           </h3>
 
                           <p 
-                            className="font-sans text-[#71717A]"
+                            className="font-sans text-[#71717A] dark:text-[#9CA3AF]"
                             style={{
                               fontSize: '12px',
                               lineHeight: 1.4,
@@ -963,7 +955,7 @@ export default function SubTopicIndex({
                             {article.excerpt}
                           </p>
 
-                          <div className="flex items-center justify-between text-[#71717A]" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          <div className="flex items-center justify-between text-[#71717A] dark:text-[#9CA3AF]" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             <span className="font-mono">{getArticleSource(article.id)}</span>
                             <ArrowUpRight className="w-3.5 h-3.5 group-hover:text-black transition-colors" />
                           </div>
@@ -974,9 +966,9 @@ export default function SubTopicIndex({
                 ) : (
                   // No Results
                   <div className="w-full pt-8">
-                    <div className="py-20 text-center space-y-3 bg-white/40 border border-dashed border-[#e1dacb] rounded-lg">
+                    <div className="py-20 text-center space-y-3 bg-white/40 dark:bg-transparent border border-dashed border-[#e1dacb] rounded-lg">
                       <span className="text-3xl">🔍</span>
-                      <p className="text-sm font-mono text-neutral-500">No matching technical research papers found</p>
+                      <p className="text-sm font-mono text-neutral-500 dark:text-[#9CA3AF]">No matching technical research papers found</p>
                     </div>
                   </div>
                 )}
@@ -996,15 +988,15 @@ export default function SubTopicIndex({
                 <h2 className="text-3xl md:text-4xl font-mono font-black tracking-widest text-[#fbfaf8] uppercase italic">
                   ZID*
                 </h2>
-                <p className="text-[9px] font-mono tracking-widest text-neutral-400 uppercase mt-1">
+                <p className="text-[9px] font-mono tracking-widest text-neutral-400 dark:text-gray-300 uppercase mt-1">
                   curated microscale research hub & terminal insights for absolute builders
                 </p>
               </div>
-              <div className="text-[10px] font-serif italic text-neutral-400 max-w-xs sm:text-right">
+              <div className="text-[10px] font-serif italic text-neutral-400 dark:text-[#9CA3AF] max-w-xs sm:text-right">
                 "Deterministic state correctness under compile stress is ZID system policy."
               </div>
             </div>
-            <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 gap-2">
+            <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 dark:text-[#9CA3AF] gap-2">
               <span>© {new Date().getFullYear()} ZID RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
               <span>ESTABLISHED MAY 2026</span>
             </div>

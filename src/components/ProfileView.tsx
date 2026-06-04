@@ -7,8 +7,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, Article } from '../types';
 import { useBookmark } from '../contexts/BookmarkContext';
+import { useTheme } from '../contexts/ThemeContext';
 import BookmarkButton from './BookmarkButton';
-import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -151,6 +152,7 @@ export default function ProfileView({
 
   const { savedArticles, uploadedArticles, removeUpload, saveUpload } = useBookmark();
   const [profileTab, setProfileTab] = useState<'STATS' | 'POSTS' | 'SAVES' | 'UPLOADS'>('STATS');
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [researchPapersOpen, setResearchPapersOpen] = useState(true);
   const [hacksOpen, setHacksOpen] = useState(false);
 
@@ -168,6 +170,18 @@ export default function ProfileView({
 
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [editingUpload, setEditingUpload] = useState<Article | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleFileUpload = () => {
+    setIsUploadModalOpen(false);
+    onAddCustomArticle(
+      "Generated Note - Neural Architecture Search",
+      "Automatically parsed from uploaded document...",
+      "Generated",
+      "Document parsed successfully..."
+    );
+  };
   const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
 
@@ -270,7 +284,7 @@ export default function ProfileView({
   const tabs: ('STATS' | 'POSTS' | 'SAVES' | 'UPLOADS')[] = ['STATS', 'POSTS', 'SAVES', 'UPLOADS'];
 
   return (
-    <div id="personal-profile-wrapper" className="min-h-screen bg-[#ded9cf] pt-12 pb-16 px-4 md:px-8 font-sans antialiased text-[#111]">
+    <div id="personal-profile-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] pt-12 pb-16 px-4 md:px-8 font-sans antialiased text-[#111] dark:text-[#F3F4F6]">
       {/* Meta-Header bar */}
       <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] border-[#ccc5b6] mb-4">
         <span>02 / CURATOR DOSSIER</span>
@@ -280,29 +294,114 @@ export default function ProfileView({
 
       <div 
         id="profile-editorial-sheet" 
-        className="w-full max-w-[1240px] mx-auto bg-[#fbfaf8] border border-[#c2bba8] shadow-2xl flex flex-col p-6 md:py-[64px] md:px-[80px]"
+        className="w-full max-w-[1240px] mx-auto bg-[#fbfaf8] dark:bg-[#121214] dark:bg-[#121214] border border-[#c2bba8] dark:border-[rgba(255,255,255,0.08)] dark:border-[rgba(255,255,255,0.08)] shadow-2xl flex flex-col p-6 md:py-[64px] md:px-[80px] transition-colors duration-300"
         style={{ minHeight: '80vh' }}
       >
+        {/* Custom Paper Upload Modal */}
+        <AnimatePresence>
+          {isUploadModalOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FAF7F2]/60 dark:bg-black/60 backdrop-blur-md"
+              onClick={() => setIsUploadModalOpen(false)}
+            >
+              <motion.div 
+                initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-lg bg-white dark:bg-[#1C1C1E] backdrop-blur-xl rounded-[32px] p-8 shadow-[0_24px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-white dark:border-white/10"
+              >
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-serif font-bold uppercase text-slate-900 dark:text-gray-100 tracking-tight">Upload Document</h2>
+                  <p className="text-stone-500 dark:text-gray-400 font-medium text-sm mt-2">Drag and drop your PDF or paper to generate a study session.</p>
+                </div>
+
+                <div 
+                  className={`group w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all duration-200 cursor-pointer ${isDragActive ? 'border-indigo-500 bg-indigo-50/50 dark:bg-white/10 dark:border-gray-300' : 'border-stone-300 dark:border-white/20 dark:bg-white/5 bg-stone-50/50 hover:bg-stone-100/50 dark:hover:bg-white/10 dark:hover:border-gray-300 hover:border-stone-400'}`}
+                  onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                  onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                  onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                  onClick={handleFileUpload}
+                >
+                  <div className={`p-4 rounded-full mb-4 transition-all duration-200 group-hover:scale-105 ${isDragActive ? 'bg-indigo-100 text-indigo-600 dark:bg-[#27272A] dark:text-white scale-105' : 'bg-stone-200/50 text-stone-500 dark:bg-[#27272A] dark:text-white'}`}>
+                    <UploadCloud size={32} />
+                  </div>
+                  <p className="text-stone-600 dark:text-gray-300 font-medium text-sm">
+                    {isDragActive ? "Drop file to upload" : "Click or drag paper here"}
+                  </p>
+                  <p className="text-stone-400 dark:text-gray-400 text-xs mt-1">Supports PDF, DOCX, TXT</p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Hub Return Bar */}
         <div 
           className="flex justify-between items-center" 
-          style={{ width: '100%', borderBottom: '1px solid #EAEAEA', paddingBottom: '24px', marginBottom: '48px' }}
+          style={{ width: '100%', borderBottom: isDarkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid #EAEAEA", paddingBottom: '24px', marginBottom: '48px' }}
         >
           <button 
             onClick={() => setActiveTab('hud')}
-            className="inline-flex items-center space-x-2 text-[11px] font-mono tracking-widest text-[#888] hover:text-[#111] transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
+            className="inline-flex items-center space-x-2 text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-[#111] dark:text-[#F3F4F6] transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
           >
             <span>← RETURN TO HUBS</span>
           </button>
-          <div className="text-[10px] font-mono text-[#888] tracking-widest uppercase hidden sm:block">
+          <div className="text-[10px] font-mono text-[#888] dark:text-[#9CA3AF] tracking-widest uppercase hidden sm:block">
             Curator Dossier // NO. 04
           </div>
-          <button 
-            onClick={onLogout}
-            className="text-[11px] font-mono tracking-widest text-[#888] hover:text-red-600 transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
-          >
-            LOGOUT
-          </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            {/* Theme Toggle */}
+            <div 
+              onClick={toggleDarkMode}
+              style={{
+                width: '48px',
+                height: '24px',
+                background: isDarkMode ? '#374151' : '#E5E7EB',
+                borderRadius: '9999px',
+                position: 'relative',
+                cursor: 'pointer',
+                transition: 'background 0.3s ease'
+              }}
+            >
+              <div 
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  background: '#FFFFFF',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  top: '2px',
+                  left: '2px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  transition: 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                  transform: isDarkMode ? 'translateX(24px)' : 'translateX(0)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {isDarkMode ? (
+                  <Moon color="#111827" size={12} strokeWidth={1.5} />
+                ) : (
+                  <Sun color="#111827" size={12} strokeWidth={1.5} />
+                )}
+              </div>
+            </div>
+
+            <button 
+              onClick={onLogout}
+              className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-red-600 transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
+            >
+              LOGOUT
+            </button>
+          </div>
         </div>
 
         {/* Top Section (The Editorial Header) */}
@@ -310,7 +409,7 @@ export default function ProfileView({
           {/* Left Column (Typography) */}
           <div className="flex flex-col justify-start" style={{ alignSelf: 'center' }}>
             <h1 
-              className="font-serif font-black text-[#111] tracking-tighter uppercase"
+              className="font-serif font-black text-[#111] dark:text-[#F3F4F6] tracking-tighter uppercase"
               style={{ 
                 fontSize: 'clamp(4rem, 8vw, 8rem)',
                 fontFamily: 'var(--font-serif)',
@@ -320,7 +419,7 @@ export default function ProfileView({
               ALEX<br />MORGAN
             </h1>
             <div className="mt-8">
-              <p className="text-sm text-[#444] font-sans leading-relaxed max-w-[480px]">
+              <p className="text-sm text-[#444] dark:text-gray-400 font-sans leading-relaxed max-w-[480px]">
                 Lead researcher and platform curator. Exploring the intersection of digital architecture and minimal interface design.
               </p>
             </div>
@@ -329,14 +428,14 @@ export default function ProfileView({
           {/* Right Column (Photo) */}
           <div className="w-full flex justify-end">
             <div 
-              className="w-full bg-[#f0ede6] overflow-hidden border border-neutral-200 rounded-none shadow-none"
+              className="w-full bg-[#f0ede6] overflow-hidden border border-neutral-200 dark:border-white/10 rounded-none shadow-none"
               style={{ maxWidth: '360px', width: '100%', aspectRatio: '1/1' }}
             >
-              <img 
+              <img className="dark:brightness-90 transition-all duration-300 grayscale contrast-[1.15]" 
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=600"
                 alt="Alex Morgan Portrait"
                 referrerPolicy="no-referrer"
-                className="grayscale contrast-[1.15]"
+                
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -346,7 +445,7 @@ export default function ProfileView({
         {/* Divider & Tab Navigation */}
         <div 
           className="w-full animate-fade-in"
-          style={{ borderTop: '1px solid #EAEAEA', marginTop: '48px' }}
+          style={{ borderTop: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #EAEAEA', marginTop: '48px' }}
         >
           <div 
             style={{
@@ -371,8 +470,8 @@ export default function ProfileView({
                     paddingTop: '16px',
                     paddingBottom: '12px',
                     marginTop: '-1px',
-                    borderTop: isActive ? '1px solid #111' : '1px solid transparent',
-                    color: isActive ? '#111' : '#888',
+                    borderTop: isActive ? (isDarkMode ? '1px solid #FFFFFF' : '1px solid #111') : '1px solid transparent',
+                    color: isActive ? (isDarkMode ? '#FFFFFF' : '#111') : (isDarkMode ? '#9CA3AF' : '#888'),
                     fontWeight: isActive ? 700 : 400,
                     textTransform: 'uppercase',
                     transition: 'all 0.2s ease',
@@ -390,52 +489,52 @@ export default function ProfileView({
           {profileTab === 'STATS' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
               {/* Block 1 */}
-              <div className="border border-[#EAEAEA] rounded-none shadow-none p-8 bg-white flex flex-col justify-between">
+              <div className="border border-[#EAEAEA] dark:border-white/5 rounded-none shadow-none p-8 bg-white dark:bg-[#1C1C1E] flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] font-mono tracking-widest text-[#888] uppercase block mb-6 font-semibold">TOTAL SAVES</span>
-                  <span className="text-3xl font-bold text-[#111] tracking-tight leading-snug block">
+                  <span className="text-[10px] font-mono tracking-widest text-[#888] dark:text-gray-400 uppercase block mb-6 font-semibold">TOTAL SAVES</span>
+                  <span className="text-3xl font-bold text-[#111] dark:text-[#F3F4F6] tracking-tight leading-snug block">
                     142
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-400 block mt-2">
+                  <span className="text-[11px] font-mono text-neutral-400 dark:text-gray-500 block mt-2">
                     Archived nodes
                   </span>
                 </div>
               </div>
 
               {/* Block 2 */}
-              <div className="border border-[#EAEAEA] rounded-none shadow-none p-8 bg-white flex flex-col justify-between">
+              <div className="border border-[#EAEAEA] dark:border-white/5 rounded-none shadow-none p-8 bg-white dark:bg-[#1C1C1E] flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] font-mono tracking-widest text-[#888] uppercase block mb-6 font-semibold">ACTIVE POSTS</span>
-                  <span className="text-3xl font-bold text-[#111] tracking-tight leading-snug block">
+                  <span className="text-[10px] font-mono tracking-widest text-[#888] dark:text-gray-400 uppercase block mb-6 font-semibold">ACTIVE POSTS</span>
+                  <span className="text-3xl font-bold text-[#111] dark:text-[#F3F4F6] tracking-tight leading-snug block">
                     28
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-400 block mt-2">
+                  <span className="text-[11px] font-mono text-neutral-400 dark:text-gray-500 block mt-2">
                     Published modules
                   </span>
                 </div>
               </div>
 
               {/* Block 3 */}
-              <div className="border border-[#EAEAEA] rounded-none shadow-none p-8 bg-white flex flex-col justify-between">
+              <div className="border border-[#EAEAEA] dark:border-white/5 rounded-none shadow-none p-8 bg-white dark:bg-[#1C1C1E] flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] font-mono tracking-widest text-[#888] uppercase block mb-6 font-semibold">NETWORK</span>
-                  <span className="text-3xl font-bold text-[#111] tracking-tight leading-snug block">
+                  <span className="text-[10px] font-mono tracking-widest text-[#888] dark:text-gray-400 uppercase block mb-6 font-semibold">NETWORK</span>
+                  <span className="text-3xl font-bold text-[#111] dark:text-[#F3F4F6] tracking-tight leading-snug block">
                     1.2K
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-400 block mt-2">
+                  <span className="text-[11px] font-mono text-neutral-400 dark:text-gray-500 block mt-2">
                     Platform peers
                   </span>
                 </div>
               </div>
 
               {/* Block 4 */}
-              <div className="border border-[#EAEAEA] rounded-none shadow-none p-8 bg-white flex flex-col justify-between">
+              <div className="border border-[#EAEAEA] dark:border-white/5 rounded-none shadow-none p-8 bg-white dark:bg-[#1C1C1E] flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] font-mono tracking-widest text-[#888] uppercase block mb-6 font-semibold">FOCUS</span>
-                  <span className="text-lg font-bold text-[#111] tracking-tight leading-snug block">
+                  <span className="text-[10px] font-mono tracking-widest text-[#888] dark:text-gray-400 uppercase block mb-6 font-semibold">FOCUS</span>
+                  <span className="text-lg font-bold text-[#111] dark:text-[#F3F4F6] tracking-tight leading-snug block">
                     UI/UX & Systems
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-400 block mt-2">
+                  <span className="text-[11px] font-mono text-neutral-400 dark:text-gray-500 block mt-2">
                     Core operational design
                   </span>
                 </div>
@@ -454,17 +553,17 @@ export default function ProfileView({
                   className="relative group overflow-hidden bg-[#F0F0F0] cursor-pointer"
                   style={{ aspectRatio: '1/1' }}
                 >
-                  <img 
+                  <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover grayscale contrast-[1.1] group-hover:grayscale-0 transition-all duration-300" 
                     src={item.img} 
                     alt={item.title}
-                    className="w-full h-full object-cover grayscale contrast-[1.1] group-hover:grayscale-0 transition-all duration-300"
+                    
                     style={{ aspectRatio: '1/1', border: 'none' }}
                   />
                   <div className="absolute inset-0 bg-black/85 flex flex-col justify-between p-4 md:p-6 text-left opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <span className="text-[10px] font-mono tracking-widest text-[#bbb] uppercase block font-semibold">
                       // {item.tag}
                     </span>
-                    <h4 className="text-[12px] md:text-[13px] font-bold text-white uppercase tracking-tight leading-snug font-mono">
+                    <h4 className="text-[12px] md:text-[13px] font-bold text-white dark:text-[#0A0A0B] uppercase tracking-tight leading-snug font-mono">
                       {item.title}
                     </h4>
                   </div>
@@ -479,32 +578,38 @@ export default function ProfileView({
                 <div className="w-full flex flex-col items-center justify-center text-center mt-16 py-20">
                   <Bookmark className="w-8 h-8 text-neutral-300" />
                   <p className="mt-4 text-sm font-mono text-neutral-500 uppercase">NO SAVED ARTICLES YET.</p>
+                  <button 
+                    onClick={() => setActiveTab('hud')}
+                    className="mt-4 px-6 py-2 rounded-full text-sm font-mono font-medium tracking-wide bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-black dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white transition-colors cursor-pointer"
+                  >
+                    Browse Papers
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {savedArticles.map((article) => (
                     <div 
                       key={article.id}
-                      className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100"
+                      className="group bg-white dark:bg-[#1C1C1E] rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100 dark:border-white/5"
                     >
                       <div 
                         className="cursor-pointer flex-1 flex flex-col"
                         onClick={() => onSelectArticle(article)}
                       >
                         <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                          <img 
+                          <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
                             src={article.imageUrl} 
                             alt={article.title}
                             referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                            
                           />
                         </div>
                         <div className="p-5 flex-1 flex flex-col space-y-3">
-                          <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                          <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
                             <span>{article.category}</span>
                             <span>{article.readTime}</span>
                           </div>
-                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] dark:text-gray-100 leading-tight line-clamp-3">
                             {article.title}
                           </h3>
                         </div>
@@ -535,32 +640,38 @@ export default function ProfileView({
                 <div className="w-full flex flex-col items-center justify-center text-center mt-16 py-20">
                   <UploadCloud size={24} color="#9CA3AF" strokeWidth={1.5} />
                   <p className="mt-4 text-sm font-mono text-neutral-500 uppercase">NO UPLOADS YET.</p>
+                  <button 
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="mt-4 px-6 py-2 rounded-full text-sm font-mono font-medium tracking-wide bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-black dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white transition-colors cursor-pointer"
+                  >
+                    Upload Document
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {uploadedArticles.map((article) => (
                     <div 
                       key={article.id}
-                      className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100"
+                      className="group bg-white dark:bg-[#1C1C1E] rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100 dark:border-white/5"
                     >
                       <div 
                         className="cursor-pointer flex-1 flex flex-col"
                         onClick={() => onSelectArticle(article)}
                       >
                         <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                          <img 
+                          <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
                             src={article.imageUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400&h=400"} 
                             alt={article.title}
                             referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                            
                           />
                         </div>
                         <div className="p-5 flex-1 flex flex-col space-y-3">
-                          <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                          <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
                             <span>{article.category}</span>
                             <span>{article.readTime}</span>
                           </div>
-                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] dark:text-gray-100 leading-tight line-clamp-3">
                             {article.title}
                           </h3>
                         </div>
@@ -637,10 +748,10 @@ export default function ProfileView({
                   >
                     {getCarouselImages(selectedPost).map((imgUrl, i) => (
                       <div key={i} className="flex-shrink-0 w-full h-full">
-                        <img 
+                        <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity pointer-events-none" 
                           src={imgUrl} 
                           alt={`${selectedPost.title} image ${i + 1}`}
-                          className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
+                          
                           draggable="false"
                         />
                       </div>
@@ -649,14 +760,14 @@ export default function ProfileView({
                   {/* Left Chevron */}
                   <button 
                     onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-                    className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white dark:text-[#0A0A0B]/70 hover:text-white dark:text-[#0A0A0B] transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
                   >
                     <ChevronLeft size={24} />
                   </button>
                   {/* Right Chevron */}
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-                    className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === getCarouselImages(selectedPost).length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white dark:text-[#0A0A0B]/70 hover:text-white dark:text-[#0A0A0B] transition-all backdrop-blur-md border border-white/10 shadow-lg ${currentImageIndex === getCarouselImages(selectedPost).length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'}`}
                   >
                     <ChevronRight size={24} />
                   </button>
@@ -665,7 +776,7 @@ export default function ProfileView({
                     {getCarouselImages(selectedPost).map((_, i) => (
                       <div 
                         key={i} 
-                        className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${currentImageIndex === i ? 'bg-white' : 'bg-white/30'}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${currentImageIndex === i ? 'bg-white dark:bg-[#1C1C1E]' : 'bg-white dark:bg-[#1C1C1E]/30'}`}
                         onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
                       ></div>
                     ))}
@@ -685,25 +796,25 @@ export default function ProfileView({
                   <button 
                     type="button"
                     onClick={() => setLikedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
-                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white dark:text-[#0A0A0B] transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
                   >
-                    <Heart size={14} fill={likedPosts[selectedPost.id] ? "#FFF" : "none"} className={likedPosts[selectedPost.id] ? "text-white" : "text-[#9BA0A8]"} />
+                    <Heart size={14} fill={likedPosts[selectedPost.id] ? "#FFF" : "none"} className={likedPosts[selectedPost.id] ? "text-white dark:text-[#0A0A0B]" : "text-[#9BA0A8]"} />
                     <span className="tracking-wide text-[10px]">{likedPosts[selectedPost.id] ? "1,241" : "1,240"}</span>
                   </button>
 
-                  <span className="h-3 w-[1px] bg-white/10"></span>
+                  <span className="h-3 w-[1px] bg-white dark:bg-[#1C1C1E]/10"></span>
 
                   {/* Save Button */}
                   <button 
                     type="button"
                     onClick={() => setSavedPosts(prev => ({ ...prev, [selectedPost.id]: !prev[selectedPost.id] }))}
-                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white dark:text-[#0A0A0B] transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
                   >
-                    <Bookmark size={13} fill={savedPosts[selectedPost.id] ? "#FFF" : "none"} className={savedPosts[selectedPost.id] ? "text-white" : "text-[#9BA0A8]"} />
+                    <Bookmark size={13} fill={savedPosts[selectedPost.id] ? "#FFF" : "none"} className={savedPosts[selectedPost.id] ? "text-white dark:text-[#0A0A0B]" : "text-[#9BA0A8]"} />
                     <span className="tracking-wide text-[10px] uppercase">{savedPosts[selectedPost.id] ? "Saved" : "Save"}</span>
                   </button>
 
-                  <span className="h-3 w-[1px] bg-white/10"></span>
+                  <span className="h-3 w-[1px] bg-white dark:bg-[#1C1C1E]/10"></span>
 
                   {/* Share Button */}
                   <button 
@@ -714,9 +825,9 @@ export default function ProfileView({
                       setShareCopied(true);
                       setTimeout(() => setShareCopied(false), 2000);
                     }}
-                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
+                    className="flex items-center space-x-2 text-[#9BA0A8] hover:text-white dark:text-[#0A0A0B] transition-all font-mono font-medium text-[11px] bg-transparent border-none p-0 cursor-pointer"
                   >
-                    <Share2 size={13} className={shareCopied ? "text-white" : "text-[#9BA0A8]"} />
+                    <Share2 size={13} className={shareCopied ? "text-white dark:text-[#0A0A0B]" : "text-[#9BA0A8]"} />
                     <span className="min-w-[40px] text-left uppercase text-[10px] tracking-wide">
                       {shareCopied ? "COPIED" : "SHARE"}
                     </span>
@@ -740,10 +851,10 @@ export default function ProfileView({
                   {/* Profile Header */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <img 
+                      <img className="dark:brightness-90 transition-all duration-300 w-9 h-9 rounded-full object-cover border border-[#3A3D45] flex-shrink-0" 
                         src={getCommenterAvatar("ALEX_MORGAN")} 
                         alt="alex_morgan"
-                        className="w-9 h-9 rounded-full object-cover border border-[#3A3D45] flex-shrink-0"
+                        
                       />
                       <span className="font-sans font-semibold text-[13px] text-[#E4E6EB] tracking-wide block leading-none truncate uppercase">ALEX_MORGAN</span>
                     </div>
@@ -772,7 +883,7 @@ export default function ProfileView({
                 </div>
 
                 {/* Vertical Comment Hierarchy */}
-                <div className="space-y-1 text-white relative">
+                <div className="space-y-1 text-white dark:text-[#0A0A0B] relative">
                   {((postDetailsMap[selectedPost.id]?.comments || []).concat(customComments[selectedPost.id] || [])).map((comment, idx) => {
                     const commentKey = `${selectedPost.id}-${idx}`;
                     const baseLikes = ((idx * 3 + selectedPost.id) % 5) + 1;
@@ -798,10 +909,10 @@ export default function ProfileView({
                         <div className="flex items-start justify-between space-x-3">
                           <div className="flex items-start space-x-3 flex-1 min-w-0">
                             {/* Tiny circular portrait profile image */}
-                            <img 
+                            <img className="dark:brightness-90 transition-all duration-300 w-7 h-7 rounded-full object-cover border border-[#3A3D45] flex-shrink-0 z-10" 
                               src={getCommenterAvatar(comment.user)} 
                               alt={comment.user}
-                              className="w-7 h-7 rounded-full object-cover border border-[#3A3D45] flex-shrink-0 z-10"
+                              
                             />
                             <div className="space-y-1 flex-1 text-left min-w-0 pt-0.5">
                               {/* Username */}
@@ -821,7 +932,7 @@ export default function ProfileView({
                             <button 
                               type="button" 
                               onClick={() => handleToggleLikeComment(selectedPost.id, idx)}
-                              className={`text-[#6A6E78] hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer ${likeState.userLiked ? 'text-white' : ''}`}
+                              className={`text-[#6A6E78] hover:text-white dark:text-[#0A0A0B] transition-colors bg-transparent border-none p-0 cursor-pointer ${likeState.userLiked ? 'text-white dark:text-[#0A0A0B]' : ''}`}
                             >
                               <Heart size={12} fill={likeState.userLiked ? "#FFF" : "none"} className={likeState.userLiked ? "" : ""} />
                             </button>
@@ -829,7 +940,7 @@ export default function ProfileView({
                             <button 
                               type="button"
                               onClick={() => setReplyingTo(comment.user)}
-                              className="text-[#6A6E78] hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer"
+                              className="text-[#6A6E78] hover:text-white dark:text-[#0A0A0B] transition-colors bg-transparent border-none p-0 cursor-pointer"
                               title="Reply"
                             >
                               <Reply size={12} />
@@ -860,7 +971,7 @@ export default function ProfileView({
                 {replyingTo && (
                   <div className="px-5 pt-3 pb-1 flex justify-between items-center animate-fade-in relative">
                     <span className="text-[10px] font-sans text-[#8B909A]">Replying to <span className="text-[#E4E6EB] font-medium">@{replyingTo}</span></span>
-                    <button type="button" onClick={() => setReplyingTo(null)} className="text-[#6A6E78] hover:text-white bg-transparent border-none p-0 cursor-pointer absolute right-5"><X size={12} /></button>
+                    <button type="button" onClick={() => setReplyingTo(null)} className="text-[#6A6E78] hover:text-white dark:text-[#0A0A0B] bg-transparent border-none p-0 cursor-pointer absolute right-5"><X size={12} /></button>
                   </div>
                 )}
                 <form 
@@ -894,7 +1005,7 @@ export default function ProfileView({
                       placeholder="Record comment in node..."
                       value={commentInput}
                       onChange={(e) => setCommentInput(e.target.value)}
-                      className="flex-1 bg-transparent border-none outline-none text-[12px] text-white placeholder-[#6A6E78] font-mono py-1"
+                      className="flex-1 bg-transparent border-none outline-none text-[12px] text-white dark:text-[#0A0A0B] placeholder-[#6A6E78] font-mono py-1"
                       autoComplete="off"
                     />
                   </div>
@@ -920,7 +1031,7 @@ export default function ProfileView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white dark:bg-[#1C1C1E]/40 backdrop-blur-md"
             onClick={() => setEditingUpload(null)}
           >
             <motion.div 
@@ -929,7 +1040,7 @@ export default function ProfileView({
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-[480px] bg-white rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200"
+              className="w-full max-w-[480px] bg-white dark:bg-[#1C1C1E] rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200 dark:border-[rgba(255,255,255,0.08)]"
             >
               <h2 className="text-xl font-sans font-bold text-neutral-900 mb-6">Edit Upload Details</h2>
               
@@ -964,7 +1075,7 @@ export default function ProfileView({
                 </button>
                 <button 
                   onClick={handleSaveEdit}
-                  className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                  className="px-6 py-2.5 bg-neutral-900 text-white dark:text-[#0A0A0B] text-sm font-medium rounded-lg hover:bg-black transition-colors"
                 >
                   Save Changes
                 </button>
@@ -981,7 +1092,7 @@ export default function ProfileView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white dark:bg-[#1C1C1E]/40 backdrop-blur-md"
             onClick={() => setItemToDelete(null)}
           >
             <motion.div 
@@ -990,7 +1101,7 @@ export default function ProfileView({
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-[400px] bg-white rounded-[16px] p-8 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200 text-center flex flex-col items-center"
+              className="w-full max-w-[400px] bg-white dark:bg-[#1C1C1E] rounded-[16px] p-8 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200 dark:border-[rgba(255,255,255,0.08)] text-center flex flex-col items-center"
             >
               <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle size={24} className="text-red-500" strokeWidth={1.5} />
@@ -1003,7 +1114,7 @@ export default function ProfileView({
               <div className="flex gap-3 w-full justify-center">
                 <button 
                   onClick={() => setItemToDelete(null)}
-                  className="flex-1 py-2.5 px-4 rounded-full bg-transparent border border-neutral-200 text-neutral-700 font-medium text-sm hover:bg-neutral-50 transition-colors focus:outline-none"
+                  className="flex-1 py-2.5 px-4 rounded-full bg-transparent border border-neutral-200 dark:border-[rgba(255,255,255,0.08)] text-neutral-700 font-medium text-sm hover:bg-neutral-50 transition-colors focus:outline-none"
                 >
                   Cancel
                 </button>
@@ -1012,7 +1123,7 @@ export default function ProfileView({
                     removeUpload(itemToDelete);
                     setItemToDelete(null);
                   }}
-                  className="flex-1 py-2.5 px-4 rounded-full bg-red-500 border border-transparent text-white font-medium text-sm hover:bg-red-600 transition-colors focus:outline-none"
+                  className="flex-1 py-2.5 px-4 rounded-full bg-red-500 border border-transparent text-white dark:text-[#0A0A0B] font-medium text-sm hover:bg-red-600 transition-colors focus:outline-none"
                 >
                   Delete
                 </button>

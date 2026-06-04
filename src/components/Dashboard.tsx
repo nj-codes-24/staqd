@@ -159,10 +159,10 @@ export default function Dashboard({
   }, [isSearching, searchQuery, articles]);
 
   return (
-    <div id="magazine-mockup-wrapper" className="min-h-screen bg-[#ded9cf] md:py-8 font-sans antialiased text-[#1c1c1c] selection:bg-[#c2b29f]">
+    <div id="magazine-mockup-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] md:py-8 font-sans antialiased text-[#1c1c1c] dark:text-[#F3F4F6] selection:bg-[#c2b29f]">
       
       {/* Behance Presentation Header bar */}
-      <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] border-[#ccc5b6] mb-4">
+      <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] dark:text-[#9CA3AF] border-[#ccc5b6] mb-4">
         <span>01 / CORE WORKSPACE</span>
         <span className="uppercase text-center">ZID TECHNICAL HUD</span>
         <span className="uppercase">Design Concept V1</span>
@@ -171,11 +171,11 @@ export default function Dashboard({
       {/* Main Container Sheet - Reclaiming Left Sidebar Space Completely */}
       <div 
         id="magazine-page-sheet" 
-        className="max-w-[1240px] mx-auto w-full bg-[#fbfaf8] shadow-2xl flex flex-col relative border border-[#c2bba8] min-h-screen transition-all duration-300"
+        className="max-w-[1240px] mx-auto w-full bg-[#fbfaf8] dark:bg-[#121214] shadow-2xl flex flex-col relative border border-[#c2bba8] dark:border-[rgba(255,255,255,0.08)] min-h-screen transition-all duration-300"
       >
         
         {/* TOP NAVBAR: Standard symmetric branded layout with sidebar removed */}
-        <header className="h-16 border-b border-[#ece8df] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8]/95 backdrop-blur-md z-20">
+        <header className="h-16 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8] dark:bg-[#121214]/95 backdrop-blur-md z-20">
           
           {/* Logo element replacement - FLANELLE converted to ZID */}
           <div 
@@ -184,7 +184,7 @@ export default function Dashboard({
               setSelectedCategory('Computer Sciences');
               setSearchQuery('');
             }}
-            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 cursor-pointer select-none"
+            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-gray-100 cursor-pointer select-none"
           >
             ZID
           </div>
@@ -195,8 +195,8 @@ export default function Dashboard({
               onClick={() => setCurrentMenuTab('hub')} 
               className={`transition relative py-2 ${
                 currentMenuTab === 'hub' 
-                  ? 'text-black font-bold border-b-2 border-black' 
-                  : 'text-[#7c7569] hover:text-black'
+                  ? 'text-black dark:text-white font-bold border-b-2 border-black dark:border-white' 
+                  : 'text-[#7c7569] dark:text-gray-400 hover:text-black dark:hover:text-white'
               }`}
             >
               Knowledge Hub
@@ -205,8 +205,8 @@ export default function Dashboard({
               onClick={() => setCurrentMenuTab('hacks')} 
               className={`transition relative py-2 ${
                 currentMenuTab === 'hacks' 
-                  ? 'text-black font-bold border-b-2 border-black' 
-                  : 'text-[#7c7569] hover:text-black'
+                  ? 'text-black dark:text-white font-bold border-b-2 border-black dark:border-white' 
+                  : 'text-[#7c7569] dark:text-gray-400 hover:text-black dark:hover:text-white'
               }`}
             >
               Hacks
@@ -218,7 +218,7 @@ export default function Dashboard({
             {/* Subscribe Button */}
             <button 
               onClick={handleOpenSubscriptionModal}
-              className="px-5 py-1.5 rounded-full border border-neutral-300 hover:border-neutral-400 bg-white shadow-sm hover:shadow-md text-[10px] sm:text-xs font-mono uppercase tracking-widest text-neutral-700 font-bold hover:scale-105 active:scale-95 transition-all duration-200"
+              className="px-5 py-1.5 rounded-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] hover:border-neutral-400 bg-white dark:bg-[#1C1C1E] shadow-sm hover:shadow-md text-[10px] sm:text-xs font-mono uppercase tracking-widest text-neutral-700 dark:text-[#F3F4F6] font-bold hover:scale-105 active:scale-95 transition-all duration-200"
             >
               Subscribe
             </button>
@@ -227,22 +227,22 @@ export default function Dashboard({
             <button 
               id="head-avatar-circle"
               onClick={() => setActiveTab('profile')}
-              className="h-8.5 w-8.5 rounded-full border border-neutral-300 overflow-hidden shadow-xs hover:scale-105 transition"
+              className="h-8.5 w-8.5 rounded-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] overflow-hidden shadow-xs hover:scale-105 transition"
               title="Open Creator Profile"
             >
-              <img 
+              <img className="dark:brightness-90 transition-all duration-300 h-full w-full object-cover" 
                 src={user.avatarUrl} 
                 alt={user.handle} 
                 referrerPolicy="no-referrer"
-                className="h-full w-full object-cover" 
+                 
               />
             </button>
           </div>
         </header>
 
         {/* HERO TITLE SECTION - Dynamic based on active page with scaling support */}
-        <div className="pt-12 pb-8 border-b border-[#ece8df]">
-          <h1 className="font-serif font-black text-center text-neutral-950 uppercase leading-none tracking-tight select-none px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[8vw] transition-all duration-300">
+        <div className="pt-12 pb-8 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)]">
+          <h1 className="font-serif font-black text-center text-neutral-950 dark:text-gray-100 uppercase leading-none tracking-tight select-none px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[8vw] transition-all duration-300">
             {currentMenuTab === 'hacks' ? 'DEVELOPER HACKS' : 'KNOWLEDGE HUB'}
           </h1>
         </div>
@@ -253,7 +253,7 @@ export default function Dashboard({
             <div className="flex-1 flex flex-col">
                 
                 {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
-                <div className="border-b border-[#ece8df] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 relative z-[50]">
+                <div className="border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] py-4 px-6 md:px-10 flex items-center justify-between bg-[#faf9f6]/40 dark:bg-transparent relative z-[50]">
                   
                   <AnimatePresence mode="wait">
                     {!isSearching ? (
@@ -275,8 +275,8 @@ export default function Dashboard({
                                   onClick={() => setSelectedCategory(cat)}
                                   className={`px-4.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-200 border cursor-pointer flex-shrink-0 ${
                                     isActive 
-                                      ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' 
-                                      : 'bg-transparent text-[#7c7569] border-[#e1dacb] hover:border-[#1a1a1a] hover:text-black'
+                                      ? 'bg-[#1a1a1a] dark:bg-gray-100 text-white dark:text-black border-[#1a1a1a] dark:border-gray-100' 
+                                      : 'bg-transparent text-[#7c7569] dark:text-gray-400 border-[#e1dacb] dark:border-white/10 hover:border-[#1a1a1a] hover:text-black dark:hover:text-white dark:bg-transparent'
                                   }`}
                                 >
                                   {cat}
@@ -285,11 +285,11 @@ export default function Dashboard({
                             })}
                         </motion.div>
                         
-                        <div className="bg-[#fbfaf8] flex items-center justify-end flex-shrink-0 z-20 w-[40px]">
+                        <div className="bg-[#fbfaf8] dark:bg-[#121214] flex items-center justify-end flex-shrink-0 z-20 w-[40px]">
                           <button 
                             key="search-btn"
                             onClick={() => setIsSearching(true)}
-                            className="flex items-center justify-center text-black hover:scale-110 transition-transform cursor-pointer bg-transparent border-none"
+                            className="flex items-center justify-center w-8 h-8 text-black dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white rounded-full transition-all cursor-pointer border-none"
                           >
                             <Search className="h-5 w-5" strokeWidth={1.5} />
                           </button>
@@ -304,14 +304,14 @@ export default function Dashboard({
                         transition={{ duration: 0.2 }}
                         className="w-full relative z-50 flex items-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                       >
-                        <div className="flex-grow flex items-center bg-white border border-transparent rounded-full px-5 h-[42px] shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+                        <div className="flex-grow flex items-center bg-white dark:bg-[#1C1C1E] border border-transparent rounded-full px-5 h-[42px] shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
                           <Search className="w-4 h-4 text-neutral-400 mr-3" />
                           <input 
                             type="text"
                             placeholder="Search papers by title, topic, or publisher..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="flex-1 bg-transparent border-none outline-none text-sm font-sans placeholder-neutral-400 text-neutral-900"
+                            className="flex-1 bg-transparent border-none outline-none text-sm font-sans placeholder-neutral-400 dark:placeholder-gray-400 text-neutral-900 dark:text-gray-100"
                             autoFocus
                           />
                           <button 
@@ -320,7 +320,7 @@ export default function Dashboard({
                               setIsSearching(false);
                               setIsFilterOpen(false);
                             }}
-                            className="text-neutral-500 hover:text-neutral-900 ml-2"
+                            className="text-neutral-500 dark:text-[#9CA3AF] hover:text-neutral-900 dark:text-gray-100 ml-2"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -334,10 +334,10 @@ export default function Dashboard({
                               exit={{ opacity: 0, x: 10, width: 0, marginLeft: 0 }}
                               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                               onClick={() => setIsFilterOpen(!isFilterOpen)}
-                              className={`flex items-center justify-center space-x-2 h-[42px] rounded-full transition-colors text-sm font-medium shadow-sm flex-shrink-0 border overflow-hidden whitespace-nowrap ${
+                              className={`flex items-center justify-center space-x-2 h-[42px] rounded-full transition-colors text-sm font-medium shadow-sm flex-shrink-0 border overflow-hidden whitespace-nowrap cursor-pointer ${
                                 isFilterOpen 
-                                  ? 'bg-[#111827] text-white border-[#111827]' 
-                                  : 'bg-white text-[#111827] border-[#E5E7EB] hover:bg-[#F9FAFB]'
+                                  ? 'bg-[#111827] text-white dark:bg-white/10 dark:text-white border-[#111827] dark:border-white/20' 
+                                  : 'bg-white dark:bg-white/5 text-[#111827] dark:text-gray-300 border-[#E5E7EB] dark:border-white/20 hover:bg-[#F9FAFB] dark:hover:bg-white/10 dark:hover:text-white'
                               }`}
                             >
                               <SlidersHorizontal size={14} strokeWidth={2} />
@@ -354,13 +354,9 @@ export default function Dashboard({
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
                               transition={{ duration: 0.2 }}
-                              className="absolute right-0 w-full z-[9999] flex flex-col overflow-hidden"
+                              className="absolute right-0 w-full z-[9999] flex flex-col overflow-hidden bg-[#F9FAFB] dark:bg-[#121214]/80 backdrop-blur-[16px] border border-[#E5E7EB] dark:border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.6)] rounded-[16px]"
                               style={{ 
-                                top: 'calc(100% + 16px)', 
-                                backgroundColor: '#F9FAFB',
-                                border: '1px solid #E5E7EB',
-                                borderRadius: '16px',
-                                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.12)'
+                                top: 'calc(100% + 16px)'
                               }}
                             >
                               <div className="p-8 flex flex-col">
@@ -370,12 +366,12 @@ export default function Dashboard({
                                     <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Sort By</h3>
                                     <div className="space-y-4">
                                       {['Relevance', 'Newest First', 'Most Cited'].map(option => (
-                                        <label key={option} className="flex items-center space-x-3 cursor-pointer group">
-                                          <div className="w-4 h-4 rounded-full border border-[#D1D5DB] flex items-center justify-center group-hover:border-[#111827] transition-colors">
-                                            {option === 'Relevance' && <div className="w-2 h-2 rounded-full bg-[#111827]" />}
-                                          </div>
-                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
-                                        </label>
+                                          <label key={option} className="flex items-center space-x-3 cursor-pointer group">
+                                            <div className="w-4 h-4 rounded-full border border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 flex items-center justify-center group-hover:border-[#111827] dark:group-hover:border-white transition-colors">
+                                              {option === 'Relevance' && <div className="w-2 h-2 rounded-full bg-[#111827] dark:bg-white" />}
+                                            </div>
+                                            <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
+                                          </label>
                                       ))}
                                     </div>
                                   </div>
@@ -386,10 +382,10 @@ export default function Dashboard({
                                     <div className="space-y-4">
                                       {['arXiv', 'IEEE', 'Nature', 'ScienceDirect'].map(option => (
                                         <label key={option} className="flex items-center space-x-3 cursor-pointer group">
-                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'arXiv' ? 'bg-[#111827] border-[#111827]' : 'border-[#D1D5DB] group-hover:border-[#111827]'}`}>
-                                            {option === 'arXiv' && <Check size={12} color="white" strokeWidth={3} />}
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'arXiv' ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
+                                            {option === 'arXiv' && <Check size={12} color="currentColor" strokeWidth={3} />}
                                           </div>
-                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
+                                          <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
                                         </label>
                                       ))}
                                     </div>
@@ -401,10 +397,10 @@ export default function Dashboard({
                                     <div className="space-y-4">
                                       {['Computer Sciences', 'Electrical', 'Mechanical', 'Aerospace'].map(option => (
                                         <label key={option} className="flex items-center space-x-3 cursor-pointer group">
-                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'Computer Sciences' ? 'bg-[#111827] border-[#111827]' : 'border-[#D1D5DB] group-hover:border-[#111827]'}`}>
-                                            {option === 'Computer Sciences' && <Check size={12} color="white" strokeWidth={3} />}
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'Computer Sciences' ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
+                                            {option === 'Computer Sciences' && <Check size={12} color="currentColor" strokeWidth={3} />}
                                           </div>
-                                          <span className="text-[13px] text-[#374151] font-mono">{option}</span>
+                                          <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
                                         </label>
                                       ))}
                                     </div>
@@ -415,12 +411,12 @@ export default function Dashboard({
                                     <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Attributes</h3>
                                     <div className="space-y-5">
                                       {['Includes Code', 'Includes Dataset'].map((asset) => (
-                                        <label key={asset} className="flex items-center justify-between cursor-pointer group">
-                                          <span className="text-[13px] text-[#374151] font-mono">{asset}</span>
-                                          <div className={`w-8 h-4 rounded-full relative transition-colors ${asset === 'Includes Code' ? 'bg-[#111827]' : 'bg-[#D1D5DB]'}`}>
-                                            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all ${asset === 'Includes Code' ? 'right-0.5' : 'left-0.5'}`} />
-                                          </div>
-                                        </label>
+                                          <label key={asset} className="flex items-center justify-between cursor-pointer group">
+                                            <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{asset}</span>
+                                            <div className={`w-8 h-4 rounded-full relative transition-colors ${asset === 'Includes Code' ? 'bg-[#111827] dark:bg-white' : 'bg-[#D1D5DB] dark:bg-white/10'}`}>
+                                              <div className={`absolute top-0.5 w-3 h-3 rounded-full shadow-sm transition-all ${asset === 'Includes Code' ? 'right-0.5 bg-white dark:bg-gray-900' : 'left-0.5 bg-white dark:bg-gray-400'}`} />
+                                            </div>
+                                          </label>
                                       ))}
                                     </div>
                                   </div>
@@ -435,7 +431,7 @@ export default function Dashboard({
                                   </button>
                                   <button 
                                     onClick={() => setIsFilterOpen(false)}
-                                    className="px-6 py-2.5 bg-[#111827] text-white rounded-full font-sans font-bold text-[11px] uppercase hover:bg-black transition-colors"
+                                    className="px-6 py-2.5 bg-[#111827] dark:bg-gray-100 text-white dark:text-black rounded-full font-sans font-bold text-[11px] uppercase hover:bg-black dark:hover:bg-white transition-all dark:hover:scale-105"
                                   >
                                     Apply Filters
                                   </button>
@@ -466,8 +462,7 @@ export default function Dashboard({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="absolute inset-0 z-40"
-                        style={{ backgroundColor: '#fbfaf8' }}
+                        className="absolute inset-0 z-40 bg-[#fbfaf8] dark:bg-[#121214]"
                       />
                     )}
                   </AnimatePresence>
@@ -491,7 +486,7 @@ export default function Dashboard({
                           >
                             {/* Left Column: Trending */}
                             <div>
-                              <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
+                              <h3 className="text-[#9CA3AF] dark:text-gray-400 text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
                                 TRENDING TOPICS
                               </h3>
                               <div className="flex flex-col space-y-6">
@@ -504,7 +499,7 @@ export default function Dashboard({
                                   <button 
                                     key={i}
                                     onClick={() => setSearchQuery(suggestion)}
-                                    className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black transition-colors"
+                                    className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black dark:text-gray-100 dark:hover:text-white transition-colors"
                                   >
                                     <span className="text-neutral-400 mr-4 font-sans text-sm">↳</span>
                                     {suggestion}
@@ -515,7 +510,7 @@ export default function Dashboard({
                             
                             {/* Right Column: Discover */}
                             <div className="hidden md:block pr-8 lg:pr-20">
-                              <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
+                              <h3 className="text-[#9CA3AF] dark:text-gray-400 text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
                                 DISCOVER
                               </h3>
                               <div className="grid grid-cols-2 gap-6">
@@ -523,7 +518,7 @@ export default function Dashboard({
                                   <div 
                                     key={article.id}
                                     onClick={() => onSelectArticle(article)}
-                                    className="group bg-[#fcfcfb] flex flex-col cursor-pointer border border-neutral-200 transition-colors hover:border-neutral-300 h-full p-5 relative"
+                                    className="group bg-[#fcfcfb] dark:bg-[#1C1C1E] flex flex-col cursor-pointer border border-neutral-200 dark:border-[rgba(255,255,255,0.08)] transition-colors hover:border-neutral-300 dark:border-[rgba(255,255,255,0.08)] h-full p-5 relative"
                                   >
                                     <div className="w-[24px] h-[3px] bg-black mb-4" />
                                     
@@ -531,7 +526,7 @@ export default function Dashboard({
                                       {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     
-                                    <h4 className="text-[13px] font-bold text-neutral-900 line-clamp-3 leading-snug mb-3 pr-2">
+                                    <h4 className="text-[13px] font-bold text-neutral-900 dark:text-gray-100 line-clamp-3 leading-snug mb-3 pr-2">
                                       {article.title}
                                     </h4>
                                     
@@ -545,7 +540,7 @@ export default function Dashboard({
                           </motion.div>
                         ) : searchResults && searchResults.length > 0 ? (
                           <div className="p-6 md:p-10">
-                            <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3 mb-6">
+                            <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] dark:text-gray-100 tracking-wider border-l-4 border-amber-800/80 dark:border-white pl-3 mb-6">
                               Search Results for "{searchQuery}"
                             </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -553,26 +548,26 @@ export default function Dashboard({
                                 <div 
                                   key={article.id}
                                   onClick={() => onSelectArticle(article)}
-                                  className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100"
+                                  className="group bg-white dark:bg-[#1C1C1E] rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100 dark:border-white/5"
                                 >
-                                  <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                                    <img 
+                                  <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative">
+                                    <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
                                       src={article.imageUrl} 
                                       alt={article.title}
                                       referrerPolicy="no-referrer"
-                                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                                      
                                     />
                                   </div>
                                   <div className="p-5 flex-1 flex flex-col space-y-3">
-                                    <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                    <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
                                       <span>{getArticleSource(article.id)}</span>
                                       <span>{article.readTime}</span>
                                     </div>
-                                    <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                                    <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] dark:text-gray-100 leading-tight line-clamp-3">
                                       {article.title}
                                     </h3>
                                     <div className="mt-auto pt-3">
-                                      <p className="text-[11px] font-serif italic text-neutral-600 line-clamp-2 leading-relaxed">
+                                      <p className="text-[11px] font-serif text-neutral-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
                                         {article.excerpt}
                                       </p>
                                     </div>
@@ -584,10 +579,10 @@ export default function Dashboard({
                         ) : searchQuery.trim().length > 0 && searchResults && searchResults.length === 0 ? (
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '80px', paddingBottom: '80px', flexGrow: 1, position: 'relative', overflow: 'hidden', paddingLeft: '24px', paddingRight: '24px' }}>
                             <label 
-                              className={`flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 w-full max-w-lg mx-auto ${
+                              className={`group flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 w-full max-w-lg mx-auto ${
                                 isDragActive 
-                                  ? 'border-[#4b3e33] bg-[#F9FAFB] scale-[1.02]' 
-                                  : 'border-[#e5e7eb] bg-white hover:border-[#4b3e33] hover:bg-[#F9FAFB]'
+                                  ? 'border-[#4b3e33] bg-[#F9FAFB] dark:bg-white/10 dark:border-white/40 scale-[1.02]' 
+                                  : 'border-[#e5e7eb] dark:border-white/20 bg-white dark:bg-white/5 hover:border-[#4b3e33] dark:hover:border-white/30 hover:bg-[#F9FAFB] dark:hover:bg-white/10'
                               }`}
                               style={{ border: '2px dashed', borderRadius: '24px', padding: '64px 48px' }}
                               onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
@@ -597,14 +592,14 @@ export default function Dashboard({
                             >
                               <input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileUpload} />
                               
-                              <div className="bg-[#f3f4f6] rounded-full p-5 mb-5 flex items-center justify-center">
-                                <UploadCloud size={32} color="#4b3e33" strokeWidth={1.75} />
+                              <div className="bg-[#f3f4f6] dark:bg-[#27272A] rounded-full p-5 mb-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                                <UploadCloud size={32} className="text-[#4b3e33] dark:text-white" strokeWidth={2} />
                               </div>
                               
-                              <h3 className="font-sans font-medium text-[20px] text-[#4b3e33] leading-tight mb-2">
+                              <h3 className="font-sans font-medium text-[20px] text-[#4b3e33] dark:text-gray-300 leading-tight mb-2">
                                 Click or drag paper here
                               </h3>
-                              <p className="text-[#9CA3AF] text-[14px] font-normal tracking-wide">
+                              <p className="text-[#9CA3AF] dark:text-gray-400 text-[14px] font-normal tracking-wide">
                                 Supports PDF, DOCX, TXT
                               </p>
                             </label>
@@ -627,12 +622,12 @@ export default function Dashboard({
                             
                             {/* Sub-topic Section Title Header */}
                             <div className="flex items-center justify-between">
-                              <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] tracking-wider border-l-4 border-amber-800/80 pl-3">
+                              <h2 className="text-sm md:text-base font-serif font-black uppercase text-[#1a1a1a] dark:text-gray-100 tracking-wider border-l-4 border-amber-800/80 dark:border-amber-500 pl-3">
                                 {subTopic.name}
                               </h2>
                               <button 
                                 onClick={() => onViewSubTopicAll?.(subTopic.name)}
-                                className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] hover:text-[#1a1a1a] transition font-bold"
+                                className="text-[10px] font-mono uppercase tracking-widest text-[#7c7569] dark:text-gray-400 hover:text-[#1a1a1a] dark:hover:text-white transition-colors cursor-pointer font-bold"
                               >
                                 View All →
                               </button>
@@ -646,39 +641,39 @@ export default function Dashboard({
                                   <div 
                                     key={article.id}
                                     onClick={() => onSelectArticle(article)}
-                                    className="group w-[280px] sm:w-[320px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+                                    className="group w-[280px] sm:w-[320px] bg-white dark:bg-[#1C1C1E] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left flex-shrink-0 snap-start transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer"
                                   >
                                     {/* Thumbnail */}
                                     <div 
-                                      className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative"
+                                      className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative"
                                     >
-                                      <img 
+                                      <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
                                         src={article.imageUrl} 
                                         alt={article.title}
                                         referrerPolicy="no-referrer"
-                                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                                        
                                       />
                                     </div>
 
                                     {/* Title / Description & Widgets */}
                                     <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                                       <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                                        <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
                                           <span>{getArticleSource(article.id)} • {article.author.name}</span>
                                           <span>{article.publishedAt}</span>
                                         </div>
                                         <h4 
-                                          className="text-xs sm:text-sm font-serif font-black text-neutral-900 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
+                                          className="text-xs sm:text-sm font-serif font-black text-neutral-900 dark:text-gray-100 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
                                         >
                                           {article.title}
                                         </h4>
-                                        <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                                        <p className="text-[11px] font-serif text-neutral-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
                                           {article.excerpt}
                                         </p>
                                       </div>
 
                                       {/* Bottom widgets bar */}
-                                      <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
+                                      <div className="pt-3 border-t border-[#ece8df] dark:border-[rgba(255,255,255,0.08)]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
                                         <span>{article.readTime}</span>
                                         <div className="-mr-1">
                                           <BookmarkButton article={article} size={14} />
@@ -695,7 +690,7 @@ export default function Dashboard({
                       })
                     ) : (
                       <div className="p-16 text-center">
-                        <p className="text-sm font-mono text-[#7c7569]">No sub-topics are defined currently for {selectedCategory}.</p>
+                        <p className="text-sm font-mono text-[#7c7569] dark:text-[#9CA3AF]">No sub-topics are defined currently for {selectedCategory}.</p>
                       </div>
                     )}
                   </div>
@@ -705,9 +700,9 @@ export default function Dashboard({
             {/* FAB Trigger for Custom Paper Upload */}
             <button 
               onClick={() => setIsUploadModalOpen(true)}
-              className="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/60 flex items-center justify-center text-slate-800 hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-white"
+              className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-white dark:bg-white/5 backdrop-blur-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/60 dark:border-white/20 flex items-center justify-center text-slate-800 dark:text-white transition-all duration-300 ease-out hover:bg-white dark:hover:bg-gray-100 dark:hover:text-black hover:scale-105 dark:hover:scale-105 active:scale-95"
             >
-              <Plus size={32} strokeWidth={1.5} />
+              <Plus size={32} strokeWidth={2} className="dark:text-white dark:group-hover:text-black" />
             </button>
 
             {/* Custom Paper Upload Modal */}
@@ -717,7 +712,7 @@ export default function Dashboard({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FAF7F2]/60 backdrop-blur-md"
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FAF7F2]/60 dark:bg-black/60 backdrop-blur-md"
                   onClick={() => setIsUploadModalOpen(false)}
                 >
                   <motion.div 
@@ -726,15 +721,15 @@ export default function Dashboard({
                     exit={{ scale: 0.95, y: 10, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-[32px] p-8 shadow-[0_24px_64px_rgba(0,0,0,0.1)] border border-white"
+                    className="w-full max-w-lg bg-white dark:bg-[#1C1C1E] backdrop-blur-xl rounded-[32px] p-8 shadow-[0_24px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-white dark:border-white/10"
                   >
                     <div className="text-center mb-6">
-                      <h2 className="text-2xl font-sans font-bold text-slate-900 tracking-tight">Upload Document</h2>
-                      <p className="text-stone-500 font-medium text-sm mt-2">Drag and drop your PDF or paper to generate a study session.</p>
+                      <h2 className="text-2xl font-serif font-bold uppercase text-slate-900 dark:text-gray-100 tracking-tight">Upload Document</h2>
+                      <p className="text-stone-500 dark:text-gray-400 font-medium text-sm mt-2">Drag and drop your PDF or paper to generate a study session.</p>
                     </div>
 
                     <div 
-                      className={`w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-colors duration-300 ${isDragActive ? 'border-indigo-500 bg-indigo-50/50' : 'border-stone-300 bg-stone-50/50 hover:bg-stone-100/50 hover:border-stone-400'}`}
+                      className={`group w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all duration-200 ${isDragActive ? 'border-indigo-500 bg-indigo-50/50 dark:bg-white/10 dark:border-gray-300' : 'border-stone-300 dark:border-white/20 dark:bg-white/5 bg-stone-50/50 hover:bg-stone-100/50 dark:hover:bg-white/10 dark:hover:border-gray-300 hover:border-stone-400'}`}
                       onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
                       onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
                       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
@@ -742,13 +737,13 @@ export default function Dashboard({
                       onClick={handleFileUpload}
                       style={{ cursor: 'pointer' }}
                     >
-                      <div className={`p-4 rounded-full mb-4 transition-colors ${isDragActive ? 'bg-indigo-100 text-indigo-600' : 'bg-stone-200/50 text-stone-500'}`}>
+                      <div className={`p-4 rounded-full mb-4 transition-all duration-200 group-hover:scale-105 ${isDragActive ? 'bg-indigo-100 text-indigo-600 dark:bg-[#27272A] dark:text-white scale-105' : 'bg-stone-200/50 text-stone-500 dark:bg-[#27272A] dark:text-white'}`}>
                         <UploadCloud size={32} />
                       </div>
-                      <p className="text-stone-600 font-medium text-sm">
+                      <p className="text-stone-600 dark:text-gray-300 font-medium text-sm">
                         {isDragActive ? "Drop file to upload" : "Click or drag paper here"}
                       </p>
-                      <p className="text-stone-400 text-xs mt-1">Supports PDF, DOCX, TXT</p>
+                      <p className="text-stone-400 dark:text-gray-400 text-xs mt-1">Supports PDF, DOCX, TXT</p>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -760,7 +755,7 @@ export default function Dashboard({
           /* HACKS VIEW STAGE */
           <div className="p-6 md:p-10 space-y-8 text-left flex-1 animate-fade-in">
             <div className="max-w-3xl space-y-4">
-              <span className="text-[10px] uppercase font-mono font-black tracking-widest text-amber-800 bg-[#fbfaf8] border border-[#e1dacb] px-3 py-1 rounded">
+              <span className="text-[10px] uppercase font-mono font-black tracking-widest text-amber-800 bg-[#fbfaf8] dark:bg-[#121214] border border-[#e1dacb] px-3 py-1 rounded">
                 High Frequency Developer Performance Hacks
               </span>
               <p className="text-sm font-serif italic text-neutral-600 leading-relaxed">
@@ -772,7 +767,7 @@ export default function Dashboard({
               {MASTER_HACKS.map((hack) => (
                 <div 
                   key={hack.id}
-                  className="bg-neutral-900 border border-neutral-800 p-6 flex flex-col justify-between text-left text-white shadow-xl min-h-[260px]"
+                  className="bg-neutral-900 border border-neutral-800 p-6 flex flex-col justify-between text-left text-white dark:text-[#0A0A0B] shadow-xl min-h-[260px]"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -802,7 +797,7 @@ export default function Dashboard({
             
             <div className="border border-dashed border-[#e1dacb] p-6 rounded text-center">
               <span className="text-lg">⚡</span>
-              <p className="text-xs font-mono text-neutral-500 mt-1">Want to contribute dynamic runtime compiler tricks? Connect your GitHub at Dashboard profile.</p>
+              <p className="text-xs font-mono text-neutral-500 dark:text-[#9CA3AF] mt-1">Want to contribute dynamic runtime compiler tricks? Connect your GitHub at Dashboard profile.</p>
             </div>
           </div>
         )}
@@ -828,7 +823,7 @@ export default function Dashboard({
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 gap-2">
+            <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 dark:text-[#9CA3AF] gap-2">
               <span>© {new Date().getFullYear()} ZID RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
               <span>ESTABLISHED MAY 2026</span>
             </div>

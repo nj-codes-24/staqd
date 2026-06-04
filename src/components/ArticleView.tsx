@@ -168,18 +168,18 @@ export default function ArticleView({
       case 'Approved':
       case 'Finalized':
         return {
-          borderColor: 'border-l-4 border-l-emerald-600 border-neutral-200/90',
+          borderColor: 'border-l-4 border-l-emerald-600 border-neutral-200 dark:border-[rgba(255,255,255,0.08)]/90',
           badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
         };
       case 'Needs Review':
         return {
-          borderColor: 'border-l-4 border-l-amber-500 border-neutral-200/90',
+          borderColor: 'border-l-4 border-l-amber-500 border-neutral-200 dark:border-[rgba(255,255,255,0.08)]/90',
           badgeClass: 'bg-amber-50 text-amber-900 border-amber-200',
         };
       case 'High Priority':
       default:
         return {
-          borderColor: 'border-l-4 border-l-rose-500 border-neutral-200/90',
+          borderColor: 'border-l-4 border-l-rose-500 border-neutral-200 dark:border-[rgba(255,255,255,0.08)]/90',
           badgeClass: 'bg-rose-50 text-rose-900 border-rose-200',
         };
     }
@@ -453,7 +453,7 @@ export default function ArticleView({
     return lines.map((line, lIdx) => {
       if (line.trim().startsWith('### ')) {
         return (
-          <h4 key={lIdx} className="text-xs font-bold text-[#1c1c1c] mt-2 mb-1 border-b border-[#ece6d8] pb-1 font-sans uppercase tracking-wider">
+          <h4 key={lIdx} className="text-xs font-bold text-[#1c1c1c] dark:text-[#F3F4F6] mt-2 mb-1 border-b border-[#ece6d8] pb-1 font-sans uppercase tracking-wider">
             {line.replace('###', '').trim()}
           </h4>
         );
@@ -475,7 +475,7 @@ export default function ArticleView({
   };
 
   return (
-    <div className="min-h-screen bg-[#ded9d0] py-6 md:py-12 px-4 md:px-8 font-sans antialiased text-[#1c1c1c] selection:bg-neutral-250 relative">
+    <div className="min-h-screen bg-[#ded9d0] dark:bg-[#09090B] py-6 md:py-12 px-4 md:px-8 font-sans antialiased text-[#1c1c1c] dark:text-[#F3F4F6] selection:bg-neutral-250 relative">
       
       {/* Presentation Header bar in clean sans-serif style from image_17 */}
       <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] uppercase">
@@ -509,7 +509,7 @@ export default function ArticleView({
       >
         <div 
           id="magazine-page-sheet" 
-          className="bg-white flex flex-col relative border border-[#F3F3F3] min-h-screen rounded-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.04)] transition-all duration-500 ease-in-out w-full"
+          className="bg-white dark:bg-[#1C1C1E] flex flex-col relative border-0 min-h-screen rounded-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.04)] transition-all duration-500 ease-in-out w-full"
           style={{
             maxWidth: isChatOpen ? 'calc(100% - 364px)' : '100%',
             marginLeft: isChatOpen ? '0' : 'auto',
@@ -518,21 +518,15 @@ export default function ArticleView({
         >
         {/* Minimalist Top Header Bar conforming to original workspace return controls */}
         <header 
-          className="h-20 bg-white flex items-center justify-between px-6 md:px-10 select-none relative"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 1000,
-            backgroundColor: '#FFFFFF',
-            borderBottom: '1px solid #F3F3F3',
-          }}
+          className="h-20 bg-white dark:bg-[#09090B]/80 backdrop-blur-md flex items-center justify-between px-6 md:px-10 select-none sticky top-0 z-50 border-b-0 shadow-sm"
+          style={{}}
         >
           {/* Left Group: ← RETURN TO HUB button */}
           <div className="flex items-center">
             <button
               id="btn-reader-back"
               onClick={onBack}
-              className="inline-flex items-center space-x-2 bg-white hover:bg-neutral-50 border border-neutral-300 text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 transition-colors rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100"
+              className="inline-flex items-center space-x-2 bg-white dark:bg-[#1C1C1E] hover:bg-neutral-50 border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-gray-200 transition-colors rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)]"
             >
               <span>← RETURN TO HUB</span>
             </button>
@@ -540,7 +534,7 @@ export default function ArticleView({
 
           {/* Center Group: Place the "ZID | RESEARCH READER" typography in the absolute center of the header */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-2.5 sm:space-x-3 pointer-events-none whitespace-nowrap">
-            <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 uppercase">
+            <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 dark:text-gray-200 uppercase">
               ZID
             </span>
             <span className="h-4 w-[1px] bg-neutral-200"></span>
@@ -555,7 +549,7 @@ export default function ArticleView({
             <button
               id="btn-reader-share"
               onClick={() => triggerToast('Share link copied to clipboard!')}
-              className="p-2.5 border border-neutral-300 bg-white hover:border-neutral-900 hover:text-black rounded-[4px] transition text-neutral-600 cursor-pointer shadow-3xs hover:bg-[#faf6ec]"
+              className="p-2.5 border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] bg-white dark:bg-[#1C1C1E] hover:border-neutral-900 hover:text-black dark:hover:text-[#F3F4F6] dark:text-[#F3F4F6] rounded-[4px] transition text-neutral-600 dark:text-[#9CA3AF] cursor-pointer shadow-3xs hover:bg-[#faf6ec]"
               title="Share research article"
             >
               <Share2 className="h-4 w-4" />
@@ -566,21 +560,21 @@ export default function ArticleView({
               <button 
                 onClick={() => setShowSaveModal(true)}
                 disabled={hasSavedUpload}
-                className="px-6 py-2 bg-[#111827] text-white text-[13px] font-medium rounded-full hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="px-6 py-2 bg-[#111827] text-white dark:text-[#0A0A0B] text-[13px] font-medium rounded-full hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {hasSavedUpload ? 'Saved' : 'Save Upload'}
               </button>
             ) : (
-              <BookmarkButton article={article} size={16} className="border border-neutral-300 rounded-[4px] bg-white shadow-3xs hover:border-neutral-900 p-2.5" />
+              <BookmarkButton article={article} size={16} className="border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-[4px] bg-white dark:bg-[#1C1C1E] shadow-3xs hover:border-neutral-900 p-2.5" />
             )}
 
             {/* User Profile Avatar */}
-            <div className="flex items-center pl-3 border-l border-neutral-200 h-8 shrink-0">
-              <img 
+            <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0">
+              <img className="dark:brightness-90 transition-all duration-300 h-9 w-9 rounded-full object-cover border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] shrink-0 hover:scale-105 transition duration-150 cursor-pointer" 
                 src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&auto=format&fit=crop" 
                 alt={user.handle} 
                 referrerPolicy="no-referrer"
-                className="h-9 w-9 rounded-full object-cover border border-neutral-300 shrink-0 hover:scale-105 transition duration-150 cursor-pointer" 
+                 
                 title={`${user.handle} Profile Account`}
                 onClick={() => {
                   onBack();
@@ -592,19 +586,19 @@ export default function ArticleView({
         </header>
 
         {/* Dynamic Interactive Dashboard Layout - 3-Column Asymmetric Grid Layout */}
-        <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white text-neutral-900 relative pb-24">
+        <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white dark:bg-[#1C1C1E] text-neutral-900 dark:text-[#F3F4F6] relative pb-24">
           
           {/* Giant Centered Main Title block - Scaled elegantly in geometric sans-serif */}
-          <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] select-none" style={{ marginBottom: '28px' }}>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black tracking-tight text-[#111111] leading-[1.2] mb-4">
+          <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] dark:border-white/10 select-none" style={{ marginBottom: '28px' }}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black tracking-tight text-[#111111] dark:text-gray-100 leading-[1.2] mb-4">
               Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] font-bold">
-              <span className="text-neutral-900 font-bold">AUTHOR • DR. EVELYN MOSS</span>
+              <span className="text-neutral-900 dark:text-[#F3F4F6] font-bold">AUTHOR • DR. EVELYN MOSS</span>
               <span>•</span>
               <span>DATE • MAY 2026</span>
               <span>•</span>
-              <span className="text-neutral-700 font-extrabold whitespace-nowrap">SCIENCEDIRECT PUBLICATION</span>
+              <span className="text-neutral-700 dark:text-[#E5E7EB] font-extrabold whitespace-nowrap">SCIENCEDIRECT PUBLICATION</span>
             </div>
           </div>
 
@@ -616,7 +610,7 @@ export default function ArticleView({
             <div id="col-left-sidebar" className="flex flex-col justify-start pt-0" style={{ gap: '24px' }}>
               
               {/* Minimalist Section Header above Audio player with Divider */}
-              <div style={{ borderBottom: '1px solid #F0F0F0', paddingBottom: '24px', marginBottom: '8px' }} className="space-y-3">
+              <div className="space-y-3 mb-4">
                 <div className="text-left select-none pb-1">
                   <span className="font-sans text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#888888]">
                     AUDIO SUMMARY
@@ -626,15 +620,8 @@ export default function ArticleView({
                 {/* Audio Interface Component (Translucent Light Mode Glass & Standardized Contours) */}
                 <div 
                   id="audio-player-interface" 
-                  className="p-5 space-y-4"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.4)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    boxShadow: '0px 12px 32px rgba(0, 0, 0, 0.06), 0px 4px 10px rgba(0, 0, 0, 0.03)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.6)',
-                    borderRadius: '16px'
-                  }}
+                  className="p-5 space-y-4 bg-white/40 dark:!bg-white/5 backdrop-blur-md shadow-[0px_12px_32px_rgba(0,0,0,0.06),0px_4px_10px_rgba(0,0,0,0.03)] border-t border-white/60 dark:!border-white/10 dark:!border rounded-[16px]"
+                  style={{}}
                 >
                   
                   {/* Row 1: Visual audio waveform (simple vertical bars) */}
@@ -646,7 +633,7 @@ export default function ArticleView({
                         <div 
                           key={i}
                           className={`w-[2px] rounded-t-sm transition-all duration-300 cursor-pointer ${
-                            isActive ? 'bg-[#1c1c1c]' : 'bg-[#e0dad2]'
+                            isActive ? 'bg-[#1c1c1c] dark:bg-white' : 'bg-[#e0dad2] dark:bg-white/20'
                           }`}
                           style={{ height: `${val}%` }}
                           onClick={() => setAudioProgress(Math.round((i / 31) * 100))}
@@ -658,7 +645,7 @@ export default function ArticleView({
                   {/* Row 2: Horizontal progress scrubber bar and timestamps */}
                   <div className="space-y-1">
                     <div 
-                      className="w-full h-1.5 bg-neutral-100/70 rounded-full cursor-pointer relative group"
+                      className="w-full h-1.5 bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)]/70 rounded-full cursor-pointer relative group"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const percent = Math.min(Math.max(0, ((e.clientX - rect.left) / rect.width) * 100), 100);
@@ -689,7 +676,7 @@ export default function ArticleView({
                           setAudioProgress(Math.max(0, audioProgress - 10));
                           triggerToast('Skipped back');
                         }}
-                        className="p-1 hover:bg-neutral-100 rounded text-neutral-700 cursor-pointer transition"
+                        className="p-1 hover:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)] rounded text-neutral-700 dark:text-[#E5E7EB] cursor-pointer transition"
                         title="Skip back"
                       >
                         <SkipBack className="h-4 w-4" />
@@ -700,14 +687,13 @@ export default function ArticleView({
                           setIsPlaying(!isPlaying);
                           triggerToast(isPlaying ? "Narration paused" : "Narration initiated");
                         }}
-                        className="h-9 w-9 text-white rounded-full flex items-center justify-center transition hover:scale-105 shadow-sm cursor-pointer"
-                        style={{ backgroundColor: '#1C1C1E' }}
+                        className="h-9 w-9 text-white dark:text-white rounded-full flex items-center justify-center transition hover:scale-105 shadow-sm cursor-pointer bg-[#1C1C1E] dark:bg-white/10 dark:border dark:border-white/20"
                         title={isPlaying ? 'Pause' : 'Play'}
                       >
                         {isPlaying ? (
-                          <Pause className="h-3.5 w-3.5 fill-white text-white" />
+                          <Pause className="h-3.5 w-3.5 fill-white text-white dark:text-white dark:fill-white" />
                         ) : (
-                          <Play className="h-3.5 w-3.5 fill-white text-white ml-0.5" />
+                          <Play className="h-3.5 w-3.5 fill-white text-white dark:text-white dark:fill-white ml-0.5" />
                         )}
                       </button>
 
@@ -716,7 +702,7 @@ export default function ArticleView({
                           setAudioProgress(Math.min(100, audioProgress + 10));
                           triggerToast('Skipped forward');
                         }}
-                        className="p-1 hover:bg-neutral-100 rounded text-neutral-700 cursor-pointer transition"
+                        className="p-1 hover:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)] rounded text-neutral-700 dark:text-[#E5E7EB] cursor-pointer transition"
                         title="Skip forward"
                       >
                         <SkipForward className="h-4 w-4" />
@@ -727,7 +713,7 @@ export default function ArticleView({
                     <div className="flex items-center space-x-1.5 shrink-0">
                       <button 
                         onClick={() => setIsMuted(!isMuted)}
-                        className="text-neutral-700 hover:text-black transition cursor-pointer"
+                        className="text-neutral-700 dark:text-[#E5E7EB] hover:text-black dark:hover:text-[#F3F4F6] dark:text-[#F3F4F6] transition cursor-pointer"
                       >
                         {isMuted ? (
                           <VolumeX className="h-3.5 w-3.5 text-red-500" />
@@ -758,7 +744,7 @@ export default function ArticleView({
 
               {/* Stacked Cue Cards Block */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0] select-none">
+                <div className="flex items-center justify-between select-none mb-4">
                   <span className="font-sans text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#888888]">
                     CUE CARDS
                   </span>
@@ -802,7 +788,7 @@ export default function ArticleView({
                     return (
                        <div 
                         key={cardData.id} 
-                        className={`absolute inset-x-0 top-0 p-6 md:p-8 flex flex-col justify-between h-[420px] transition-all duration-300 select-none cursor-grab active:cursor-grabbing ${zIndexClass} ${opacityClass}`}
+                        className={`absolute inset-x-0 top-0 p-6 md:p-8 flex flex-col justify-between h-[420px] transition-all duration-300 select-none cursor-grab active:cursor-grabbing dark:!bg-[#1C1C1E] border dark:!border-white/5 ${zIndexClass} ${opacityClass}`}
                         style={{ 
                           transform: transformStyle,
                           background: cardTheme.bg,
@@ -826,10 +812,10 @@ export default function ArticleView({
                         </span>
 
                         <div className="text-left flex-grow flex-1 flex flex-col justify-start pt-6">
-                          <h4 className="text-lg font-serif font-black tracking-tight text-[#111111] leading-snug font-bold">
+                          <h4 className="text-lg font-serif font-black tracking-tight text-[#111111] dark:text-gray-100 leading-snug font-bold">
                             {cardData.term}
                           </h4>
-                          <p className="text-xs text-[#222222] font-sans mt-3 leading-relaxed font-normal">
+                          <p className="text-xs text-[#222222] dark:text-gray-400 font-sans mt-3 leading-relaxed font-normal">
                             {cardData.desc}
                           </p>
                         </div>
@@ -867,33 +853,33 @@ export default function ArticleView({
             <div id="col-center-main-content" className="space-y-6 text-left pt-0 pb-8">
 
               {/* Long Summary content with clear white, crisp background and high contrast text */}
-              <div className="font-serif text-base leading-[1.7] text-neutral-950 space-y-6">
+              <div className="font-serif text-base font-normal leading-relaxed text-neutral-950 dark:text-gray-300 space-y-6">
                 
-                <h3 className="text-sm font-sans font-bold uppercase text-neutral-950 tracking-wider border-l-2 border-[#111] pl-3 py-0.5 mt-4 select-none">
+                <h3 className="text-sm font-sans font-semibold uppercase text-neutral-950 dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-4 select-none">
                   1. Operational Strategies: Gold Purity Assay & Labs
                 </h3>
-                <p>
+                <p className="dark:text-gray-300 leading-relaxed font-normal">
                   Recent research highlights that securing gold pureness metrics demands a structured, end-to-end trace mechanism. Assay diagnostic laboratories increasingly leverage advanced high-frequency spectrometers on the operational floor, validating metal compositions dynamically prior to custom shaping. By establishing localized testing nodes, companies can successfully bypass expensive middleman certification bottlenecks while logging high-integrity metrics that streamline downstream assembly line assignments.
                 </p>
  
-                <h3 className="text-sm font-sans font-bold uppercase text-[#111] tracking-wider border-l-2 border-[#111] pl-3 py-0.5 mt-6 select-none">
+                <h3 className="text-sm font-sans font-semibold uppercase text-[#111] dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-6 select-none">
                   2. Sourcing Ethics & The Kimberley Process Traceability
                 </h3>
-                <p>
+                <p className="dark:text-gray-300 leading-relaxed font-normal">
                   Ethical logistics protocols must rigidly adhere to standard international governance guidelines. Implementing block-by-block ledger verification secures diamond provenance, totally preventing conflict gemstones from entering retail pipelines. Our operational model integrates a centralized digital certificate track that maps Kimberley invoices with active carat density certifications. Such strategies shield brands from systemic sourcing vulnerabilities while guaranteeing uncompromised product authenticity.
                 </p>
  
                 {/* Mathematical or operational registry scale blockquote in standard light gray palette */}
-                <div className="bg-[#F9F9F9] border border-neutral-200 p-5 my-6 text-xs font-mono text-neutral-800 leading-normal select-text shadow-3xs" style={{ borderRadius: '12px' }}>
-                  # Operational Assay Matrix Metrics Log<br />
+                <div className="bg-[#F9F9F9] dark:bg-black/60 dark:shadow-inner border border-neutral-200 dark:border-white/5 p-5 my-6 text-xs font-mono text-neutral-800 dark:text-gray-300 leading-normal select-text shadow-3xs" style={{ borderRadius: '12px' }}>
+                  <span className="dark:text-gray-500"># Operational Assay Matrix Metrics Log</span><br />
                   Assay_Verification_Token = d3.scaleLinear().domain([24k_Gold, 14k_Alloy])<br />
-                  Conflict_Free_Ratio = Count_Kimberley / Count_Total_Diamonds = 1.000 // 100% Certified Ethical Sourced
+                  Conflict_Free_Ratio = Count_Kimberley / Count_Total_Diamonds = 1.000 <span className="dark:text-gray-500">// 100% Certified Ethical Sourced</span>
                 </div>
  
-                <h3 className="text-sm font-sans font-bold uppercase text-neutral-950 tracking-wider border-l-2 border-[#111] pl-3 py-0.5 mt-6 select-none">
+                <h3 className="text-sm font-sans font-semibold uppercase text-neutral-950 dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-6 select-none">
                   3. Customer Engagement: Bridging Sourcing & Presentation
                 </h3>
-                <p>
+                <p className="dark:text-gray-300 leading-relaxed font-normal">
                   Enhancing customer engagement hinges on absolute corporate transparency. Discerning clientele require vetted proof of hallmark credentials before finalizing transactions. Clearly displaying gold assays, Kimberley certifications, and carat metrics inside custom jewelry concierge dashboards significantly advances buyer trust index ratings. Future developments aim to empower buyers with direct QR scans of the assay certificate log, establishing a direct emotional link between custom craftsmanship, material authenticity, and ethical production values.
                 </p>
 
@@ -910,7 +896,7 @@ export default function ArticleView({
       {/* Squeezed side-by-side Chat Panel */}
       <div 
         id="chatbot-drawer-container"
-        className="transition-all duration-500 ease-in-out flex flex-col shrink-0"
+        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#050505] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'}`}
         style={{
           width: isChatOpen ? '340px' : '0px',
           minWidth: isChatOpen ? '340px' : '0px',
@@ -920,24 +906,20 @@ export default function ArticleView({
           height: '100vh',
           position: 'sticky',
           top: '0px',
-          background: 'white',
-          borderLeft: isChatOpen ? '1px solid #F3F3F3' : 'none',
-          borderRight: isChatOpen ? '1px solid #F3F3F3' : 'none',
-          borderBottom: isChatOpen ? '1px solid #F3F3F3' : 'none',
           borderRadius: '0px',
           boxShadow: isChatOpen ? '0 4px 24px rgba(0, 0, 0, 0.02)' : 'none',
           overflow: 'hidden',
         }}
       >
         {/* Drawer Header */}
-        <div className="p-4 border-b border-neutral-100 flex items-center justify-between select-none h-20 bg-white">
+        <div className="p-4 flex items-center justify-between select-none h-20 bg-white dark:bg-transparent">
           <div className="flex items-center space-x-2.5">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-sans text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#888888]">RESEARCH ASSISTANT</span>
           </div>
           <button 
             onClick={() => setIsChatOpen(false)}
-            className="p-1.5 hover:bg-black/5 rounded-full text-neutral-600 transition cursor-pointer flex items-center justify-center"
+            className="p-1.5 hover:bg-black/5 rounded-full text-neutral-600 dark:text-[#9CA3AF] transition cursor-pointer flex items-center justify-center"
             title="Minimize concierge drawer"
           >
             <X className="h-4.5 w-4.5" />
@@ -946,7 +928,7 @@ export default function ArticleView({
 
         {/* Chat Message Logs Body & Empty State */}
         <div 
-          className="flex-1 overflow-y-auto p-4 flex flex-col bg-white"
+          className="flex-1 overflow-y-auto p-4 flex flex-col bg-white dark:bg-transparent"
           style={messages.length === 0 ? { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' } : undefined}
         >
           {messages.length === 0 ? (
@@ -964,12 +946,11 @@ export default function ArticleView({
                   className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div 
-                    className={`max-w-[85%] rounded-[12px] px-4 py-3 text-[13px] leading-[1.5] ${
+                    className={`max-w-[85%] rounded-[12px] px-4 py-3 text-[13px] leading-[1.5] border-0 ${
                       msg.sender === 'user' 
-                        ? 'text-white' 
-                        : 'bg-neutral-100 text-neutral-900 border border-neutral-200/50'
+                        ? 'text-white dark:text-gray-300 bg-[#2C2C2E] dark:bg-white/10' 
+                        : 'bg-neutral-100 dark:bg-transparent text-neutral-900 dark:text-gray-300'
                     }`}
-                    style={msg.sender === 'user' ? { backgroundColor: '#2C2C2E' } : undefined}
                   >
                     {msg.sender === 'assistant' ? (
                       <div className="space-y-1.5">{renderChatMessageContent(msg.text)}</div>
@@ -996,18 +977,18 @@ export default function ArticleView({
         </div>
 
         {/* Form Input query field sitting perfectly flush */}
-        <form onSubmit={handleSend} className="p-4 border-t border-[#EAEAEA] bg-white flex items-center space-x-2 shrink-0">
+        <form onSubmit={handleSend} className="p-4 bg-white dark:bg-transparent flex items-center space-x-2 shrink-0">
           <input 
             type="text" 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask the concierge..."
-            className="flex-1 bg-white rounded-full outline-none text-[12px] leading-none transition placeholder-neutral-400 font-sans"
-            style={{ border: '1px solid #EAEAEA', padding: '10px 14px' }}
+            className="flex-1 bg-white dark:bg-white/5 rounded-full outline-none text-[12px] leading-none transition placeholder-neutral-400 dark:placeholder-gray-500 font-sans border border-[#EAEAEA] dark:border-white/10"
+            style={{ padding: '10px 14px' }}
           />
           <button 
             type="submit" 
-            className="h-9 w-9 bg-neutral-900 hover:bg-neutral-950 text-white rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer shadow-3xs shrink-0"
+            className="h-9 w-9 bg-neutral-900 dark:bg-[#F3F4F6] hover:bg-neutral-950 text-white dark:text-[#0A0A0B] rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer shadow-3xs shrink-0"
             title="Send query"
           >
             <Send className="h-3.5 w-3.5" />
@@ -1021,7 +1002,7 @@ export default function ArticleView({
       
       {/* 1. Modal: Expanded Cue Card Detail Display */}
       {selectedCueCard && (
-        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-neutral-900 dark:bg-[#F3F4F6]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1029,14 +1010,14 @@ export default function ArticleView({
           >
             <button 
               onClick={() => setSelectedCueCard(null)}
-              className="absolute top-5 right-5 h-8 w-8 rounded-full bg-neutral-950/10 hover:bg-neutral-950/20 text-neutral-900 font-black cursor-pointer flex items-center justify-center"
+              className="absolute top-5 right-5 h-8 w-8 rounded-full bg-neutral-950/10 hover:bg-neutral-950/20 text-neutral-900 dark:text-[#F3F4F6] font-black cursor-pointer flex items-center justify-center"
             >
               &times;
             </button>
             
             <div className="flex items-center space-x-3 mb-6">
-              <div className="h-10 w-10 bg-neutral-950 rounded-full flex items-center justify-center text-white shadow-xs">
-                {React.createElement(selectedCueCard.icon as any, { className: "h-5 w-5 text-white" })}
+              <div className="h-10 w-10 bg-neutral-950 rounded-full flex items-center justify-center text-white dark:text-[#0A0A0B] shadow-xs">
+                {React.createElement(selectedCueCard.icon as any, { className: "h-5 w-5 text-white dark:text-[#0A0A0B]" })}
               </div>
               <div>
                 <span className="text-[10px] font-mono tracking-widest text-[#7a7465] uppercase font-bold">Registry Item Details</span>
@@ -1046,19 +1027,19 @@ export default function ArticleView({
               </div>
             </div>
 
-            <div className="space-y-4 font-sans text-xs text-neutral-850 leading-relaxed bg-white/50 p-6 rounded-2xl border border-black/5">
-              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-widest font-mono">Detailed Definition</h4>
+            <div className="space-y-4 font-sans text-xs text-neutral-850 leading-relaxed bg-white dark:bg-[#1C1C1E]/50 p-6 rounded-2xl border border-black dark:border-[rgba(255,255,255,0.2)]/5">
+              <h4 className="text-xs font-bold text-neutral-900 dark:text-[#F3F4F6] uppercase tracking-widest font-mono">Detailed Definition</h4>
               <p>{selectedCueCard.desc}</p>
               
-              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-widest font-mono pt-2">Operational Scope & Standards</h4>
+              <h4 className="text-xs font-bold text-neutral-900 dark:text-[#F3F4F6] uppercase tracking-widest font-mono pt-2">Operational Scope & Standards</h4>
               <p>
                 Our lead metallurgists continuously log XRF testing intervals to assure {selectedCueCard.term} complies with global ethical trade specifications. Any discrepancies in {selectedCueCard.term} prompt immediate assay review benchmarks.
               </p>
             </div>
 
             <div className="mt-6 flex items-center justify-between">
-              <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest font-bold">Status Code Check</span>
-              <span className="font-extrabold text-neutral-950 bg-white/70 px-4 py-1.5 rounded-full border border-black/5 font-mono text-xs shadow-3xs">
+              <span className="text-[10px] font-mono text-neutral-500 dark:text-[#9CA3AF] uppercase tracking-widest font-bold">Status Code Check</span>
+              <span className="font-extrabold text-neutral-950 bg-white dark:bg-[#1C1C1E]/70 px-4 py-1.5 rounded-full border border-black dark:border-[rgba(255,255,255,0.2)]/5 font-mono text-xs shadow-3xs">
                 {selectedCueCard.status}
               </span>
             </div>
@@ -1068,15 +1049,15 @@ export default function ArticleView({
 
       {/* 2. Modal: Add Cue Card */}
       {isAddingCard && (
-        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-neutral-900 dark:bg-[#F3F4F6]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-md bg-[#faf7ee] border border-[#c2bba8] p-8 rounded-3xl shadow-2xl relative text-left"
+            className="w-full max-w-md bg-[#faf7ee] border border-[#c2bba8] dark:border-[rgba(255,255,255,0.08)] p-8 rounded-3xl shadow-2xl relative text-left"
           >
             <button 
               onClick={() => setIsAddingCard(false)}
-              className="absolute top-5 right-5 h-8 w-8 rounded-full bg-neutral-950/10 hover:bg-neutral-950/20 text-neutral-900 font-extrabold cursor-pointer flex items-center justify-center"
+              className="absolute top-5 right-5 h-8 w-8 rounded-full bg-neutral-950/10 hover:bg-neutral-950/20 text-neutral-900 dark:text-[#F3F4F6] font-extrabold cursor-pointer flex items-center justify-center"
             >
               &times;
             </button>
@@ -1084,39 +1065,39 @@ export default function ArticleView({
             <h3 className="text-lg font-serif font-black text-neutral-950 mb-1">
               Add Concept Cue Card
             </h3>
-            <p className="text-xs text-neutral-500 mb-6 leading-relaxed">
+            <p className="text-xs text-neutral-500 dark:text-[#9CA3AF] mb-6 leading-relaxed">
               Dynamically inject a new sourcing audit, term, or operational parameter to your list.
             </p>
 
             <form onSubmit={handleCreateCueCard} className="space-y-4 font-sans text-xs">
               <div>
-                <label className="block font-mono text-[10px] text-neutral-600 uppercase font-extrabold mb-1.5">Term Name</label>
+                <label className="block font-mono text-[10px] text-neutral-600 dark:text-[#9CA3AF] uppercase font-extrabold mb-1.5">Term Name</label>
                 <input 
                   type="text" 
                   value={newCardTerm}
                   onChange={(e) => setNewCardTerm(e.target.value)}
                   placeholder="e.g., Gold Purity Standard" 
-                  className="w-full border border-neutral-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-neutral-200"
+                  className="w-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-neutral-200"
                 />
               </div>
 
               <div>
-                <label className="block font-mono text-[10px] text-neutral-600 uppercase font-extrabold mb-1.5">Short Definition / Description</label>
+                <label className="block font-mono text-[10px] text-neutral-600 dark:text-[#9CA3AF] uppercase font-extrabold mb-1.5">Short Definition / Description</label>
                 <textarea 
                   value={newCardDesc}
                   onChange={(e) => setNewCardDesc(e.target.value)}
                   placeholder="e.g., Ethical sourcing standards compliant logs." 
-                  className="w-full border border-neutral-300 rounded-xl px-4 py-3 h-20 outline-none focus:ring-2 focus:ring-neutral-200 resize-none"
+                  className="w-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 h-20 outline-none focus:ring-2 focus:ring-neutral-200 resize-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-mono text-[10px] text-neutral-600 uppercase font-extrabold mb-1.5">Sourcing Status</label>
+                  <label className="block font-mono text-[10px] text-neutral-600 dark:text-[#9CA3AF] uppercase font-extrabold mb-1.5">Sourcing Status</label>
                   <select 
                     value={newCardStatus}
                     onChange={(e) => setNewCardStatus(e.target.value)}
-                    className="w-full border border-neutral-300 rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-neutral-200 bg-white"
+                    className="w-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-neutral-200 bg-white dark:bg-[#1C1C1E]"
                   >
                     <option value="Needs Review">Needs Review</option>
                     <option value="Approved">Approved</option>
@@ -1126,11 +1107,11 @@ export default function ArticleView({
                 </div>
 
                 <div>
-                  <label className="block font-mono text-[10px] text-neutral-600 uppercase font-extrabold mb-1.5">Color Palette Box</label>
+                  <label className="block font-mono text-[10px] text-neutral-600 dark:text-[#9CA3AF] uppercase font-extrabold mb-1.5">Color Palette Box</label>
                   <select 
                     value={newCardColor}
                     onChange={(e) => setNewCardColor(e.target.value)}
-                    className="w-full border border-neutral-300 rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-neutral-200 bg-white"
+                    className="w-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-xl px-3 py-3 outline-none focus:ring-2 focus:ring-neutral-200 bg-white dark:bg-[#1C1C1E]"
                   >
                     <option value="orange">Orange (Beige)</option>
                     <option value="blue">Blue (Soft Sky)</option>
@@ -1144,7 +1125,7 @@ export default function ArticleView({
 
               <button 
                 type="submit" 
-                className="w-full bg-neutral-950 text-white font-mono text-xs uppercase tracking-widest font-black py-4 rounded-xl mt-4 hover:bg-black transition cursor-pointer"
+                className="w-full bg-neutral-950 text-white dark:text-[#0A0A0B] font-mono text-xs uppercase tracking-widest font-black py-4 rounded-xl mt-4 hover:bg-black transition cursor-pointer"
               >
                 Inject Cue Card
               </button>
@@ -1157,7 +1138,7 @@ export default function ArticleView({
       <button
         id="fab-chatbot-concierge"
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-[40px] right-[40px] w-[56px] h-[56px] bg-[#111] hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 shadow-[0_12px_24px_rgba(0,0,0,0.15)] z-[100]"
+        className="fixed bottom-[40px] right-[40px] w-[56px] h-[56px] bg-[#111] dark:bg-white/10 backdrop-blur-md border border-transparent dark:border-white/20 text-white rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 dark:hover:bg-white/20 dark:hover:border-white/40 active:scale-95 shadow-[0_12px_24px_rgba(0,0,0,0.15)] z-[100]"
         style={{
           opacity: isChatOpen ? 0 : 1,
           pointerEvents: isChatOpen ? 'none' : 'auto',
@@ -1165,7 +1146,7 @@ export default function ArticleView({
         }}
         title="Open Concierge Assistant"
       >
-        <Sparkles className="h-5.5 w-5.5 text-white transition-transform duration-300" />
+        <Sparkles className="h-5.5 w-5.5 text-white dark:text-white transition-transform duration-300" />
       </button>
 
 
@@ -1176,7 +1157,7 @@ export default function ArticleView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white dark:bg-[#1C1C1E]/40 backdrop-blur-md"
             onClick={() => setShowSaveModal(false)}
           >
             <motion.div 
@@ -1185,28 +1166,28 @@ export default function ArticleView({
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-[480px] bg-white rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200"
+              className="w-full max-w-[480px] bg-white dark:bg-[#1C1C1E] rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200 dark:border-[rgba(255,255,255,0.08)]"
             >
-              <h2 className="text-xl font-sans font-bold text-neutral-900 mb-6">Save to Profile</h2>
+              <h2 className="text-xl font-sans font-bold text-neutral-900 dark:text-[#F3F4F6] mb-6">Save to Profile</h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Document Title</label>
+                  <label className="block text-[11px] font-mono text-neutral-500 dark:text-[#9CA3AF] uppercase tracking-widest mb-2">Document Title</label>
                   <input 
                     type="text" 
                     value={modalTitle}
                     onChange={(e) => setModalTitle(e.target.value)}
-                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500"
+                    className="w-full bg-transparent border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-lg p-3 text-sm text-neutral-900 dark:text-[#F3F4F6] focus:outline-none focus:border-neutral-500"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Short Description</label>
+                  <label className="block text-[11px] font-mono text-neutral-500 dark:text-[#9CA3AF] uppercase tracking-widest mb-2">Short Description</label>
                   <textarea 
                     value={modalDesc}
                     onChange={(e) => setModalDesc(e.target.value)}
                     rows={4}
-                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 resize-none"
+                    className="w-full bg-transparent border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-lg p-3 text-sm text-neutral-900 dark:text-[#F3F4F6] focus:outline-none focus:border-neutral-500 resize-none"
                   />
                 </div>
               </div>
@@ -1214,13 +1195,13 @@ export default function ArticleView({
               <div className="mt-8 flex items-center justify-between">
                 <button 
                   onClick={() => setShowSaveModal(false)}
-                  className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                  className="text-sm text-neutral-500 dark:text-[#9CA3AF] hover:text-neutral-900 dark:text-[#F3F4F6] transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleConfirmSave}
-                  className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                  className="px-6 py-2.5 bg-neutral-900 dark:bg-[#F3F4F6] text-white dark:text-[#0A0A0B] text-sm font-medium rounded-lg hover:bg-black transition-colors"
                 >
                   Confirm Save
                 </button>
