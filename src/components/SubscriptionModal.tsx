@@ -78,6 +78,16 @@ export default function SubscriptionModal({
     }
   }, [isBookOpen, setIsCheckRevealed]);
 
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setIsBookOpen(false);
+    // Total unmount delay: Fold (400ms) + Micro-Hold (100ms) + Vanish (250ms)
+    setTimeout(() => {
+      onClose();
+    }, 750);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -86,7 +96,7 @@ export default function SubscriptionModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-md overflow-hidden"
-          onClick={onClose}
+          onClick={handleClose}
         >
           {/* Custom style block for smooth animations and technical texture */}
           <style>{`
@@ -196,16 +206,11 @@ export default function SubscriptionModal({
 
           {/* Global Close Button */}
           <button 
-            onClick={() => {
-              if (isClosing) return;
-              setIsClosing(true);
-              setIsBookOpen(false);
-              // Fold takes 500ms, then fade takes 300ms. Total 800ms before unmount.
-              setTimeout(() => {
-                onClose();
-              }, 800);
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClose();
             }}
-            className="absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer"
+            className={`absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer ${isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <X size={20} strokeWidth={2} />
           </button>
@@ -222,7 +227,7 @@ export default function SubscriptionModal({
             */}
             <motion.div 
               className="relative w-[380px] h-[600px]"
-              style={{ perspective: 1800 }}
+              style={{ perspective: 1000 }}
               animate={{ 
                 x: isBookOpen ? '50%' : 0,
                 scale: isClosing ? 0.95 : 1,
@@ -230,10 +235,10 @@ export default function SubscriptionModal({
               }}
               transition={{ 
                 x: isClosing 
-                  ? { duration: 0.5, ease: [0.4, 0, 0.2, 1] } 
+                  ? { duration: 0.4, ease: [0.4, 0, 0.2, 1] } 
                   : { type: 'spring', stiffness: 50, damping: 20 },
-                scale: { duration: 0.3, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.3, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] }
+                scale: { duration: 0.25, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] },
+                opacity: { duration: 0.25, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] }
               }}
             >
               
@@ -440,12 +445,12 @@ export default function SubscriptionModal({
               {/* === FRONT COVER (SWINGS LEFT) === */}
               <motion.div
                 className="absolute inset-0 w-full h-full z-30 transform-gpu"
-                style={{ originX: 0, transformStyle: 'preserve-3d' }}
+                style={{ transformOrigin: 'left center', transformStyle: 'preserve-3d' }}
                 initial={false}
                 animate={{ rotateY: isBookOpen ? -180 : 0 }}
                 transition={
                   isClosing
-                    ? { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+                    ? { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
                     : { type: 'spring', stiffness: 45, damping: 16 }
                 }
               >
