@@ -53,6 +53,7 @@ import {
   X,
 } from 'lucide-react';
 import { Article, UserProfile } from '../types';
+import BookmarkButton from './BookmarkButton';
 
 interface ArticleViewProps {
   article: Article;
@@ -543,17 +544,7 @@ export default function ArticleView({
             </button>
 
             {/* Save icon */}
-            <button
-              id="btn-reader-bookmark"
-              onClick={() => {
-                onToggleBookmark(article.id);
-                triggerToast(article.isBookmarked ? 'Removed from local bookmarks' : 'Added to local bookmarks');
-              }}
-              className="p-2.5 border border-neutral-300 bg-white hover:border-neutral-900 hover:text-black rounded-[4px] transition text-neutral-600 cursor-pointer shadow-3xs hover:bg-[#faf6ec]"
-              title={article.isBookmarked ? 'Saved' : 'Save publication'}
-            >
-              <Bookmark className={`h-4 w-4 ${article.isBookmarked ? 'fill-neutral-900 text-neutral-900' : ''}`} />
-            </button>
+            <BookmarkButton article={article} size={16} className="border border-neutral-300 rounded-[4px] bg-white shadow-3xs hover:border-neutral-900 p-2.5" />
 
             {/* User Profile Avatar */}
             <div className="flex items-center pl-3 border-l border-neutral-200 h-8 shrink-0">

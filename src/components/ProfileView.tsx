@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, Article } from '../types';
+import { useBookmark } from '../contexts/BookmarkContext';
+import BookmarkButton from './BookmarkButton';
 import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProfileViewProps {
@@ -144,6 +146,7 @@ export default function ProfileView({
     { id: 3, title: "True Square", tag: "Map-based real estate boundary visualizer" }
   ];
 
+  const { savedArticles } = useBookmark();
   const [profileTab, setProfileTab] = useState<'STATS' | 'POSTS' | 'SAVES'>('STATS');
   const [researchPapersOpen, setResearchPapersOpen] = useState(true);
   const [hacksOpen, setHacksOpen] = useState(false);
@@ -456,135 +459,48 @@ export default function ProfileView({
           )}
 
           {profileTab === 'SAVES' && (
-            <div className="w-full max-w-[800px] mx-auto animate-fade-in text-left">
-              {/* RESEARCH PAPERS COLLAPSIBLE SECTION */}
-              <div className="border-b border-stone-200">
-                <div 
-                  onClick={() => setResearchPapersOpen(!researchPapersOpen)}
-                  className="flex justify-between items-center py-6 border-b border-[#111] cursor-pointer"
-                  style={{ userSelect: 'none' }}
-                >
-                  <span className="font-bold uppercase text-[14px] tracking-[0.05em] text-[#111]">
-                    RESEARCH PAPERS
-                  </span>
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    style={{
-                      transform: researchPapersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease',
-                    }}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
+            <div className="w-full mx-auto animate-fade-in text-left">
+              {savedArticles.length === 0 ? (
+                <div className="mt-16 py-20 text-center flex flex-col items-center">
+                  <Bookmark className="w-8 h-8 text-neutral-300 mb-4" />
+                  <p className="text-sm font-mono text-neutral-500 uppercase">No saved articles yet.</p>
                 </div>
-                
-                {researchPapersOpen && (
-                  <div 
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', padding: '24px 0' }}
-                  >
-                    {/* Paper 1 */}
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {savedArticles.map((article) => (
                     <div 
-                      className="bg-white"
-                      style={{ border: '1px solid #EAEAEA', display: 'flex', flexDirection: 'column', padding: '24px 20px', borderRadius: '0', boxShadow: 'none' }}
+                      key={article.id}
+                      className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100"
                     >
-                      <span className="text-[9px] font-mono tracking-widest text-[#888] uppercase block mb-3">OCT 2025</span>
-                      <h4 className="text-[13px] font-bold text-[#111] uppercase tracking-tight leading-snug mb-2 font-mono">
-                        DECENTRALIZED ARCHITECTURES
-                      </h4>
-                      <p className="text-[11px] text-[#555] font-sans leading-relaxed line-clamp-3">
-                        Exploring network layouts for distributed client-side nodes to establish robust, real-time edge state without server-side database requirements.
-                      </p>
+                      <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
+                        <img 
+                          src={article.imageUrl} 
+                          alt={article.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                        />
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col space-y-3">
+                        <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                          <span>{article.category}</span>
+                          <span>{article.readTime}</span>
+                        </div>
+                        <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                          {article.title}
+                        </h3>
+                        <div className="mt-auto pt-3 border-t border-[#ece8df]/60 flex items-center justify-between">
+                          <p className="text-[10px] font-sans tracking-widest uppercase text-neutral-400">
+                            {article.publishedAt}
+                          </p>
+                          <div className="-mr-1">
+                            <BookmarkButton article={article} size={14} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Paper 2 */}
-                    <div 
-                      className="bg-white"
-                      style={{ border: '1px solid #EAEAEA', display: 'flex', flexDirection: 'column', padding: '24px 20px', borderRadius: '0', boxShadow: 'none' }}
-                    >
-                      <span className="text-[9px] font-mono tracking-widest text-[#888] uppercase block mb-3">JAN 2026</span>
-                      <h4 className="text-[13px] font-bold text-[#111] uppercase tracking-tight leading-snug mb-2 font-mono">
-                        TYPOGRAPHIC HEURISTICS
-                      </h4>
-                      <p className="text-[11px] text-[#555] font-sans leading-relaxed line-clamp-3">
-                        An investigation into user cognition and reading efficiency under massive font-size scaling, high contrasts, and ultra-dense structural grid layouts.
-                      </p>
-                    </div>
-
-                    {/* Paper 3 */}
-                    <div 
-                      className="bg-white"
-                      style={{ border: '1px solid #EAEAEA', display: 'flex', flexDirection: 'column', padding: '24px 20px', borderRadius: '0', boxShadow: 'none' }}
-                    >
-                      <span className="text-[9px] font-mono tracking-widest text-[#888] uppercase block mb-3">APR 2026</span>
-                      <h4 className="text-[13px] font-bold text-[#111] uppercase tracking-tight leading-snug mb-2 font-mono">
-                        SYNTAX TREE PARSERS
-                      </h4>
-                      <p className="text-[11px] text-[#555] font-sans leading-relaxed line-clamp-3">
-                        Leveraging WASM compilers to parse AST representations in real-time, enabling interactive client-only code analysis directly in browser frames.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* HACKS COLLAPSIBLE SECTION */}
-              <div className="mt-4">
-                <div 
-                  onClick={() => setHacksOpen(!hacksOpen)}
-                  className="flex justify-between items-center py-6 border-b border-[#111] cursor-pointer"
-                  style={{ userSelect: 'none' }}
-                >
-                  <span className="font-bold uppercase text-[14px] tracking-[0.05em] text-[#111]">
-                    HACKS
-                  </span>
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    style={{
-                      transform: hacksOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease',
-                    }}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
+                  ))}
                 </div>
-                
-                {hacksOpen && (
-                  <div 
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', padding: '24px 0' }}
-                  >
-                    {[
-                      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=400&h=400",
-                      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400&h=400",
-                      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=400&h=400",
-                      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=400&h=400",
-                      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=400&h=400",
-                      "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&q=80&w=400&h=400"
-                    ].map((imgSrc, index) => (
-                      <img 
-                        key={index}
-                        src={imgSrc} 
-                        alt={`Hack Thumbnail ${index + 1}`}
-                        className="grayscale contrast-[1.1] hover:grayscale-0 transition-all duration-300"
-                        style={{ aspectRatio: '1/1', backgroundColor: '#F0F0F0', width: '100%', border: 'none', objectFit: 'cover' }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           )}
         </div>

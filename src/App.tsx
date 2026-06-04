@@ -12,6 +12,8 @@ import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
 import { UserProfile, Article } from './types';
 import { INITIAL_USER, MOCK_ARTICLES } from './data';
+import { BookmarkProvider } from './contexts/BookmarkContext';
+import GlobalToast from './components/GlobalToast';
 
 export default function App() {
   const [isOnboarded, setIsOnboarded] = useState(false);
@@ -106,8 +108,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 relative selection:bg-indigo-150 selection:text-indigo-805">
-      <AnimatePresence mode="wait">
+    <BookmarkProvider>
+      <div className="min-h-screen bg-slate-50 relative selection:bg-indigo-150 selection:text-indigo-805">
+        <GlobalToast />
+        <AnimatePresence mode="wait">
         
         {/* Onboarding View Stage */}
         {!isOnboarded && (
@@ -203,7 +207,8 @@ export default function App() {
           </motion.div>
         )}
 
-      </AnimatePresence>
-    </div>
+        </AnimatePresence>
+      </div>
+    </BookmarkProvider>
   );
 }

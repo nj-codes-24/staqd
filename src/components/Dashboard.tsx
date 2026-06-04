@@ -26,6 +26,7 @@ import StudyView from './StudyView';
 import SubscriptionModal from './SubscriptionModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
+import BookmarkButton from './BookmarkButton';
 
 const getArticleSource = (articleId: string) => {
   const sources = ['arXiv', 'IEEE Spec', 'Nature Portfolio', 'MIT Tech Review', 'ACM Library', 'ScienceDirect'];
@@ -696,16 +697,9 @@ export default function Dashboard({
                                       {/* Bottom widgets bar */}
                                       <div className="pt-3 border-t border-[#ece8df]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
                                         <span>{article.readTime}</span>
-                                        <button 
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            onToggleBookmark(article.id);
-                                          }}
-                                          className="p-1 text-neutral-400 hover:text-black transition"
-                                          title="Save index"
-                                        >
-                                          <Bookmark className={`h-3.5 w-3.5 ${article.isBookmarked ? 'fill-black text-black' : ''}`} />
-                                        </button>
+                                        <div className="-mr-1">
+                                          <BookmarkButton article={article} size={14} />
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
