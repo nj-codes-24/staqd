@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CreditCard, X, ChevronRight, Lock } from 'lucide-react';
+import { CreditCard, X, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -50,6 +50,7 @@ export default function SubscriptionModal({
   const [cvc, setCvc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +67,7 @@ export default function SubscriptionModal({
       setCvc('');
       setIsSubmitting(false);
       setSubmitSuccess(false);
+      setIsClosing(false);
     }
   }, [isOpen, setIsBookOpen, setIsCheckRevealed]);
 
@@ -195,12 +197,13 @@ export default function SubscriptionModal({
           {/* Global Close Button */}
           <button 
             onClick={() => {
-              if (isBookOpen) {
-                setIsBookOpen(false);
-                setTimeout(() => onClose(), 600); // Wait for the book to close before unmounting
-              } else {
+              if (isClosing) return;
+              setIsClosing(true);
+              setIsBookOpen(false);
+              // Fold takes 500ms, then fade takes 300ms. Total 800ms before unmount.
+              setTimeout(() => {
                 onClose();
-              }
+              }, 800);
             }}
             className="absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer"
           >
@@ -220,8 +223,18 @@ export default function SubscriptionModal({
             <motion.div 
               className="relative w-[380px] h-[600px]"
               style={{ perspective: 1800 }}
-              animate={{ x: isBookOpen ? '50%' : 0 }}
-              transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              animate={{ 
+                x: isBookOpen ? '50%' : 0,
+                scale: isClosing ? 0.95 : 1,
+                opacity: isClosing ? 0 : 1
+              }}
+              transition={{ 
+                x: isClosing 
+                  ? { duration: 0.5, ease: [0.4, 0, 0.2, 1] } 
+                  : { type: 'spring', stiffness: 50, damping: 20 },
+                scale: { duration: 0.3, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] },
+                opacity: { duration: 0.3, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] }
+              }}
             >
               
               {/* === RIGHT INSIDE PAGE (THE BASE POCKET FOLDER) === */}
@@ -241,14 +254,13 @@ export default function SubscriptionModal({
                   }}
                   transition={{
                     type: 'spring',
-                    stiffness: 110,
-                    damping: 15
+                    stiffness: 200, damping: 25 
                   }}
                 >
-                  <div className="w-full relative z-10">
-                    <PerforatedEdge position="top" />
-
-                    <div className="px-6 py-6 md:px-7 bg-[#fefcf8] text-[#1a1a1a] font-mono text-[13px] shadow-[inset_0_0_40px_rgba(0,0,0,0.02)] border-x border-[#f5f1e8] rounded-t-sm">
+                  <motion.div layout transition={{ type: 'spring', stiffness: 200, damping: 25 }} className="w-full relative z-10 flex flex-col items-center">
+                    {/* The physical paper receipt */}
+                    <motion.div layout className={`w-full bg-[#fefcf8] relative rounded-t-sm transition-shadow duration-700 ${submitSuccess ? 'shadow-[0_30px_60px_rgba(0,0,0,0.6)]' : 'shadow-[0_5px_15px_rgba(0,0,0,0.1)]'}`}>
+                      <div className="px-6 py-6 md:px-7 bg-[#fefcf8] text-[#1a1a1a] font-mono text-sm relative overflow-hidden">
                       
                       {/* Tightened header with clear spacing */}
                       <div className="text-center mb-4 mt-2">
@@ -256,141 +268,164 @@ export default function SubscriptionModal({
                         <p className="text-neutral-500 text-[10px] mt-1 pr-1">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                       </div>
 
-                      <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
-
-                      <ul className="space-y-2.5 font-medium leading-relaxed mb-4 text-neutral-700 text-xs">
-                        <li className="flex justify-between items-end">
-                          <span className="leading-tight pr-4">01. Unlimited AI Synthetics</span>
-                          <span className="font-bold">${planType === 'monthly' ? '40.00' : '33.20'}</span>
-                        </li>
-                        <li className="flex justify-between items-end">
-                          <span className="leading-tight pr-4">02. Auto-Cue Card Decks</span>
-                          <span className="font-bold">${planType === 'monthly' ? '25.00' : '20.75'}</span>
-                        </li>
-                        <li className="flex justify-between items-end">
-                          <span className="leading-tight pr-4">03. Voice Synthesis Module</span>
-                          <span className="font-bold">${planType === 'monthly' ? '35.00' : '29.05'}</span>
-                        </li>
-                        <li className="flex justify-between items-end">
-                          <span className="leading-tight pr-4">04. Scholar Network Access</span>
-                          <span className="font-bold">${planType === 'monthly' ? '30.00' : '24.90'}</span>
-                        </li>
-                      </ul>
-
-                      <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
-
-                      <div className="space-y-1.5 mt-3 font-bold text-xs relative">
-                        <div className="flex justify-between text-neutral-500 font-normal">
-                          <span>Subtotal</span>
-                          <div className="flex flex-col items-end">
-                            <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400' : ''}`}>$130.00</span>
-                            {planType === 'yearly' && (
-                              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-black font-bold">$107.90</motion.span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {planType === 'yearly' && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }} 
-                            animate={{ opacity: 1, height: 'auto' }} 
-                            className="flex justify-between text-amber-700/80 font-bold italic text-[10px]"
+                      <AnimatePresence mode="wait">
+                        {!submitSuccess ? (
+                          <motion.div
+                            key="billing"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
                           >
-                            <span>Annual Discount Applied</span>
-                            <span>-17%</span>
+                            <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
+
+                            <ul className="space-y-2.5 font-medium leading-relaxed mb-4 text-neutral-700 text-xs">
+                              <li className="flex justify-between items-end">
+                                <span className="leading-tight pr-4">01. Unlimited AI Synthetics</span>
+                                <span className="font-bold">${planType === 'monthly' ? '40.00' : '33.20'}</span>
+                              </li>
+                              <li className="flex justify-between items-end">
+                                <span className="leading-tight pr-4">02. Auto-Cue Card Decks</span>
+                                <span className="font-bold">${planType === 'monthly' ? '25.00' : '20.75'}</span>
+                              </li>
+                              <li className="flex justify-between items-end">
+                                <span className="leading-tight pr-4">03. Voice Synthesis Module</span>
+                                <span className="font-bold">${planType === 'monthly' ? '35.00' : '29.05'}</span>
+                              </li>
+                              <li className="flex justify-between items-end">
+                                <span className="leading-tight pr-4">04. Scholar Network Access</span>
+                                <span className="font-bold">${planType === 'monthly' ? '30.00' : '24.90'}</span>
+                              </li>
+                            </ul>
+
+                            <div className="border-t-2 border-dashed border-neutral-300 my-4"></div>
+
+                            <div className="space-y-1.5 mt-3 font-bold text-xs relative">
+                              <div className="flex justify-between text-neutral-500 font-normal">
+                                <span>Subtotal</span>
+                                <div className="flex flex-col items-end">
+                                  <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400' : ''}`}>$130.00</span>
+                                  {planType === 'yearly' && (
+                                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-black font-bold">$107.90</motion.span>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {planType === 'yearly' && (
+                                <motion.div 
+                                  initial={{ opacity: 0, height: 0 }} 
+                                  animate={{ opacity: 1, height: 'auto' }} 
+                                  className="flex justify-between text-amber-700/80 font-bold italic text-[10px]"
+                                >
+                                  <span>Annual Discount Applied</span>
+                                  <span>-17%</span>
+                                </motion.div>
+                              )}
+
+                              <div className="flex justify-between text-neutral-500 font-normal">
+                                <span>Tax (8%)</span>
+                                <span>${planType === 'monthly' ? '10.40' : '8.63'}</span>
+                              </div>
+                              
+                              <div className="flex justify-between text-base mt-3 pt-3 border-t-[3px] border-black text-black">
+                                <span>TOTAL</span>
+                                <div className="flex flex-col items-end">
+                                  <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400 text-xs' : ''}`}>$140.40</span>
+                                  {planType === 'yearly' && (
+                                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-black">$116.53</motion.span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="features"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <div className="border-t-2 border-dashed border-neutral-300 mt-4 mb-5"></div>
+                            <ul className="space-y-4 font-medium leading-relaxed text-neutral-800 text-xs pb-1">
+                              <li className="flex items-start">
+                                <CheckCircle2 className="w-4 h-4 mr-3 text-neutral-900 shrink-0 mt-0.5" />
+                                <span><strong className="block text-sm mb-0.5 text-black">Unlimited AI Synthetics</strong> <span className="text-neutral-500">(Enhanced Access)</span></span>
+                              </li>
+                              <li className="flex items-start">
+                                <CheckCircle2 className="w-4 h-4 mr-3 text-neutral-900 shrink-0 mt-0.5" />
+                                <span><strong className="block text-sm mb-0.5 text-black">Auto-Cue Card Decks</strong> <span className="text-neutral-500">(Unlimited)</span></span>
+                              </li>
+                              <li className="flex items-start">
+                                <CheckCircle2 className="w-4 h-4 mr-3 text-neutral-900 shrink-0 mt-0.5" />
+                                <span><strong className="block text-sm mb-0.5 text-black">Voice Synthesis Module</strong> <span className="text-neutral-500">(Active)</span></span>
+                              </li>
+                              <li className="flex items-start">
+                                <CheckCircle2 className="w-4 h-4 mr-3 text-neutral-900 shrink-0 mt-0.5" />
+                                <span><strong className="block text-sm mb-0.5 text-black">Scholar Network Access</strong> <span className="text-neutral-500">(Live)</span></span>
+                              </li>
+                            </ul>
                           </motion.div>
                         )}
+                      </AnimatePresence>
 
-                        <div className="flex justify-between text-neutral-500 font-normal">
-                          <span>Tax (8%)</span>
-                          <span>${planType === 'monthly' ? '10.40' : '8.63'}</span>
-                        </div>
-                        
-                        <div className="flex justify-between text-base mt-3 pt-3 border-t-[3px] border-black text-black">
-                          <span>TOTAL</span>
-                          <div className="flex flex-col items-end">
-                            <span className={`strike-through ${planType === 'yearly' ? 'active text-neutral-400 text-xs' : ''}`}>$140.40</span>
-                            {planType === 'yearly' && (
-                              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-black">$116.53</motion.span>
-                            )}
-                          </div>
-                        </div>
                       </div>
-
-                    </div>
+                    </motion.div>
 
                     <PerforatedEdge position="bottom" />
                     
-                    {/* THE SUCCESS STAMP ANIMATION */}
+                    {/* THE BRASS PUSHPIN ANIMATION */}
                     <AnimatePresence>
                       {submitSuccess && (
                         <motion.div
-                          initial={{ scale: 3, opacity: 0, rotate: 0 }}
-                          animate={{ scale: 1, opacity: 0.85, rotate: -5 }}
-                          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none w-56 h-56"
+                          initial={{ y: -30, scale: 2, opacity: 0 }}
+                          animate={{ y: 0, scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
+                          className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
                         >
-                          <svg viewBox="0 0 200 200" className="w-full h-full text-green-600 mix-blend-multiply drop-shadow-sm">
-                            {/* Outer and Inner Circles */}
-                            <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" strokeWidth="5" strokeDasharray="12 3 4 2 8 2" />
-                            <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="20 1 10 1" />
-                            
-                            {/* Curved Text */}
-                            <path id="top-curve" d="M 28,100 A 72,72 0 0,1 172,100" fill="none" />
-                            <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
-                              <textPath href="#top-curve" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
-                            </text>
-                            
-                            <path id="bottom-curve" d="M 172,100 A 72,72 0 0,1 28,100" fill="none" />
-                            <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
-                              <textPath href="#bottom-curve" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
-                            </text>
-                            
-                            {/* Stars */}
-                            <g fill="currentColor" transform="translate(100, 68)">
-                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
-                              <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
-                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
-                            </g>
-                            <g fill="currentColor" transform="translate(100, 132) rotate(180)">
-                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
-                              <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
-                              <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
-                            </g>
-                            
-                            {/* Center Banner */}
-                            <g transform="rotate(-8, 100, 100)">
-                              <rect x="8" y="76" width="184" height="48" rx="6" fill="#fefcf8" stroke="currentColor" strokeWidth="4" />
-                              <text x="100" y="110" fill="currentColor" fontSize="30" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="3">
-                                CONFIRMED
-                              </text>
-                            </g>
-                          </svg>
+                          <div className="relative flex items-center justify-center">
+                            {/* Pushpin Shadow */}
+                            <div className="absolute top-2 -left-1 w-5 h-5 bg-black/40 rounded-full blur-[3px]" />
+                            {/* Pushpin Head */}
+                            <div className="w-6 h-6 rounded-full shadow-[inset_-2px_-2px_6px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.4)]"
+                                 style={{ background: 'radial-gradient(circle at 30% 30%, #ffd700, #b8860b 60%, #8b6508)' }} />
+                            {/* Pushpin Highlight */}
+                            <div className="absolute top-[4px] left-[5px] w-2 h-2 rounded-full bg-white/40 blur-[1px]" />
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
+                  </motion.div>
                 </motion.div>
 
                 {/* LAYER 3: THE SLEEVE POCKET (CONVERTED TO INTERACTIVE BUTTON WITH HOVER STATE) */}
                 <button 
                   onClick={() => {
-                    const newRevealed = !isCheckRevealed;
-                    setIsCheckRevealed(newRevealed);
-                    setCheckoutStep(newRevealed ? 'payment' : 'pitch');
+                    if (submitSuccess || isCheckRevealed) return;
+                    setIsCheckRevealed(true);
+                    setCheckoutStep('payment');
                   }}
-                  className="absolute bottom-0 left-0 right-0 h-[45%] z-20 bg-[#2C3742] rounded-br-[24px] shadow-[0_-15px_40px_rgba(0,0,0,0.4)] border-t border-white/10 flex flex-col items-center justify-between p-6 pointer-events-auto cursor-pointer group text-left select-none outline-none focus:outline-none"
+                  className={`absolute bottom-0 left-0 right-0 h-[45%] z-20 bg-[#2C3742] rounded-br-[24px] shadow-[0_-15px_40px_rgba(0,0,0,0.4)] border-t border-white/10 flex flex-col items-center justify-between p-6 ${submitSuccess || isCheckRevealed ? 'pointer-events-none' : 'pointer-events-auto cursor-pointer'} group text-left select-none outline-none focus:outline-none`}
                   style={{
                     clipPath: 'polygon(0 20%, 100% 0, 100% 100%, 0% 100%)',
                     backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 100%)'
                   }}
                 >
-                  {/* Subtle Centered "TAP TO REVEAL" / "TAP TO COLLAPSE" text featuring custom gold shimmer */}
-                  <div className="absolute inset-0 flex items-center justify-center pt-8 pointer-events-none">
-                    <span className="font-mono text-xs font-black uppercase tracking-[0.3em] select-none shimmer-text-gold group-hover:brightness-125 group-hover:scale-102 transition-all duration-300">
-                      {isCheckRevealed ? "TAP TO COLLAPSE" : "TAP TO REVEAL"}
-                    </span>
-                  </div>
+                  {/* Subtle Centered "TAP TO REVEAL" text featuring custom gold shimmer */}
+                  <AnimatePresence>
+                    {!submitSuccess && !isCheckRevealed && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex items-center justify-center pt-8 pointer-events-none"
+                      >
+                        <span className="font-mono text-xs font-black uppercase tracking-[0.3em] select-none shimmer-text-gold group-hover:brightness-125 group-hover:scale-102 transition-all duration-300">
+                          TAP TO REVEAL
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Aesthetic label at final corner */}
                   <div className="mt-auto w-full flex justify-end">
@@ -408,7 +443,11 @@ export default function SubscriptionModal({
                 style={{ originX: 0, transformStyle: 'preserve-3d' }}
                 initial={false}
                 animate={{ rotateY: isBookOpen ? -180 : 0 }}
-                transition={{ type: 'spring', stiffness: 45, damping: 16 }}
+                transition={
+                  isClosing
+                    ? { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+                    : { type: 'spring', stiffness: 45, damping: 16 }
+                }
               >
                 
                 {/* OUTSIDE COVER (Visible when closed) */}
@@ -440,9 +479,12 @@ export default function SubscriptionModal({
 
                 {/* INSIDE COVER (The Left Page Pitch, visible when open) */}
                 <div 
-                  className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-l-[24px] border-y border-l border-[#d3ccbc] shadow-[inset_-20px_0_40px_rgba(0,0,0,0.07)] flex flex-col pointer-events-auto workspace-grid"
+                  className="absolute inset-0 w-full h-full bg-[#E8E0D2] rounded-l-[24px] border-y border-l border-[#d3ccbc] shadow-[inset_-20px_0_40px_rgba(0,0,0,0.07)] flex flex-col pointer-events-auto workspace-grid overflow-hidden"
                   style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
                 >
+                  {/* Vignette Layer for tactile material enhancement */}
+                  <div className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.12) 130%)' }} />
+
                   <AnimatePresence mode="wait">
                     {checkoutStep === 'pitch' ? (
                       <motion.div 
@@ -477,9 +519,18 @@ export default function SubscriptionModal({
                         exit={{ opacity: 0, x: 10 }}
                         className="px-6 py-5 flex flex-col h-full relative text-left z-50 pointer-events-auto"
                       >
-                        <h3 className="text-2xl font-serif font-black uppercase text-[#1a1a1a] mb-4">Checkout</h3>
-                        
-                        {/* Plan Selection */}
+                        <AnimatePresence mode="wait">
+                          {!submitSuccess ? (
+                            <motion.div
+                              key="form"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="flex flex-col h-full"
+                            >
+                              <h3 className="text-2xl font-serif font-black uppercase text-[#1a1a1a] mb-4">Checkout</h3>
+                              
+                              {/* Plan Selection */}
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <button 
                             type="button"
@@ -642,37 +693,142 @@ export default function SubscriptionModal({
                             </div>
                           )}
 
-                          <div className="pt-2 mt-auto">
+                          <div className="pt-2 mt-auto flex flex-col items-center">
                             <motion.button 
-                              whileHover={(!isSubmitting && !submitSuccess) ? { scale: 1.01 } : {}}
-                              whileTap={(!isSubmitting && !submitSuccess) ? { scale: 0.95 } : {}}
+                              whileHover={!isSubmitting ? { scale: 1.01 } : {}}
+                              whileTap={!isSubmitting ? { scale: 0.95 } : {}}
                               onClick={() => {
-                                if (isSubmitting || submitSuccess) return;
+                                if (isSubmitting) return;
                                 setIsSubmitting(true);
                                 setTimeout(() => {
                                   setIsSubmitting(false);
                                   setSubmitSuccess(true);
                                 }, 1500);
                               }}
-                              disabled={isSubmitting || submitSuccess}
-                              className={`w-full h-12 text-[#E5C158] font-sans font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center space-x-2 transition-all duration-300 rounded-xl shadow-xl ${
-                                submitSuccess 
-                                  ? 'bg-[#10B981] text-white' 
-                                  : isSubmitting 
-                                    ? 'bg-zinc-850 opacity-75 cursor-not-allowed' 
-                                    : 'bg-zinc-950 hover:bg-zinc-900 cursor-pointer'
+                              disabled={isSubmitting}
+                              className={`w-full h-12 font-sans font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center transition-all duration-300 rounded-xl shadow-xl relative overflow-hidden ${
+                                isSubmitting 
+                                  ? 'bg-black cursor-not-allowed text-transparent' 
+                                  : 'bg-zinc-950 hover:bg-zinc-900 cursor-pointer text-[#E5C158]'
                               }`}
                             >
-                              <span>
-                                {submitSuccess 
-                                  ? '✓ Payment Successful' 
-                                  : isSubmitting 
-                                    ? 'Processing Secure Connection...' 
-                                    : 'Confirm Subscription'}
-                              </span>
+                              <AnimatePresence mode="wait">
+                                {isSubmitting ? (
+                                  <motion.div
+                                    key="loading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 flex items-center justify-center"
+                                  >
+                                    <div className="w-5 h-5 border-[2px] border-white/20 border-t-white rounded-full animate-spin" />
+                                  </motion.div>
+                                ) : (
+                                  <motion.span
+                                    key="text"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                  >
+                                    Confirm Subscription
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
                             </motion.button>
+                            
+                            <AnimatePresence>
+                              {isSubmitting && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                  animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                  className="text-center overflow-hidden"
+                                >
+                                  <span className="font-mono text-[9px] uppercase tracking-widest font-bold text-neutral-800">
+                                    Processing secure payment...
+                                  </span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </div>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="success"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.4 }}
+                              className="flex flex-col h-full relative"
+                            >
+                              {/* Left Panel Stamp */}
+                              <div className="absolute -top-2 -left-4 w-40 h-40 transform -rotate-12 z-0 pointer-events-none">
+                                <svg viewBox="0 0 200 200" className="w-full h-full text-green-600 mix-blend-multiply drop-shadow-sm opacity-90">
+                                  <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" strokeWidth="5" strokeDasharray="12 3 4 2 8 2" />
+                                  <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="20 1 10 1" />
+                                  <path id="top-curve2" d="M 28,100 A 72,72 0 0,1 172,100" fill="none" />
+                                  <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
+                                    <textPath href="#top-curve2" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
+                                  </text>
+                                  <path id="bottom-curve2" d="M 172,100 A 72,72 0 0,1 28,100" fill="none" />
+                                  <text fill="currentColor" fontSize="22" fontWeight="900" letterSpacing="5" fontFamily="sans-serif">
+                                    <textPath href="#bottom-curve2" startOffset="50%" textAnchor="middle">CONFIRMED</textPath>
+                                  </text>
+                                  <g fill="currentColor" transform="translate(100, 68)">
+                                    <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
+                                    <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
+                                    <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
+                                  </g>
+                                  <g fill="currentColor" transform="translate(100, 132) rotate(180)">
+                                    <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(-30, 3) scale(1.2)" />
+                                    <polygon points="0,-8 3,-2 9,-2 4,2 6,8 0,4 -6,8 -4,2 -9,-2 -3,-2" transform="scale(1.5)" />
+                                    <polygon points="0,-6 2,-2 7,-2 3,1 4,6 0,3 -4,6 -3,1 -7,-2 -2,-2" transform="translate(30, 3) scale(1.2)" />
+                                  </g>
+                                  <g transform="rotate(-8, 100, 100)">
+                                    <rect x="8" y="76" width="184" height="48" rx="6" fill="#E8E0D2" stroke="currentColor" strokeWidth="4" />
+                                    <text x="100" y="110" fill="currentColor" fontSize="30" fontWeight="900" fontFamily="sans-serif" textAnchor="middle" letterSpacing="3">
+                                      CONFIRMED
+                                    </text>
+                                  </g>
+                                </svg>
+                              </div>
+                              
+                              <div className="mt-auto ml-[16px] mb-[20px] z-10 flex flex-col justify-end w-full">
+                                {/* Editorial Micro-details */}
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 0.5, duration: 0.6 }}
+                                  className="mb-8"
+                                >
+                                  <p className="font-sans font-bold uppercase text-[10px] tracking-[0.25em] text-[#1E272E]/40 mb-2">
+                                    TRANSACTION VERIFIED • SECURE
+                                  </p>
+                                  <div className="h-[1px] w-[40%] bg-[#1E272E]/20" />
+                                </motion.div>
+
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.2, duration: 0.5 }}
+                                  className="font-serif font-black uppercase flex flex-col whitespace-nowrap"
+                                  style={{ 
+                                    color: '#1E272E',
+                                    lineHeight: '0.75', 
+                                    letterSpacing: '-0.03em',
+                                    fontSize: 'clamp(36px, 11vw, 48px)',
+                                    transform: 'scaleY(1.15)',
+                                    transformOrigin: 'bottom left'
+                                  }}
+                                >
+                                  <span>WELCOME</span>
+                                  <span>TO</span>
+                                  <span>ZID HUB PRO</span>
+                                </motion.div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
                     )}
                   </AnimatePresence>
