@@ -211,6 +211,7 @@ export default function App() {
                 onAddCustomArticle={handleAddCustomArticle}
                 onLogout={handleLogout}
                 onUpdateUser={handleUpdateUserProfile}
+                onSelectArticle={(article) => setSelectedArticle(article)}
               />
             ) : (
               <Dashboard 

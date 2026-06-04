@@ -54,6 +54,7 @@ import {
 } from 'lucide-react';
 import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
+import { useBookmark } from '../contexts/BookmarkContext';
 
 interface ArticleViewProps {
   article: Article;
@@ -97,6 +98,23 @@ export default function ArticleView({
   // Volume state
   const [volumeVal, setVolumeVal] = useState<number>(80);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  const { saveUpload, uploadedArticles } = useBookmark();
+  const isUploadedDocument = article.id.startsWith('custom-paper');
+  const hasSavedUpload = uploadedArticles.some(a => a.id === article.id);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState(article.title);
+  const [modalDesc, setModalDesc] = useState(article.excerpt);
+
+  const handleConfirmSave = () => {
+    saveUpload({
+      ...article,
+      title: modalTitle,
+      excerpt: modalDesc
+    });
+    setShowSaveModal(false);
+  };
+
 
   // Sleek audio player states
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -544,7 +562,17 @@ export default function ArticleView({
             </button>
 
             {/* Save icon */}
-            <BookmarkButton article={article} size={16} className="border border-neutral-300 rounded-[4px] bg-white shadow-3xs hover:border-neutral-900 p-2.5" />
+            {isUploadedDocument ? (
+              <button 
+                onClick={() => setShowSaveModal(true)}
+                disabled={hasSavedUpload}
+                className="px-6 py-2 bg-[#111827] text-white text-[13px] font-medium rounded-full hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {hasSavedUpload ? 'Saved' : 'Save Upload'}
+              </button>
+            ) : (
+              <BookmarkButton article={article} size={16} className="border border-neutral-300 rounded-[4px] bg-white shadow-3xs hover:border-neutral-900 p-2.5" />
+            )}
 
             {/* User Profile Avatar */}
             <div className="flex items-center pl-3 border-l border-neutral-200 h-8 shrink-0">
@@ -1140,6 +1168,68 @@ export default function ArticleView({
         <Sparkles className="h-5.5 w-5.5 text-white transition-transform duration-300" />
       </button>
 
+
+      {/* Save Upload Modal */}
+      <AnimatePresence>
+        {showSaveModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            onClick={() => setShowSaveModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[480px] bg-white rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200"
+            >
+              <h2 className="text-xl font-sans font-bold text-neutral-900 mb-6">Save to Profile</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Document Title</label>
+                  <input 
+                    type="text" 
+                    value={modalTitle}
+                    onChange={(e) => setModalTitle(e.target.value)}
+                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Short Description</label>
+                  <textarea 
+                    value={modalDesc}
+                    onChange={(e) => setModalDesc(e.target.value)}
+                    rows={4}
+                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-between">
+                <button 
+                  onClick={() => setShowSaveModal(false)}
+                  className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleConfirmSave}
+                  className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                >
+                  Confirm Save
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

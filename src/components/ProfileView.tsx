@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, Article } from '../types';
 import { useBookmark } from '../contexts/BookmarkContext';
 import BookmarkButton from './BookmarkButton';
-import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -17,6 +18,7 @@ interface ProfileViewProps {
   onAddCustomArticle: (title: string, excerpt: string, category: string, content: string) => void;
   onLogout: () => void;
   onUpdateUser: (updatedUser: UserProfile) => void;
+  onSelectArticle: (article: Article) => void;
 }
 
 const postDetailsMap: Record<number, {
@@ -117,7 +119,8 @@ export default function ProfileView({
   articles, 
   onAddCustomArticle,
   onLogout,
-  onUpdateUser
+  onUpdateUser,
+  onSelectArticle
 }: ProfileViewProps) {
   const postsData = [
     { id: 1, title: "Neural Style Transfer Pipelines", tag: "Computer Vision", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400&h=400" },
@@ -146,8 +149,8 @@ export default function ProfileView({
     { id: 3, title: "True Square", tag: "Map-based real estate boundary visualizer" }
   ];
 
-  const { savedArticles } = useBookmark();
-  const [profileTab, setProfileTab] = useState<'STATS' | 'POSTS' | 'SAVES'>('STATS');
+  const { savedArticles, uploadedArticles, removeUpload, saveUpload } = useBookmark();
+  const [profileTab, setProfileTab] = useState<'STATS' | 'POSTS' | 'SAVES' | 'UPLOADS'>('STATS');
   const [researchPapersOpen, setResearchPapersOpen] = useState(true);
   const [hacksOpen, setHacksOpen] = useState(false);
 
@@ -162,6 +165,18 @@ export default function ProfileView({
   const [savedPosts, setSavedPosts] = useState<Record<number, boolean>>({});
   const [commentLikes, setCommentLikes] = useState<Record<string, { count: number; userLiked: boolean }>>({});
   const [shareCopied, setShareCopied] = useState(false);
+
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [editingUpload, setEditingUpload] = useState<Article | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+
+  const handleSaveEdit = () => {
+    if (editingUpload) {
+      saveUpload({ ...editingUpload, title: editTitle, excerpt: editDesc });
+      setEditingUpload(null);
+    }
+  };
 
   // Swipe Carousel logic
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -252,7 +267,7 @@ export default function ProfileView({
     };
   }, [selectedPost]);
 
-  const tabs: ('STATS' | 'POSTS' | 'SAVES')[] = ['STATS', 'POSTS', 'SAVES'];
+  const tabs: ('STATS' | 'POSTS' | 'SAVES' | 'UPLOADS')[] = ['STATS', 'POSTS', 'SAVES', 'UPLOADS'];
 
   return (
     <div id="personal-profile-wrapper" className="min-h-screen bg-[#ded9cf] pt-12 pb-16 px-4 md:px-8 font-sans antialiased text-[#111]">
@@ -461,9 +476,9 @@ export default function ProfileView({
           {profileTab === 'SAVES' && (
             <div className="w-full mx-auto animate-fade-in text-left">
               {savedArticles.length === 0 ? (
-                <div className="mt-16 py-20 text-center flex flex-col items-center">
-                  <Bookmark className="w-8 h-8 text-neutral-300 mb-4" />
-                  <p className="text-sm font-mono text-neutral-500 uppercase">No saved articles yet.</p>
+                <div className="w-full flex flex-col items-center justify-center text-center mt-16 py-20">
+                  <Bookmark className="w-8 h-8 text-neutral-300" />
+                  <p className="mt-4 text-sm font-mono text-neutral-500 uppercase">NO SAVED ARTICLES YET.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -472,28 +487,110 @@ export default function ProfileView({
                       key={article.id}
                       className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100"
                     >
-                      <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                        <img 
-                          src={article.imageUrl} 
-                          alt={article.title}
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
-                        />
-                      </div>
-                      <div className="p-5 flex-1 flex flex-col space-y-3">
-                        <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
-                          <span>{article.category}</span>
-                          <span>{article.readTime}</span>
+                      <div 
+                        className="cursor-pointer flex-1 flex flex-col"
+                        onClick={() => onSelectArticle(article)}
+                      >
+                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
+                          <img 
+                            src={article.imageUrl} 
+                            alt={article.title}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                          />
                         </div>
-                        <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
-                          {article.title}
-                        </h3>
+                        <div className="p-5 flex-1 flex flex-col space-y-3">
+                          <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                            <span>{article.category}</span>
+                            <span>{article.readTime}</span>
+                          </div>
+                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                            {article.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="px-5 pb-5">
                         <div className="mt-auto pt-3 border-t border-[#ece8df]/60 flex items-center justify-between">
                           <p className="text-[10px] font-sans tracking-widest uppercase text-neutral-400">
                             {article.publishedAt}
                           </p>
-                          <div className="-mr-1">
+                          <div 
+                            className="-mr-1 cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <BookmarkButton article={article} size={14} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {profileTab === 'UPLOADS' && (
+            <div className="w-full mx-auto animate-fade-in text-left">
+              {uploadedArticles && uploadedArticles.length === 0 ? (
+                <div className="w-full flex flex-col items-center justify-center text-center mt-16 py-20">
+                  <UploadCloud size={24} color="#9CA3AF" strokeWidth={1.5} />
+                  <p className="mt-4 text-sm font-mono text-neutral-500 uppercase">NO UPLOADS YET.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {uploadedArticles.map((article) => (
+                    <div 
+                      key={article.id}
+                      className="group bg-white rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] h-full border border-neutral-100"
+                    >
+                      <div 
+                        className="cursor-pointer flex-1 flex flex-col"
+                        onClick={() => onSelectArticle(article)}
+                      >
+                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
+                          <img 
+                            src={article.imageUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400&h=400"} 
+                            alt={article.title}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                          />
+                        </div>
+                        <div className="p-5 flex-1 flex flex-col space-y-3">
+                          <div className="flex items-center justify-between text-[9px] font-mono text-[#8a8174] uppercase tracking-wider font-semibold">
+                            <span>{article.category}</span>
+                            <span>{article.readTime}</span>
+                          </div>
+                          <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] leading-tight line-clamp-3">
+                            {article.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="px-5 pb-5">
+                        <div className="mt-auto pt-3 border-t border-[#ece8df]/60 flex items-center justify-between w-full">
+                          <p className="text-[10px] font-sans tracking-widest uppercase text-neutral-400">
+                            13TH MAY
+                          </p>
+                          <div className="flex gap-3 items-center">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingUpload(article);
+                                setEditTitle(article.title);
+                                setEditDesc(article.excerpt);
+                              }}
+                              className="text-[#9CA3AF] hover:text-[#111827] hover:scale-110 transition-all duration-200 focus:outline-none"
+                            >
+                              <Pencil size={15} strokeWidth={1.5} />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setItemToDelete(article.id);
+                              }}
+                              className="text-[#9CA3AF] hover:text-[#EF4444] hover:bg-red-500/10 p-1 -m-1 rounded transition-all duration-200 focus:outline-none"
+                            >
+                              <Trash2 size={15} strokeWidth={1.5} />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -815,6 +912,116 @@ export default function ProfileView({
           </div>
         </div>
       )}
+
+      {/* Edit Upload Modal */}
+      <AnimatePresence>
+        {editingUpload && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            onClick={() => setEditingUpload(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[480px] bg-white rounded-[16px] p-10 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200"
+            >
+              <h2 className="text-xl font-sans font-bold text-neutral-900 mb-6">Edit Upload Details</h2>
+              
+              <div className="space-y-4 text-left">
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Document Title</label>
+                  <input 
+                    type="text" 
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-500 uppercase tracking-widest mb-2">Short Description</label>
+                  <textarea 
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                    rows={4}
+                    className="w-full bg-transparent border border-neutral-300 rounded-lg p-3 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-between">
+                <button 
+                  onClick={() => setEditingUpload(null)}
+                  className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSaveEdit}
+                  className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {itemToDelete && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+            onClick={() => setItemToDelete(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[400px] bg-white rounded-[16px] p-8 shadow-[0_24px_48px_rgba(0,0,0,0.08)] border border-neutral-200 text-center flex flex-col items-center"
+            >
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle size={24} className="text-red-500" strokeWidth={1.5} />
+              </div>
+              <h2 className="text-lg font-sans font-bold text-neutral-900">Delete this upload?</h2>
+              <p className="text-sm text-neutral-500 mt-2 mb-8">
+                This action cannot be undone. The document and all its generated insights will be permanently removed from your profile.
+              </p>
+              
+              <div className="flex gap-3 w-full justify-center">
+                <button 
+                  onClick={() => setItemToDelete(null)}
+                  className="flex-1 py-2.5 px-4 rounded-full bg-transparent border border-neutral-200 text-neutral-700 font-medium text-sm hover:bg-neutral-50 transition-colors focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    removeUpload(itemToDelete);
+                    setItemToDelete(null);
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-full bg-red-500 border border-transparent text-white font-medium text-sm hover:bg-red-600 transition-colors focus:outline-none"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
