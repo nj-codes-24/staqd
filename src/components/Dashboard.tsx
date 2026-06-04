@@ -340,7 +340,13 @@ export default function Dashboard({
                 </div>
 
                 {/* MAIN CONTENT SPACE - POPULATE BY SELECTED CATEGORY'S SUB-TOPICS OR SEARCH */}
-                <div className="flex-1 divide-y-2 divide-[#ece8df]/70 min-h-[400px] relative">
+                <div 
+                  className={`flex-1 divide-y-2 divide-[#ece8df]/70 relative flex flex-col ${
+                    searchQuery.trim().length > 0 && searchResults && searchResults.length === 0 
+                      ? 'h-[calc(100vh-160px)] overflow-hidden' 
+                      : 'min-h-[calc(100vh-160px)]'
+                  }`}
+                >
                   
                   {/* The Solid Overlay for Search Focus Mode */}
                   <AnimatePresence>
@@ -364,34 +370,67 @@ export default function Dashboard({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.3 }}
-                        className="absolute inset-0 z-50 overflow-y-auto"
+                        className="relative z-50 w-full flex-1 flex flex-col"
                       >
                         {!searchQuery.trim() ? (
                           <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3 }}
-                            className="mt-[40px] px-6 md:px-10 w-full"
+                            className="mt-[40px] px-6 md:px-10 w-full grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-12"
                           >
-                            <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
-                              TRENDING TOPICS
-                            </h3>
-                            <div className="flex flex-col space-y-6">
-                              {[
-                                "Autonomous Decision Systems",
-                                "PPO Agents in Synthetics",
-                                "Causal Deduction",
-                                "Generative Architecture"
-                              ].map((suggestion, i) => (
-                                <button 
-                                  key={i}
-                                  onClick={() => setSearchQuery(suggestion)}
-                                  className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black transition-colors"
-                                >
-                                  <span className="text-neutral-400 mr-4 font-sans text-sm">↳</span>
-                                  {suggestion}
-                                </button>
-                              ))}
+                            {/* Left Column: Trending */}
+                            <div>
+                              <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
+                                TRENDING TOPICS
+                              </h3>
+                              <div className="flex flex-col space-y-6">
+                                {[
+                                  "Autonomous Decision Systems",
+                                  "PPO Agents in Synthetics",
+                                  "Causal Deduction",
+                                  "Generative Architecture"
+                                ].map((suggestion, i) => (
+                                  <button 
+                                    key={i}
+                                    onClick={() => setSearchQuery(suggestion)}
+                                    className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black transition-colors"
+                                  >
+                                    <span className="text-neutral-400 mr-4 font-sans text-sm">↳</span>
+                                    {suggestion}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {/* Right Column: Discover */}
+                            <div className="hidden md:block pr-8 lg:pr-20">
+                              <h3 className="text-[#9CA3AF] text-[10px] font-sans font-bold tracking-[0.3em] uppercase mb-8 text-left">
+                                DISCOVER
+                              </h3>
+                              <div className="grid grid-cols-2 gap-6">
+                                {articles.slice(0, 2).map((article, idx) => (
+                                  <div 
+                                    key={article.id}
+                                    onClick={() => onSelectArticle(article)}
+                                    className="group bg-[#fcfcfb] flex flex-col cursor-pointer border border-neutral-200 transition-colors hover:border-neutral-300 h-full p-5 relative"
+                                  >
+                                    <div className="w-[24px] h-[3px] bg-black mb-4" />
+                                    
+                                    <div className="font-serif font-black text-4xl text-neutral-200 leading-none mb-3 tracking-tighter">
+                                      {String(idx + 1).padStart(2, '0')}
+                                    </div>
+                                    
+                                    <h4 className="text-[13px] font-bold text-neutral-900 line-clamp-3 leading-snug mb-3 pr-2">
+                                      {article.title}
+                                    </h4>
+                                    
+                                    <p className="text-[10px] text-[#6B7280] font-sans tracking-widest uppercase mt-auto">
+                                      {article.readTime}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </motion.div>
                         ) : searchResults && searchResults.length > 0 ? (
@@ -432,38 +471,41 @@ export default function Dashboard({
                               ))}
                             </div>
                           </div>
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 h-full min-h-[400px]">
-                            <div 
-                                className={`max-w-xl w-full p-12 rounded-2xl border-[1.5px] border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer ${
-                                  isDragActive 
-                                    ? 'border-[#9CA3AF] bg-[#f0efec] scale-[1.02]' 
-                                    : 'border-[#D1D5DB] bg-[#f8f7f5] hover:border-[#9CA3AF] hover:bg-[#f3f2ee]'
-                                }`}
-                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
-                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
-                                onClick={handleFileUpload}
-                              >
-                                <div className="mb-5 text-neutral-400">
-                                  <UploadCloud size={36} strokeWidth={1} />
-                                </div>
-                                <h3 className="font-serif font-bold text-xl text-neutral-700 mb-2">
-                                  No such document found.
-                                </h3>
-                                <p className="text-[#6B7280] text-sm tracking-wide">
-                                  If you have the document, drop it here and we will process it.
-                                </p>
+                        ) : searchQuery.trim().length > 0 && searchResults && searchResults.length === 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '80px', paddingBottom: '80px', flexGrow: 1, position: 'relative', overflow: 'hidden', paddingLeft: '24px', paddingRight: '24px' }}>
+                            <label 
+                              className={`flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 w-full max-w-lg mx-auto ${
+                                isDragActive 
+                                  ? 'border-[#4b3e33] bg-[#F9FAFB] scale-[1.02]' 
+                                  : 'border-[#e5e7eb] bg-white hover:border-[#4b3e33] hover:bg-[#F9FAFB]'
+                              }`}
+                              style={{ border: '2px dashed', borderRadius: '24px', padding: '64px 48px' }}
+                              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                              onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                              onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                            >
+                              <input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileUpload} />
+                              
+                              <div className="bg-[#f3f4f6] rounded-full p-5 mb-5 flex items-center justify-center">
+                                <UploadCloud size={32} color="#4b3e33" strokeWidth={1.75} />
                               </div>
+                              
+                              <h3 className="font-sans font-medium text-[20px] text-[#4b3e33] leading-tight mb-2">
+                                Click or drag paper here
+                              </h3>
+                              <p className="text-[#9CA3AF] text-[14px] font-normal tracking-wide">
+                                Supports PDF, DOCX, TXT
+                              </p>
+                            </label>
                           </div>
-                        )}
+                        ) : null}
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  {/* Sub Topics always rendered in background */}
-                  <div className="relative z-0 h-full">
+                  {/* Sub Topics (Hidden during search to prevent phantom scroll) */}
+                  <div className={`relative z-0 h-full ${isSearching ? 'hidden' : 'block'}`}>
                     {currentSubTopics.length > 0 ? (
                       currentSubTopics.map((subTopic, sIdx) => {
                         const featured = subTopic.featuredArticle;
