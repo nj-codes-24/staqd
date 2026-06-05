@@ -15,6 +15,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [isSuccess, setIsSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAuthenticatingSocial, setIsAuthenticatingSocial] = useState<'google' | 'github' | null>(null);
+
+  const handleSocialAuth = (provider: 'google' | 'github') => {
+    setIsAuthenticatingSocial(provider);
+    setTimeout(() => {
+      setIsSuccess(true);
+      setIsAuthenticatingSocial(null);
+    }, 2000);
+  };
 
   const prefix = email.split('@')[0] || '';
   let sanitizedName = prefix
@@ -176,13 +185,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                         <div className="bg-black/40 p-1 rounded-full flex gap-1 border border-white/5 shadow-inner">
                           <button 
                             onClick={() => setMode('login')}
-                            className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'login' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'}`}
+                            disabled={isAuthenticatingSocial !== null}
+                            className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'login' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'} ${isAuthenticatingSocial !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             LOGIN
                           </button>
                           <button 
                             onClick={() => setMode('signup')}
-                            className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'signup' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'}`}
+                            disabled={isAuthenticatingSocial !== null}
+                            className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'signup' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'} ${isAuthenticatingSocial !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             SIGNUP
                           </button>
@@ -190,16 +201,28 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                       </div>
 
                       <div className="absolute top-[280px] left-0 w-full px-8 flex flex-col z-20">
-                        <div className="space-y-10 mt-4">
-                          <div className="flex flex-col items-start w-full gap-3">
-                            <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">{mode === 'login' ? 'USER / MAIL' : 'MAIL'}</label>
-                            <input type="text" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={mode === 'login' ? "ENTER ID OR EMAIL..." : "ENTER EMAIL..."} className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
+                        {!isAuthenticatingSocial ? (
+                          <div className="space-y-10 mt-4">
+                            <div className="flex flex-col items-start w-full gap-3">
+                              <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">{mode === 'login' ? 'USER / MAIL' : 'MAIL'}</label>
+                              <input type="text" disabled={isLoading} value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={mode === 'login' ? "ENTER ID OR EMAIL..." : "ENTER EMAIL..."} className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
+                            </div>
+                            <div className="flex flex-col items-start w-full gap-3">
+                              <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">CODE</label>
+                              <input type="password" disabled={isLoading} value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="ENTER AUTH CODE..." className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
+                            </div>
                           </div>
-                          <div className="flex flex-col items-start w-full gap-3">
-                            <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">CODE</label>
-                            <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="ENTER AUTH CODE..." className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
-                          </div>
-                        </div>
+                        ) : (
+                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col justify-center items-center h-[160px] w-full mt-4 space-y-6">
+                            <div className="w-full max-w-[200px] h-[1px] bg-white/10 relative overflow-hidden">
+                              <motion.div className="absolute top-0 bottom-0 w-1/3 bg-[#FBBF24]" animate={{ x: ['-100%', '300%'] }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }} />
+                            </div>
+                            <div className="flex items-center gap-2 text-[#FBBF24] font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                              <motion.span animate={{ opacity: [1, 0.2, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}>●</motion.span>
+                              <span>AWAITING PROTOCOL...</span>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
 
                       <div className="absolute bottom-20 left-0 w-full flex justify-center z-20 h-4 pointer-events-none">
@@ -214,31 +237,73 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </AnimatePresence>
 
                 <div className="absolute bottom-6 left-0 w-full px-8 z-30">
-                  <div className="flex flex-row items-center gap-3 w-full">
-                    <button 
-                      onClick={isSuccess ? handleFinalEntry : handleSubmit}
-                      disabled={isLoading}
-                      className={`flex-1 h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]'}`}
-                    >
-                      {isLoading ? (
-                        <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
-                      ) : isSuccess ? (
-                        <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
-                      ) : (
-                        mode === 'login' ? 'AUTHENTICATE' : 'SIGN UP'
+                  <div className="flex flex-row items-center justify-center gap-3 w-full">
+                    <AnimatePresence mode="popLayout">
+                      {(!isSuccess && isAuthenticatingSocial !== 'google' && isAuthenticatingSocial !== 'github') && (
+                        <motion.button 
+                          key="main-auth"
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                          onClick={handleSubmit}
+                          disabled={isLoading}
+                          className={`flex-1 h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]'}`}
+                        >
+                          {isLoading ? (
+                            <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            mode === 'login' ? 'AUTHENTICATE' : 'SIGN UP'
+                          )}
+                        </motion.button>
                       )}
-                    </button>
-                    
-                    {!isSuccess && (
-                      <>
-                        <button title="Continue with Google" className="w-11 h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition-all shadow-lg text-white/50 hover:text-white">
+                      
+                      {(!isSuccess && isAuthenticatingSocial !== 'github') && (
+                        <motion.button 
+                          key="google-auth"
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                          onClick={() => handleSocialAuth('google')}
+                          disabled={isAuthenticatingSocial !== null || isLoading}
+                          title="Continue with Google" 
+                          className={`h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 transition-all ${isAuthenticatingSocial === 'google' ? 'w-[42px] bg-white/10 scale-95 shadow-inner opacity-70 text-white' : 'w-11 bg-white/5 hover:bg-white/10 active:scale-95 shadow-lg text-white/50 hover:text-white'}`}
+                        >
                           <Chrome className="w-5 h-5" />
-                        </button>
-                        <button title="Continue with GitHub" className="w-11 h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition-all shadow-lg text-white/50 hover:text-white">
+                        </motion.button>
+                      )}
+
+                      {(!isSuccess && isAuthenticatingSocial !== 'google') && (
+                        <motion.button 
+                          key="github-auth"
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                          onClick={() => handleSocialAuth('github')}
+                          disabled={isAuthenticatingSocial !== null || isLoading}
+                          title="Continue with GitHub" 
+                          className={`h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 transition-all ${isAuthenticatingSocial === 'github' ? 'w-[42px] bg-white/10 scale-95 shadow-inner opacity-70 text-white' : 'w-11 bg-white/5 hover:bg-white/10 active:scale-95 shadow-lg text-white/50 hover:text-white'}`}
+                        >
                           <Github className="w-5 h-5" />
-                        </button>
-                      </>
-                    )}
+                        </motion.button>
+                      )}
+
+                      {isSuccess && (
+                        <motion.button 
+                          key="success-auth"
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                          onClick={handleFinalEntry}
+                          className={`flex-1 w-full h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]`}
+                        >
+                          <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
