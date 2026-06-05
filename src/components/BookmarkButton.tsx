@@ -7,16 +7,23 @@ interface BookmarkButtonProps {
   article: Article;
   className?: string;
   size?: number;
+  onSaveAuthError?: () => void;
 }
 
-export default function BookmarkButton({ article, className = '', size = 20 }: BookmarkButtonProps) {
+export default function BookmarkButton({ article, className = '', size = 20, onSaveAuthError }: BookmarkButtonProps) {
   const { isSaved, toggleSave } = useBookmark();
   const saved = isSaved(article.id);
 
   return (
     <button
       onClick={(e) => {
+        e.preventDefault();
         e.stopPropagation();
+        const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+        if (!isAuth) {
+          if (onSaveAuthError) onSaveAuthError();
+          return;
+        }
         toggleSave(article);
       }}
       className={`relative inline-flex items-center justify-center p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-transparent transition-all duration-300 cursor-pointer group ${className}`}

@@ -33,8 +33,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     e.preventDefault();
     if (isLoading) return;
     
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      setError("ACCESS DENIED - RETRY");
+    if (!name.trim()) {
+      setError("ERROR: NAME REQUIRED");
+      return;
+    }
+    
+    if (!email.trim()) {
+      setError("ERROR: MAIL REQUIRED");
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("ERROR: INVALID MAIL FORMAT");
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError("ERROR: CODE REQUIRED");
       return;
     }
     
@@ -172,15 +188,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                         <div className="space-y-6">
                           <div className="flex items-end gap-4 w-full">
                             <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">NAME :</label>
-                            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
+                            <input type="text" value={name} onChange={(e) => { setName(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
                           </div>
                           <div className="flex items-end gap-4 w-full">
                             <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">MAIL :</label>
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
+                            <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
                           </div>
                           <div className="flex items-end gap-4 w-full">
                             <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">CODE :</label>
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
+                            <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
                           </div>
                         </div>
                       </div>

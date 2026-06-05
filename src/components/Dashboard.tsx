@@ -713,7 +713,7 @@ export default function Dashboard({
                                       <div className="pt-3 border-t border-[#ece8df] dark:border-[rgba(255,255,255,0.08)]/60 flex items-center justify-between text-[9px] font-mono text-neutral-400 mt-auto">
                                         <span>{article.readTime}</span>
                                         <div className="-mr-1">
-                                          <BookmarkButton article={article} size={14} />
+                                          <BookmarkButton article={article} size={14} onSaveAuthError={() => setIsAuthModalOpen(true)} />
                                         </div>
                                       </div>
                                     </div>

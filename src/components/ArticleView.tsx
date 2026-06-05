@@ -607,7 +607,7 @@ export default function ArticleView({
                 {hasSavedUpload ? 'Saved' : 'Save Upload'}
               </button>
             ) : (
-              <BookmarkButton article={article} size={16} className="border border-neutral-300 bg-white shadow-3xs hover:border-neutral-900 p-2.5 dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg" />
+              <BookmarkButton article={article} size={16} onSaveAuthError={() => setIsAuthModalOpen(true)} className="border border-neutral-300 bg-white shadow-3xs hover:border-neutral-900 p-2.5 dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg" />
             )}
 
             {/* Auth Login Trigger */}
