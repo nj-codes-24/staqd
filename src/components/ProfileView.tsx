@@ -10,6 +10,7 @@ import { useBookmark } from '../contexts/BookmarkContext';
 import { useTheme } from '../contexts/ThemeContext';
 import BookmarkButton from './BookmarkButton';
 import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
+import EditProfileModal from './EditProfileModal';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -20,6 +21,8 @@ interface ProfileViewProps {
   onLogout: () => void;
   onUpdateUser: (updatedUser: UserProfile) => void;
   onSelectArticle: (article: Article) => void;
+  isEditingProfile?: boolean;
+  setIsEditingProfile?: (val: boolean) => void;
 }
 
 const postDetailsMap: Record<number, {
@@ -121,7 +124,9 @@ export default function ProfileView({
   onAddCustomArticle,
   onLogout,
   onUpdateUser,
-  onSelectArticle
+  onSelectArticle,
+  isEditingProfile,
+  setIsEditingProfile
 }: ProfileViewProps) {
   const postsData = [
     { id: 1, title: "Neural Style Transfer Pipelines", tag: "Computer Vision", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400&h=400" },
@@ -172,6 +177,21 @@ export default function ProfileView({
   const [editingUpload, setEditingUpload] = useState<Article | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+
+  const [editName, setEditName] = useState(user?.name || "Member");
+  const [editBio, setEditBio] = useState(user?.bio || "No bio added yet.");
+  const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+
+  // Pre-fill parsed name from auth setup if we just entered edit mode
+  useEffect(() => {
+    if (isEditingProfile) {
+      const authName = localStorage.getItem('authName');
+      if (authName && authName !== 'MEMBER') {
+        setEditName(authName);
+      }
+      setIsEditingModalOpen(true);
+    }
+  }, [isEditingProfile]);
 
   const handleFileUpload = () => {
     setIsUploadModalOpen(false);
@@ -396,6 +416,12 @@ export default function ProfileView({
             </div>
 
             <button 
+              onClick={() => setIsEditingModalOpen(true)}
+              className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-[#111] dark:hover:text-white transition-colors uppercase font-bold cursor-pointer bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 px-4 py-2 rounded-md"
+            >
+              EDIT PROFILE
+            </button>
+            <button 
               onClick={onLogout}
               className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-red-600 transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
             >
@@ -407,7 +433,7 @@ export default function ProfileView({
         {/* Top Section (The Editorial Header) */}
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-12 md:gap-20 items-start text-left">
           {/* Left Column (Typography) */}
-          <div className="flex flex-col justify-start" style={{ alignSelf: 'center' }}>
+          <div className="flex flex-col justify-start w-full" style={{ alignSelf: 'center' }}>
             <h1 
               className="font-serif font-black text-[#111] dark:text-[#F3F4F6] tracking-tighter uppercase"
               style={{ 
@@ -416,11 +442,16 @@ export default function ProfileView({
                 lineHeight: '0.9'
               }}
             >
-              ALEX<br />MORGAN
+              {(user?.name || "Member").split(' ').map((part, i) => (
+                <React.Fragment key={i}>
+                  {part}
+                  {i < (user?.name || "Member").split(' ').length - 1 && <br />}
+                </React.Fragment>
+              ))}
             </h1>
-            <div className="mt-8">
-              <p className="text-sm text-[#444] dark:text-gray-400 font-sans leading-relaxed max-w-[480px]">
-                Lead researcher and platform curator. Exploring the intersection of digital architecture and minimal interface design.
+            <div className="mt-8 w-full max-w-[480px]">
+              <p className={`text-sm font-sans leading-relaxed ${user?.bio ? 'text-[#444] dark:text-gray-400' : 'text-black/40 dark:text-white/40 italic'}`}>
+                {user?.bio || "No bio added yet."}
               </p>
             </div>
           </div>
@@ -428,14 +459,13 @@ export default function ProfileView({
           {/* Right Column (Photo) */}
           <div className="w-full flex justify-end">
             <div 
-              className="w-full bg-[#f0ede6] overflow-hidden border border-neutral-200 dark:border-white/10 rounded-none shadow-none"
+              className="w-full bg-[#f0ede6] overflow-hidden border border-neutral-200 dark:border-white/10 rounded-none shadow-none relative"
               style={{ maxWidth: '360px', width: '100%', aspectRatio: '1/1' }}
             >
               <img className="dark:brightness-90 transition-all duration-300 grayscale contrast-[1.15]" 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=600"
-                alt="Alex Morgan Portrait"
+                src={user?.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=600"}
+                alt="Profile Portrait"
                 referrerPolicy="no-referrer"
-                
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -1104,7 +1134,16 @@ export default function ProfileView({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <EditProfileModal
+        isOpen={isEditingModalOpen}
+        onClose={() => setIsEditingModalOpen(false)}
+        user={user}
+        onSave={(updatedUser) => {
+          onUpdateUser(updatedUser);
+          setIsEditingModalOpen(false);
+        }}
+      />
     </div>
   );
 }
-

@@ -12,6 +12,8 @@ export type OnboardingStep =
   | 'success';
 
 export interface UserProfile {
+  name?: string;
+  bio?: string;
   email: string;
   handle: string;
   avatarUrl: string;

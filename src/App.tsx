@@ -22,6 +22,7 @@ export default function App() {
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>(MOCK_ARTICLES);
   const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   
 
   React.useEffect(() => {
@@ -103,6 +104,7 @@ export default function App() {
     localStorage.removeItem('authName');
     setActiveTab('hud');
     setSelectedArticle(null);
+    setUserProfile(INITIAL_USER);
   };
 
   const handleUpdateUserProfile = (updatedUser: UserProfile) => {
@@ -180,12 +182,15 @@ export default function App() {
                 onLogout={handleLogout}
                 onUpdateUser={handleUpdateUserProfile}
                 onSelectArticle={(article) => setSelectedArticle(article)}
+                isEditingProfile={isEditingProfile}
+                setIsEditingProfile={setIsEditingProfile}
               />
             ) : (
               <Dashboard 
                 user={userProfile}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
+                onUpdateUser={handleUpdateUserProfile}
                 onSelectArticle={(article) => {
                   setSelectedArticle(article);
                 }}
@@ -199,6 +204,7 @@ export default function App() {
                 onStartProcessing={(newArticle) => {
                   setProcessingArticle(newArticle);
                 }}
+                setIsEditingProfile={setIsEditingProfile}
               />
             )}
         </motion.div>

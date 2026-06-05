@@ -48,6 +48,8 @@ interface DashboardProps {
   onToggleBookmark: (articleId: string) => void;
   onViewSubTopicAll?: (subTopic: string) => void;
   onStartProcessing: (newArticle: Article) => void;
+  setIsEditingProfile: (val: boolean) => void;
+  onUpdateUser: (user: UserProfile) => void;
 }
 
 export default function Dashboard({ 
@@ -59,7 +61,9 @@ export default function Dashboard({
   articles,
   onToggleBookmark,
   onViewSubTopicAll,
-  onStartProcessing
+  onStartProcessing,
+  setIsEditingProfile,
+  onUpdateUser
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
@@ -225,7 +229,10 @@ export default function Dashboard({
                   Subscribe
                 </button>
                 <div 
-                  onClick={() => setActiveTab('profile')}
+                  onClick={() => {
+                    setActiveTab('profile');
+                    setIsEditingProfile(false);
+                  }}
                   className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative hover:scale-105 transition-transform"
                 >
                    <User className="w-5 h-5 text-neutral-500" />
@@ -787,7 +794,22 @@ export default function Dashboard({
         <AuthModal 
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
-          onAuthSuccess={() => setIsAuthenticated(true)}
+          onAuthSuccess={(isSignup) => {
+            setIsAuthenticated(true);
+            if (isSignup) {
+              const authName = localStorage.getItem('authName') || 'MEMBER';
+              onUpdateUser({
+                ...user,
+                name: authName,
+                bio: '',
+                avatarUrl: ''
+              });
+              setActiveTab('profile');
+              setIsEditingProfile(false); // Make sure modal does NOT auto-open
+            } else {
+              setActiveTab('hud');
+            }
+          }}
         />
 
       </div>

@@ -43,6 +43,8 @@ export const ALL_TOPICS = [
 ];
 
 export const INITIAL_USER: UserProfile = {
+  name: 'Alex Morgan',
+  bio: 'Lead researcher and platform curator. Exploring the intersection of digital architecture and minimal interface design.',
   email: 'curator@zid.hub',
   handle: 'curator_alpha',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
