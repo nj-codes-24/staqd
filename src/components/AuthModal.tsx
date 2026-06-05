@@ -17,13 +17,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [password, setPassword] = useState('');
   const [isAuthenticatingSocial, setIsAuthenticatingSocial] = useState<'google' | 'github' | null>(null);
 
-  const handleSocialAuth = (provider: 'google' | 'github') => {
-    setIsAuthenticatingSocial(provider);
-    setTimeout(() => {
-      setIsSuccess(true);
+  useEffect(() => {
+    if (!isOpen) {
+      setError(null);
+      setEmail('');
+      setPassword('');
+      setIsSuccess(false);
+      setMode('login');
       setIsAuthenticatingSocial(null);
-    }, 2000);
-  };
+    }
+  }, [isOpen]);
 
   const prefix = email.split('@')[0] || '';
   let sanitizedName = prefix
@@ -36,15 +39,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const finalDerivedName = sanitizedName || 'MEMBER';
   const nameParts = finalDerivedName.split(' ');
 
-  const handleFinalEntry = () => {
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('authName', finalDerivedName);
-    onAuthSuccess?.();
-    setIsSuccess(false);
-    setMode('login');
-    setEmail('');
-    setPassword('');
-    onClose();
+  const handleSocialAuth = (provider: 'google' | 'github') => {
+    setIsAuthenticatingSocial(provider);
+    setTimeout(() => {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('authName', 'MEMBER');
+      onAuthSuccess?.();
+      setIsSuccess(true);
+      setIsAuthenticatingSocial(null);
+    }, 2000);
   };
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
@@ -73,6 +76,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     setError(null);
     
     setTimeout(() => {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('authName', finalDerivedName);
+      onAuthSuccess?.();
       setIsLoading(false);
       setIsSuccess(true);
     }, 1500);
@@ -297,7 +303,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                          onClick={handleFinalEntry}
+                          onClick={onClose}
                           className={`flex-1 w-full h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]`}
                         >
                           <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
