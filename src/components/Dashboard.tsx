@@ -19,10 +19,13 @@ import {
   Plus,
   UploadCloud,
   SlidersHorizontal,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SubscriptionModal from './SubscriptionModal';
+import { useTheme } from '../contexts/ThemeContext';
 import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
@@ -63,6 +66,8 @@ export default function Dashboard({
   const [isSearching, setIsSearching] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  const { isDarkMode, toggleDarkMode } = useTheme();
   
   const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
@@ -237,12 +242,22 @@ export default function Dashboard({
           {/* Far Right widgets */}
           <div className="flex items-center space-x-4 md:space-x-6">
             {!isAuthenticated ? (
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer"
-              >
-                Sign up
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={toggleDarkMode}
+                  className="w-9 h-9 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-all duration-300 hover:rotate-12 cursor-pointer"
+                  aria-label="Toggle theme"
+                  title="Toggle theme"
+                >
+                  {isDarkMode ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+                </button>
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer"
+                >
+                  Sign up
+                </button>
+              </div>
             ) : (
               <>
                 <button 

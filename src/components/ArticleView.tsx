@@ -51,12 +51,15 @@ import {
   HelpCircle,
   VolumeX,
   X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
 import AuthModal from './AuthModal';
 import SubscriptionModal from './SubscriptionModal';
 import { useBookmark } from '../contexts/BookmarkContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ArticleViewProps {
   article: Article;
@@ -112,6 +115,8 @@ export default function ArticleView({
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
+  
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     const isAuth = localStorage.getItem('isAuthenticated') === 'true';
@@ -608,12 +613,22 @@ export default function ArticleView({
             {/* Auth Login Trigger */}
             <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0 gap-3">
               {!isAuthenticated ? (
-                <button 
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer whitespace-nowrap"
-                >
-                  Sign up
-                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={toggleDarkMode}
+                    className="w-9 h-9 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-all duration-300 hover:rotate-12 cursor-pointer"
+                    aria-label="Toggle theme"
+                    title="Toggle theme"
+                  >
+                    {isDarkMode ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+                  </button>
+                  <button 
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer whitespace-nowrap"
+                  >
+                    Sign up
+                  </button>
+                </div>
               ) : (
                 <>
                   <button 
