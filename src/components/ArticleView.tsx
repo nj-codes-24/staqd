@@ -113,6 +113,21 @@ export default function ArticleView({
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
 
+  useEffect(() => {
+    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+    if (isAuth) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleAuthGuardedAction = (actionFn: () => void) => {
+    if (isAuthenticated) {
+      actionFn();
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
+
   const handleConfirmSave = () => {
     saveUpload({
       ...article,
@@ -576,7 +591,7 @@ export default function ArticleView({
             {/* Save icon */}
             {isUploadedDocument ? (
               <button 
-                onClick={() => setShowSaveModal(true)}
+                onClick={() => handleAuthGuardedAction(() => setShowSaveModal(true))}
                 disabled={hasSavedUpload}
                 className={`px-6 py-2 text-[13px] font-medium rounded-full transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${
                   hasSavedUpload 

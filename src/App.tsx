@@ -115,7 +115,9 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    setIsOnboarded(false);
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('authName');
+    setActiveTab('hud');
     setSelectedArticle(null);
   };
 

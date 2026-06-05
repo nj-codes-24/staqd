@@ -18,6 +18,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [password, setPassword] = useState('');
 
   const handleFinalEntry = () => {
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('authName', name || 'GUEST');
     onAuthSuccess?.();
     setIsSuccess(false);
     setMode('login');
@@ -30,6 +32,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     if (isLoading) return;
+    
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("ACCESS DENIED - RETRY");
+      return;
+    }
     
     setIsLoading(true);
     setError(null);

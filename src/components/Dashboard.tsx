@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Compass, 
   Search, 
@@ -75,6 +75,21 @@ export default function Dashboard({
   // Auth Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+    if (isAuth) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleAuthGuardedAction = (actionFn: () => void) => {
+    if (isAuthenticated) {
+      actionFn();
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
 
   const handleFileUpload = () => {
     setIsUploadModalOpen(false);
@@ -706,7 +721,7 @@ export default function Dashboard({
               </div>
             {/* FAB Trigger for Custom Paper Upload */}
             <button 
-              onClick={() => setIsUploadModalOpen(true)}
+              onClick={() => handleAuthGuardedAction(() => setIsUploadModalOpen(true))}
               className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-white dark:bg-white/5 backdrop-blur-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/60 dark:border-white/20 flex items-center justify-center text-slate-800 dark:text-white transition-all duration-300 ease-out hover:bg-white dark:hover:bg-gray-100 dark:hover:text-black hover:scale-105 dark:hover:scale-105 active:scale-95"
             >
               <Plus size={32} strokeWidth={2} className="dark:text-white dark:group-hover:text-black" />
