@@ -54,6 +54,7 @@ import {
 } from 'lucide-react';
 import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
+import AuthModal from './AuthModal';
 import { useBookmark } from '../contexts/BookmarkContext';
 
 interface ArticleViewProps {
@@ -103,6 +104,7 @@ export default function ArticleView({
   const isUploadedDocument = article.id.startsWith('custom-paper');
   const hasSavedUpload = uploadedArticles.some(a => a.id === article.id);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
 
@@ -583,19 +585,14 @@ export default function ArticleView({
               <BookmarkButton article={article} size={16} className="border border-neutral-300 bg-white shadow-3xs hover:border-neutral-900 p-2.5 dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg" />
             )}
 
-            {/* User Profile Avatar */}
+            {/* Auth Login Trigger */}
             <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0">
-              <img className="dark:brightness-90 transition-all duration-300 h-9 w-9 rounded-full object-cover border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] shrink-0 hover:scale-105 transition duration-150 cursor-pointer" 
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&auto=format&fit=crop" 
-                alt={user.handle} 
-                referrerPolicy="no-referrer"
-                 
-                title={`${user.handle} Profile Account`}
-                onClick={() => {
-                  onBack();
-                  setActiveTab('profile');
-                }}
-              />
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer whitespace-nowrap"
+              >
+                Sign up
+              </button>
             </div>
           </div>
         </header>
@@ -1014,6 +1011,11 @@ export default function ArticleView({
 
       {/* Renders dynamic slideover modals for adding / detail previewing */}
       
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+
       {/* 1. Modal: Expanded Cue Card Detail Display */}
       {selectedCueCard && (
         <div className="fixed inset-0 bg-neutral-900 dark:bg-[#F3F4F6]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

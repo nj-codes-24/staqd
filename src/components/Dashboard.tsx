@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SubscriptionModal from './SubscriptionModal';
+import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
 import BookmarkButton from './BookmarkButton';
@@ -69,6 +70,9 @@ export default function Dashboard({
 
   // Custom Paper Upload Feature States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handleFileUpload = () => {
     setIsUploadModalOpen(false);
@@ -215,27 +219,12 @@ export default function Dashboard({
 
           {/* Far Right widgets */}
           <div className="flex items-center space-x-4 md:space-x-6">
-            {/* Subscribe Button */}
+            {/* Auth Login Trigger */}
             <button 
-              onClick={handleOpenSubscriptionModal}
-              className="px-5 py-1.5 rounded-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] hover:border-neutral-400 bg-white dark:bg-[#1C1C1E] shadow-sm hover:shadow-md text-[10px] sm:text-xs font-mono uppercase tracking-widest text-neutral-700 dark:text-[#F3F4F6] font-bold hover:scale-105 active:scale-95 transition-all duration-200"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer"
             >
-              Subscribe
-            </button>
-            
-            {/* Profile Avatar Trigger */}
-            <button 
-              id="head-avatar-circle"
-              onClick={() => setActiveTab('profile')}
-              className="h-8.5 w-8.5 rounded-full border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] overflow-hidden shadow-xs hover:scale-105 transition"
-              title="Open Creator Profile"
-            >
-              <img className="dark:brightness-90 transition-all duration-300 h-full w-full object-cover" 
-                src={user.avatarUrl} 
-                alt={user.handle} 
-                referrerPolicy="no-referrer"
-                 
-              />
+              Sign up
             </button>
           </div>
         </header>
@@ -839,6 +828,10 @@ export default function Dashboard({
           setIsBookOpen={setIsBookOpen}
           isCheckRevealed={isCheckRevealed}
           setIsCheckRevealed={setIsCheckRevealed}
+        />
+        <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)} 
         />
 
       </div>
