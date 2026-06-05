@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SubscriptionModal from './SubscriptionModal';
+import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
@@ -73,6 +74,7 @@ export default function Dashboard({
 
   // Auth Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleFileUpload = () => {
     setIsUploadModalOpen(false);
@@ -178,8 +180,8 @@ export default function Dashboard({
         className="max-w-[1240px] mx-auto w-full bg-[#fbfaf8] dark:bg-[#121214] shadow-2xl flex flex-col relative border border-[#c2bba8] dark:border-[rgba(255,255,255,0.08)] min-h-screen transition-all duration-300"
       >
         
-        {/* TOP NAVBAR: Standard symmetric branded layout with sidebar removed */}
-        <header className="h-16 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8] dark:bg-[#121214]/95 backdrop-blur-md z-20">
+        {/* Main Dashboard Navigation Header */}
+        <header className="h-16 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8] dark:bg-[#121214]/95 backdrop-blur-md z-50 relative transition-colors">
           
           {/* Logo element replacement - FLANELLE converted to ZID */}
           <div 
@@ -219,13 +221,29 @@ export default function Dashboard({
 
           {/* Far Right widgets */}
           <div className="flex items-center space-x-4 md:space-x-6">
-            {/* Auth Login Trigger */}
-            <button 
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer"
-            >
-              Sign up
-            </button>
+            {!isAuthenticated ? (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer"
+              >
+                Sign up
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => setIsSubscriptionModalOpen(true)}
+                  className="px-6 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all hover:scale-105 text-[11px] font-mono uppercase tracking-[0.2em] font-bold cursor-pointer"
+                >
+                  Subscribe
+                </button>
+                <div 
+                  onClick={() => setActiveTab('profile')}
+                  className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative hover:scale-105 transition-transform"
+                >
+                   <User className="w-5 h-5 text-neutral-500" />
+                </div>
+              </>
+            )}
           </div>
         </header>
 
@@ -832,6 +850,7 @@ export default function Dashboard({
         <AuthModal 
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
+          onAuthSuccess={() => setIsAuthenticated(true)}
         />
 
       </div>

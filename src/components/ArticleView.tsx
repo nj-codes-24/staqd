@@ -55,6 +55,7 @@ import {
 import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
 import AuthModal from './AuthModal';
+import SubscriptionModal from './SubscriptionModal';
 import { useBookmark } from '../contexts/BookmarkContext';
 
 interface ArticleViewProps {
@@ -105,6 +106,10 @@ export default function ArticleView({
   const hasSavedUpload = uploadedArticles.some(a => a.id === article.id);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
+  const [isCheckRevealed, setIsCheckRevealed] = useState(false);
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
 
@@ -586,13 +591,33 @@ export default function ArticleView({
             )}
 
             {/* Auth Login Trigger */}
-            <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0">
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer whitespace-nowrap"
-              >
-                Sign up
-              </button>
+            <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0 gap-3">
+              {!isAuthenticated ? (
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="px-6 py-2 rounded-full border border-neutral-300 dark:border-white/20 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-neutral-800 dark:text-white cursor-pointer whitespace-nowrap"
+                >
+                  Sign up
+                </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setIsSubscriptionModalOpen(true)}
+                    className="px-6 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all hover:scale-105 text-[11px] font-mono uppercase tracking-[0.2em] font-bold cursor-pointer whitespace-nowrap"
+                  >
+                    Subscribe
+                  </button>
+                  <div 
+                    onClick={() => {
+                      setActiveTab('profile');
+                      onBack();
+                    }}
+                    className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative shrink-0 hover:scale-105 transition-transform"
+                  >
+                     <UserIcon className="w-4 h-4 text-neutral-500" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -1014,6 +1039,16 @@ export default function ArticleView({
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
+        onAuthSuccess={() => setIsAuthenticated(true)}
+      />
+
+      <SubscriptionModal 
+        isOpen={isSubscriptionModalOpen} 
+        onClose={() => setIsSubscriptionModalOpen(false)} 
+        isBookOpen={isBookOpen}
+        setIsBookOpen={setIsBookOpen}
+        isCheckRevealed={isCheckRevealed}
+        setIsCheckRevealed={setIsCheckRevealed}
       />
 
       {/* 1. Modal: Expanded Cue Card Detail Display */}
