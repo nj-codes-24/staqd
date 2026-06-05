@@ -450,25 +450,36 @@ export default function ArticleView({
 
   const renderChatMessageContent = (text: string) => {
     const lines = text.split('\n');
+    
+    const parseInlineMarkdown = (content: string) => {
+      const parts = content.split(/\*\*(.*?)\*\*/g);
+      return parts.map((part, i) => {
+        if (i % 2 === 1) {
+          return <span key={i} className="font-semibold text-black dark:text-white">{part}</span>;
+        }
+        return <span key={i}>{part}</span>;
+      });
+    };
+
     return lines.map((line, lIdx) => {
       if (line.trim().startsWith('### ')) {
         return (
-          <h4 key={lIdx} className="text-xs font-bold text-[#1c1c1c] dark:text-[#F3F4F6] mt-2 mb-1 border-b border-[#ece6d8] pb-1 font-sans uppercase tracking-wider">
-            {line.replace('###', '').trim()}
+          <h4 key={lIdx} className="text-sm font-bold text-[#1c1c1c] dark:text-[#F3F4F6] mt-3 mb-2 border-b border-[#ece6d8] dark:border-white/10 pb-1 font-sans uppercase tracking-wider">
+            {parseInlineMarkdown(line.replace('###', '').trim())}
           </h4>
         );
       }
       if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
         const cleanContent = line.replace(/^[\*\-]\s+/, '');
         return (
-          <li key={lIdx} className="text-neutral-750 ml-3 list-disc mt-1 text-[11px] leading-relaxed">
-            {cleanContent}
+          <li key={lIdx} className="text-neutral-700 dark:text-gray-300 ml-4 list-disc text-sm leading-relaxed">
+            {parseInlineMarkdown(cleanContent)}
           </li>
         );
       }
       return (
-        <p key={lIdx} className="text-neutral-850 text-[11px] leading-relaxed mb-1 font-sans whitespace-pre-wrap">
-          {line}
+        <p key={lIdx} className="text-neutral-800 dark:text-gray-300 text-sm leading-relaxed font-sans whitespace-pre-wrap">
+          {parseInlineMarkdown(line)}
         </p>
       );
     });
@@ -952,7 +963,7 @@ export default function ArticleView({
                     }`}
                   >
                     {msg.sender === 'assistant' ? (
-                      <div className="space-y-1.5">{renderChatMessageContent(msg.text)}</div>
+                      <div className="space-y-2">{renderChatMessageContent(msg.text)}</div>
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.text}</p>
                     )}
