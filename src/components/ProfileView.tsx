@@ -151,7 +151,7 @@ export default function ProfileView({
   ];
 
   const { savedArticles, uploadedArticles, removeUpload, saveUpload } = useBookmark();
-  const [profileTab, setProfileTab] = useState<'STATS' | 'POSTS' | 'SAVES' | 'UPLOADS'>('STATS');
+  const [profileTab, setProfileTab] = useState<'STATS' | 'SAVES' | 'UPLOADS'>('STATS');
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [researchPapersOpen, setResearchPapersOpen] = useState(true);
   const [hacksOpen, setHacksOpen] = useState(false);
@@ -281,7 +281,7 @@ export default function ProfileView({
     };
   }, [selectedPost]);
 
-  const tabs: ('STATS' | 'POSTS' | 'SAVES' | 'UPLOADS')[] = ['STATS', 'POSTS', 'SAVES', 'UPLOADS'];
+  const tabs: ('STATS' | 'SAVES' | 'UPLOADS')[] = ['STATS', 'SAVES', 'UPLOADS'];
 
   return (
     <div id="personal-profile-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] pt-12 pb-16 px-4 md:px-8 font-sans antialiased text-[#111] dark:text-[#F3F4F6]">
@@ -542,35 +542,7 @@ export default function ProfileView({
             </div>
           )}
 
-          {profileTab === 'POSTS' && (
-            <div 
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', padding: '24px 0' }}
-            >
-              {postsData.map((item) => (
-                <div 
-                  key={item.id}
-                  onClick={() => setSelectedPost(item)}
-                  className="relative group overflow-hidden bg-[#F0F0F0] cursor-pointer"
-                  style={{ aspectRatio: '1/1' }}
-                >
-                  <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover grayscale contrast-[1.1] group-hover:grayscale-0 transition-all duration-300" 
-                    src={item.img} 
-                    alt={item.title}
-                    
-                    style={{ aspectRatio: '1/1', border: 'none' }}
-                  />
-                  <div className="absolute inset-0 bg-black/85 flex flex-col justify-between p-4 md:p-6 text-left opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <span className="text-[10px] font-mono tracking-widest text-[#bbb] uppercase block font-semibold">
-                      // {item.tag}
-                    </span>
-                    <h4 className="text-[12px] md:text-[13px] font-bold text-white dark:text-[#0A0A0B] uppercase tracking-tight leading-snug font-mono">
-                      {item.title}
-                    </h4>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
 
           {profileTab === 'SAVES' && (
             <div className="w-full mx-auto animate-fade-in text-left">

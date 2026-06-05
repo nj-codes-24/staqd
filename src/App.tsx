@@ -5,7 +5,6 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import StudyView from './components/StudyView';
 import ArticleView from './components/ArticleView';
@@ -17,7 +16,6 @@ import { BookmarkProvider } from './contexts/BookmarkContext';
 import GlobalToast from './components/GlobalToast';
 
 export default function App() {
-  const [isOnboarded, setIsOnboarded] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER);
   const [activeTab, setActiveTab] = useState<'hud' | 'saved' | 'profile'>('hud');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -100,20 +98,6 @@ export default function App() {
     setArticles(prev => [newArticle, ...prev]);
   };
 
-  const handleOnboardingComplete = (profile: UserProfile) => {
-    setUserProfile(profile);
-    setIsOnboarded(true);
-    setActiveTab('hud');
-    setSelectedArticle(null);
-  };
-
-  const handleSkipOnboarding = () => {
-    setUserProfile(INITIAL_USER);
-    setIsOnboarded(true);
-    setActiveTab('hud');
-    setSelectedArticle(null);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('authName');
@@ -131,34 +115,16 @@ export default function App() {
         <GlobalToast />
         <AnimatePresence mode="wait">
         
-        {/* Onboarding View Stage */}
-        {!isOnboarded && (
-          <motion.div
-            key="onboarding"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
-          >
-            <Onboarding 
-              onComplete={handleOnboardingComplete} 
-              onSkip={handleSkipOnboarding} 
-            />
-          </motion.div>
-        )}
-
         {/* Logged in Workspace Stage */}
-        {isOnboarded && (
-          <motion.div
-            key="workspace"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
-          >
-            {/* Conditional Subtree Routing */}
+        <motion.div
+          key="workspace"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="w-full"
+        >
+          {/* Conditional Subtree Routing */}
             {processingArticle ? (
               <motion.div
                 key="processing"
@@ -235,8 +201,7 @@ export default function App() {
                 }}
               />
             )}
-          </motion.div>
-        )}
+        </motion.div>
 
         </AnimatePresence>
       </div>

@@ -69,7 +69,6 @@ export default function Dashboard({
   
   const { isDarkMode, toggleDarkMode } = useTheme();
   
-  const [currentMenuTab, setCurrentMenuTab] = useState<'hub' | 'hacks'>('hub');
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
@@ -140,33 +139,7 @@ export default function Dashboard({
     'Physics and Chemistry'
   ];
 
-  // Developer Hacks data specifically built for ZID hacks tab
-  const MASTER_HACKS = [
-    {
-      id: 'hack-1',
-      title: 'Eliminating React Recoil & Context Multi-Rerenders via Selector Slices',
-      desc: 'Bypass default state cascades by wrapping context values in custom memoized proxy structures.',
-      code: 'const useSlice = (selector) => useContext(Ctx)[selector]; // Core Type-safe selector rule',
-      difficulty: 'Hard core',
-      rating: '9.8 / 10'
-    },
-    {
-      id: 'hack-2',
-      title: 'V8 Off-Heap Memory Streaming for Direct Socket Serialization',
-      desc: 'Stream high-frequency binary charts directly through WebAssembly buffers to skip JSON transport bottlenecks.',
-      code: 'Module._malloc(dataBuffer.byteLength); // Zero-copy serializations',
-      difficulty: 'Expert',
-      rating: '9.5 / 10'
-    },
-    {
-      id: 'hack-3',
-      title: 'LLM Response Streaming via SSE Transfer-Encoding Optimization',
-      desc: 'Halve prompt first-token latency by shifting connection backplanes to raw chunked text/event-streams.',
-      code: 'res.setHeader("Content-Type", "text/event-stream");',
-      difficulty: 'Intermediate',
-      rating: '9.2 / 10'
-    }
-  ];
+
 
   // Dynamically get the sub-topics for the currently selected category
   const currentSubTopics = useMemo(() => {
@@ -204,38 +177,23 @@ export default function Dashboard({
         <header className="h-16 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8] dark:bg-[#121214]/95 backdrop-blur-md z-50 relative transition-colors">
           
           {/* Logo element replacement - FLANELLE converted to ZID */}
-          <div 
-            onClick={() => {
-              setCurrentMenuTab('hub');
-              setSelectedCategory('Computer Sciences');
-              setSearchQuery('');
+          <a 
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.reload();
             }}
-            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-gray-100 cursor-pointer select-none"
+            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-gray-100 cursor-pointer select-none no-underline"
           >
             ZID
-          </div>
+          </a>
 
-          {/* Top navigation - limited strictly to "Knowledge Hub" and "Hacks" */}
+          {/* Top navigation - limited strictly to "Knowledge Hub" */}
           <nav className="flex items-center space-x-8 text-[11px] font-mono uppercase tracking-widest">
             <button 
-              onClick={() => setCurrentMenuTab('hub')} 
-              className={`transition relative py-2 ${
-                currentMenuTab === 'hub' 
-                  ? 'text-black dark:text-white font-bold border-b-2 border-black dark:border-white' 
-                  : 'text-[#7c7569] dark:text-gray-400 hover:text-black dark:hover:text-white'
-              }`}
+              className="transition relative py-2 text-black dark:text-white font-bold border-b-2 border-black dark:border-white"
             >
               Knowledge Hub
-            </button>
-            <button 
-              onClick={() => setCurrentMenuTab('hacks')} 
-              className={`transition relative py-2 ${
-                currentMenuTab === 'hacks' 
-                  ? 'text-black dark:text-white font-bold border-b-2 border-black dark:border-white' 
-                  : 'text-[#7c7569] dark:text-gray-400 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              Hacks
             </button>
           </nav>
 
@@ -277,16 +235,15 @@ export default function Dashboard({
           </div>
         </header>
 
-        {/* HERO TITLE SECTION - Dynamic based on active page with scaling support */}
+        {/* HERO TITLE SECTION */}
         <div className="pt-12 pb-8 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)]">
           <h1 className="font-serif font-black text-center text-neutral-950 dark:text-gray-100 uppercase leading-none tracking-tight select-none px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[8vw] transition-all duration-300">
-            {currentMenuTab === 'hacks' ? 'DEVELOPER HACKS' : 'KNOWLEDGE HUB'}
+            KNOWLEDGE HUB
           </h1>
         </div>
 
         {/* KNOWLEDGE HUB VIEW STAGE */}
-        {currentMenuTab === 'hub' ? (
-          <>
+        <>
             <div className="flex-1 flex flex-col">
                 
                 {/* CATEGORY SELECTOR + FILTER TRIGGER ROW */}
@@ -787,57 +744,7 @@ export default function Dashboard({
               )}
             </AnimatePresence>
           </>
-        ) : (
-          
-          /* HACKS VIEW STAGE */
-          <div className="p-6 md:p-10 space-y-8 text-left flex-1 animate-fade-in">
-            <div className="max-w-3xl space-y-4">
-              <span className="text-[10px] uppercase font-mono font-black tracking-widest text-amber-800 bg-[#fbfaf8] dark:bg-[#121214] border border-[#e1dacb] px-3 py-1 rounded">
-                High Frequency Developer Performance Hacks
-              </span>
-              <p className="text-sm font-serif italic text-neutral-600 leading-relaxed">
-                A curated sequence of speed, network, and layout hacks gathered for building high speed technical portals. Click to apply formulas.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {MASTER_HACKS.map((hack) => (
-                <div 
-                  key={hack.id}
-                  className="bg-neutral-900 border border-neutral-800 p-6 flex flex-col justify-between text-left text-white dark:text-[#0A0A0B] shadow-xl min-h-[260px]"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[8px] font-mono text-amber-200 border border-amber-900 bg-amber-950/40 px-2 py-0.5 rounded uppercase">
-                        {hack.difficulty}
-                      </span>
-                      <span className="text-[9px] font-mono text-neutral-400">
-                        Score: {hack.rating}
-                      </span>
-                    </div>
-
-                    <h3 className="text-sm font-serif font-bold text-[#fafafa] leading-snug">
-                      {hack.title}
-                    </h3>
-
-                    <p className="text-[11px] text-neutral-400 leading-relaxed">
-                      {hack.desc}
-                    </p>
-                  </div>
-
-                  <div className="bg-black/50 border border-neutral-800 p-2.5 rounded font-mono text-[9px] text-[#818cf8] overflow-x-auto whitespace-pre-wrap mt-4 select-all">
-                    <code>{hack.code}</code>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="border border-dashed border-[#e1dacb] p-6 rounded text-center">
-              <span className="text-lg">⚡</span>
-              <p className="text-xs font-mono text-neutral-500 dark:text-[#9CA3AF] mt-1">Want to contribute dynamic runtime compiler tricks? Connect your GitHub at Dashboard profile.</p>
-            </div>
-          </div>
-        )}
 
         {/* BRUTALIST TECHNICAL FOOTER */}
         <footer className="mt-auto p-8 bg-[#141619] text-[#b8b3a9] border-t border-[#292c30]">
