@@ -8,6 +8,27 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    // Simulate terminal security check
+    setTimeout(() => {
+      setIsLoading(false);
+      setError('ACCESS DENIED - RETRY');
+      
+      // Auto clear error message
+      setTimeout(() => setError(null), 3000);
+    }, 1500);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -28,7 +49,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* The Heavy-Duty Branded Lanyard Strap */}
-            <div className="w-20 h-[100vh] bg-[#F9F9F9] absolute bottom-[100%] mb-[-36px] left-1/2 -translate-x-1/2 shadow-[inset_4px_0_10px_rgba(0,0,0,0.06),_inset_-4px_0_10px_rgba(0,0,0,0.06)] z-0 border-x border-black/5 flex flex-col justify-end items-center overflow-hidden">
+            <div className="w-20 h-[100vh] bg-[#F9F9F9] absolute bottom-[100%] mb-[-36px] left-1/2 -translate-x-1/2 shadow-[inset_4px_0_10px_rgba(0,0,0,0.06),_inset_-4px_0_10px_rgba(0,0,0,0.06)] z-0 flex flex-col justify-end items-center overflow-hidden">
               
               {/* Vertical ZID HUB Branding */}
               <div className="absolute top-[85%] -translate-y-1/2 flex items-center justify-center">
@@ -39,12 +60,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   ZID HUB
                 </span>
               </div>
-
-              {/* Metallic Rivet Clamp */}
-              <div className="w-[88px] -ml-[2px] h-6 bg-gradient-to-b from-[#e0e0e0] via-[#ffffff] to-[#909090] border border-[#9ca3af] rounded-[3px] shadow-md flex items-center justify-center relative z-10 mb-[-2px]">
-                 <div className="w-16 h-[1.5px] bg-black/20 rounded-full"></div>
-                 <div className="w-16 h-[1px] bg-white absolute top-[13.5px] rounded-full"></div>
-              </div>
             </div>
 
             {/* The Realistic Processed Clasp Image */}
@@ -52,68 +67,116 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <ProcessedClaspImage className="w-[120px] object-contain opacity-95 saturate-[0.85] contrast-[1.1] brightness-[1.1]" />
             </div>
 
-            {/* ID Badge Container (The Cream Base) */}
-            <div className="relative w-[350px] h-[550px] bg-[#FDF4E3] rounded-[24px] shadow-[0_30px_60px_rgba(0,0,0,0.5)] overflow-hidden z-20 mt-4">
+            {/* The Plastic Sleeve (Outer Container) */}
+            <div className="relative w-[360px] h-[570px] bg-[#2A2A2A]/80 rounded-[20px] shadow-[inset_0_4px_10px_rgba(255,255,255,0.1),_0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 p-3 z-20 mt-4 backdrop-blur-md">
               
-              {/* Deep Punched Hole */}
-              <div className="w-6 h-6 rounded-full bg-[#151515] absolute top-4 left-1/2 -translate-x-1/2 shadow-[inset_0_6px_8px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.9)] border border-black/50 z-20"></div>
+              {/* Deep Punched Hole (On the Plastic Sleeve) */}
+              <div className="w-[48px] h-[12px] rounded-full bg-[#151515] absolute top-3 left-1/2 -translate-x-1/2 shadow-[inset_0_6px_8px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.2)] border border-black/80 z-30"></div>
 
-              {/* Abstract Wavy Graphics - Top Right */}
-              <svg className="absolute top-0 right-0 w-[240px] h-[340px] z-0" viewBox="0 0 240 340" fill="none">
-                <path d="M 60 0 C 60 120, 160 180, 160 260 C 160 300, 200 340, 240 340 L 240 0 Z" fill="#2A2A2A" />
-                <path d="M 120 0 C 120 100, 200 120, 200 200 C 200 240, 220 280, 240 280 L 240 0 Z" fill="#3D7C8A" />
-                <path d="M 180 0 C 180 60, 220 80, 220 160 C 220 180, 240 200, 240 200 L 240 0 Z" fill="#E56B5B" />
-              </svg>
-
-              {/* Abstract Wavy Graphics - Bottom Left */}
-              <svg className="absolute bottom-0 left-0 w-[280px] h-[220px] z-0" viewBox="0 0 280 220" fill="none">
-                <path d="M 0 20 C 100 20, 100 160, 200 160 C 240 160, 260 220, 280 220 L 0 220 Z" fill="#2A2A2A" />
-                <path d="M 0 80 C 60 80, 60 180, 140 180 C 180 180, 200 220, 220 220 L 0 220 Z" fill="#3D7C8A" />
-                <path d="M 0 140 C 40 140, 40 200, 80 200 C 110 200, 130 220, 150 220 L 0 220 Z" fill="#E56B5B" />
-                <circle cx="80" cy="180" r="8" fill="#E56B5B" />
-              </svg>
-
-              {/* Orange ID Pill at Bottom */}
-              <div className="absolute bottom-6 right-6 bg-[#E88B67] px-4 py-1.5 rounded-full text-white text-[10px] font-mono tracking-widest font-bold shadow-sm z-10">
-                ID: 112-245-259-009
-              </div>
-
-              {/* Branding Header Block */}
-              <div className="absolute top-[80px] left-0 bg-[#E56B5B] pl-8 pr-10 py-5 rounded-r-[2rem] shadow-md z-20 flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#FDF4E3] flex flex-col items-center justify-center pt-0.5 shadow-inner">
-                  <div className="w-3.5 h-3.5 bg-[#E56B5B] rounded-full mb-[1px]"></div>
-                  <div className="w-2 h-1.5 bg-[#E56B5B] rounded-b-sm"></div>
+              {/* Inner Card & Diagonal Split */}
+              <div 
+                className="w-full h-full rounded-[10px] overflow-hidden relative shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] before:absolute before:inset-0 before:bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] before:opacity-[0.15] before:z-10 before:pointer-events-none"
+                style={{ background: 'linear-gradient(160deg, #FBBF24 0%, #FBBF24 35%, #121212 35.1%, #121212 100%)' }}
+              >
+                
+                {/* Typography & Branding */}
+                <div className="absolute top-12 right-6 flex flex-col items-end z-20">
+                  <h2 className="text-[#121212] text-3xl font-black font-sans tracking-tighter leading-none">
+                    ZID HUB
+                  </h2>
+                  <h3 className="text-[#121212]/80 font-mono text-[10px] uppercase tracking-[0.3em] mt-1 font-bold">
+                    Platform Access
+                  </h3>
                 </div>
-                <div className="flex flex-col text-left">
-                  <h2 className="text-[#FDF4E3] text-[22px] font-bold font-serif leading-none tracking-tight">ZID Hub</h2>
-                  <h3 className="text-[#FDF4E3]/90 text-[10px] font-sans font-medium tracking-widest mt-1.5 uppercase">Platform Access</h3>
-                </div>
-              </div>
 
-              {/* Centered Login Form */}
-              <div className="absolute top-[230px] left-0 w-full px-10 flex flex-col items-center text-center z-20">
-                <div className="w-full space-y-3.5 mb-8">
-                  <input 
-                    type="text" 
-                    placeholder="Full Name" 
-                    className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-neutral-300 text-neutral-800 placeholder-neutral-500 rounded-xl text-sm font-medium focus:outline-none focus:border-neutral-500 focus:bg-white transition-colors shadow-inner"
-                  />
-                  <input 
-                    type="email" 
-                    placeholder="Email Address" 
-                    className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-neutral-300 text-neutral-800 placeholder-neutral-500 rounded-xl text-sm font-medium focus:outline-none focus:border-neutral-500 focus:bg-white transition-colors shadow-inner"
-                  />
-                  <input 
-                    type="password" 
-                    placeholder="Password" 
-                    className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-neutral-300 text-neutral-800 placeholder-neutral-500 rounded-xl text-sm font-medium focus:outline-none focus:border-neutral-500 focus:bg-white transition-colors shadow-inner"
-                  />
+                {/* Login/Signup Toggle */}
+                <div className="absolute top-[210px] w-full flex justify-end px-8 z-20">
+                  <div className="bg-black/40 p-1 rounded-full flex gap-1 border border-white/5 shadow-inner">
+                    <button 
+                      onClick={() => setMode('login')}
+                      className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'login' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'}`}
+                    >
+                      LOGIN
+                    </button>
+                    <button 
+                      onClick={() => setMode('signup')}
+                      className={`px-6 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] transition-all duration-200 ${mode === 'signup' ? 'bg-[#FBBF24] text-black shadow-sm' : 'text-white/40 hover:text-white/70'}`}
+                    >
+                      SIGNUP
+                    </button>
+                  </div>
                 </div>
-                <button className="w-full py-4 bg-[#2A2A2A] text-white font-bold uppercase tracking-[0.2em] text-[11px] rounded-xl shadow-[0_8px_16px_rgba(42,42,42,0.3)] hover:bg-black transition-all active:scale-[0.98]">
-                  AUTHORIZE
-                </button>
-              </div>
 
+                {/* The Modern "Dossier" Input Fields */}
+                <div className="absolute top-[280px] left-0 w-full px-8 flex flex-col z-20">
+                  <div className="space-y-6">
+                    {/* Name Field */}
+                    <div className="flex items-end gap-4 w-full">
+                      <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">
+                        NAME :
+                      </label>
+                      <input 
+                        type="text" 
+                        className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none"
+                      />
+                    </div>
+
+                    {/* Email Field */}
+                    <div className="flex items-end gap-4 w-full">
+                      <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">
+                        MAIL :
+                      </label>
+                      <input 
+                        type="email" 
+                        className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none"
+                      />
+                    </div>
+
+                    {/* Password Field */}
+                    <div className="flex items-end gap-4 w-full">
+                      <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">
+                        CODE :
+                      </label>
+                      <input 
+                        type="password" 
+                        className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                <div className="absolute bottom-20 left-0 w-full flex justify-center z-20 h-4">
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="text-orange-500/80 text-[10px] tracking-widest font-mono font-bold uppercase"
+                      >
+                        {error}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* The Authenticate Button */}
+                <div className="absolute bottom-8 left-0 w-full px-8 z-20">
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                    className={`w-full py-3 h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]'}`}
+                  >
+                    {isLoading ? (
+                      <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      mode === 'login' ? 'AUTHENTICATE' : 'SIGN UP'
+                    )}
+                  </button>
+                </div>
+
+              </div>
             </div>
 
             {/* Modular OAuth Sidecar */}
@@ -144,35 +207,36 @@ function ProcessedClaspImage({ className }: { className?: string }) {
 
   useEffect(() => {
     const img = new Image();
-    img.crossOrigin = 'Anonymous';
+    
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
+      if (!ctx) {
+        setDataUrl('/clasp_raw.png');
+        return;
+      }
       
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
       
-      // Target pitch black (or very dark) pixels to make them transparent
       for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        
-        const maxVal = Math.max(r, g, b);
+        const maxVal = Math.max(data[i], data[i + 1], data[i + 2]);
         if (maxVal < 25) {
-          data[i + 3] = 0; // Set alpha to 0 (fully transparent)
+          data[i + 3] = 0;
         } else if (maxVal < 60) {
-          // Anti-alias smooth transition for dark edges
           data[i + 3] = Math.floor(((maxVal - 25) / 35) * 255);
         }
       }
       
       ctx.putImageData(imageData, 0, 0);
       setDataUrl(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => {
+      // Fallback to raw image if canvas manipulation fails
+      setDataUrl('/clasp_raw.png');
     };
     img.src = '/clasp_raw.png';
   }, []);
