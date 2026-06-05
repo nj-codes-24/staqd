@@ -348,7 +348,7 @@ export default function ProfileView({
         >
           <button 
             onClick={() => setActiveTab('hud')}
-            className="inline-flex items-center space-x-2 text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-[#111] dark:text-[#F3F4F6] transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
+            className="inline-flex items-center space-x-2 bg-transparent hover:bg-neutral-100 border border-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-[11px] font-mono tracking-widest text-[#888] hover:text-[#111] dark:text-[#9CA3AF] dark:hover:text-white transition-all duration-300 uppercase font-bold cursor-pointer rounded-[4px] px-3 py-1.5 -ml-3"
           >
             <span>← RETURN TO HUBS</span>
           </button>

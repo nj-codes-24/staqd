@@ -537,7 +537,7 @@ export default function ArticleView({
             <button
               id="btn-reader-back"
               onClick={onBack}
-              className="inline-flex items-center space-x-2 bg-white dark:bg-[#1C1C1E] border border-neutral-300 dark:border-transparent hover:bg-neutral-50 dark:hover:bg-[#1C1C1E] dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-gray-300 dark:hover:text-white transition-all duration-300 rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:active:bg-white/10"
+              className="inline-flex items-center space-x-2 bg-white dark:bg-transparent hover:bg-neutral-50 border border-neutral-300 dark:border dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-white transition-all duration-300 rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:active:bg-white/10"
             >
               <span>← RETURN TO HUB</span>
             </button>
@@ -560,7 +560,7 @@ export default function ArticleView({
             <button
               id="btn-reader-share"
               onClick={() => triggerToast('Share link copied to clipboard!')}
-              className="p-2.5 border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] bg-white dark:bg-[#1C1C1E] hover:border-neutral-900 hover:text-black dark:hover:text-[#F3F4F6] dark:text-[#F3F4F6] rounded-[4px] transition text-neutral-600 dark:text-[#9CA3AF] cursor-pointer shadow-3xs hover:bg-[#faf6ec]"
+              className="p-2.5 border border-neutral-300 bg-white hover:border-neutral-900 hover:text-black hover:bg-[#faf6ec] text-neutral-600 cursor-pointer shadow-3xs dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg"
               title="Share research article"
             >
               <Share2 className="h-4 w-4" />
@@ -571,12 +571,16 @@ export default function ArticleView({
               <button 
                 onClick={() => setShowSaveModal(true)}
                 disabled={hasSavedUpload}
-                className="px-6 py-2 bg-[#111827] text-white dark:text-[#0A0A0B] text-[13px] font-medium rounded-full hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className={`px-6 py-2 text-[13px] font-medium rounded-full transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${
+                  hasSavedUpload 
+                    ? 'bg-[#111827] text-white dark:bg-transparent dark:border dark:border-white/30 dark:text-white'
+                    : 'bg-[#111827] text-white dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]'
+                }`}
               >
                 {hasSavedUpload ? 'Saved' : 'Save Upload'}
               </button>
             ) : (
-              <BookmarkButton article={article} size={16} className="border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] rounded-[4px] bg-white dark:bg-[#1C1C1E] shadow-3xs hover:border-neutral-900 p-2.5" />
+              <BookmarkButton article={article} size={16} className="border border-neutral-300 bg-white shadow-3xs hover:border-neutral-900 p-2.5 dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg" />
             )}
 
             {/* User Profile Avatar */}
@@ -687,7 +691,7 @@ export default function ArticleView({
                           setAudioProgress(Math.max(0, audioProgress - 10));
                           triggerToast('Skipped back');
                         }}
-                        className="p-1 hover:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)] rounded text-neutral-700 dark:text-[#E5E7EB] cursor-pointer transition"
+                        className="p-1 hover:bg-neutral-100 text-neutral-700 cursor-pointer dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg"
                         title="Skip back"
                       >
                         <SkipBack className="h-4 w-4" />
@@ -698,7 +702,7 @@ export default function ArticleView({
                           setIsPlaying(!isPlaying);
                           triggerToast(isPlaying ? "Narration paused" : "Narration initiated");
                         }}
-                        className="h-9 w-9 text-white dark:text-white rounded-full flex items-center justify-center transition hover:scale-105 shadow-sm cursor-pointer bg-[#1C1C1E] dark:bg-white/10 dark:border dark:border-white/20"
+                        className={`h-9 w-9 text-white dark:text-white rounded-full flex items-center justify-center hover:scale-105 shadow-sm cursor-pointer bg-[#1C1C1E] transition-all duration-300 ${isPlaying ? 'dark:bg-transparent dark:border dark:border-white/30' : 'dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]'}`}
                         title={isPlaying ? 'Pause' : 'Play'}
                       >
                         {isPlaying ? (
@@ -713,7 +717,7 @@ export default function ArticleView({
                           setAudioProgress(Math.min(100, audioProgress + 10));
                           triggerToast('Skipped forward');
                         }}
-                        className="p-1 hover:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)] rounded text-neutral-700 dark:text-[#E5E7EB] cursor-pointer transition"
+                        className="p-1 hover:bg-neutral-100 text-neutral-700 cursor-pointer dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg"
                         title="Skip forward"
                       >
                         <SkipForward className="h-4 w-4" />
@@ -724,7 +728,7 @@ export default function ArticleView({
                     <div className="flex items-center space-x-1.5 shrink-0">
                       <button 
                         onClick={() => setIsMuted(!isMuted)}
-                        className="text-neutral-700 dark:text-[#E5E7EB] hover:text-black dark:hover:text-[#F3F4F6] dark:text-[#F3F4F6] transition cursor-pointer"
+                        className={`p-1 hover:bg-neutral-100 hover:text-black text-neutral-700 cursor-pointer dark:bg-transparent dark:text-white transition-all duration-300 rounded-lg ${isMuted ? 'dark:border dark:border-white/30' : 'dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]'}`}
                       >
                         {isMuted ? (
                           <VolumeX className="h-3.5 w-3.5 text-red-500" />
@@ -929,7 +933,7 @@ export default function ArticleView({
           </div>
           <button 
             onClick={() => setIsChatOpen(false)}
-            className="p-1.5 hover:bg-black/5 rounded-full text-neutral-600 dark:text-[#9CA3AF] transition cursor-pointer flex items-center justify-center"
+            className="p-1.5 hover:bg-black/5 text-neutral-600 cursor-pointer flex items-center justify-center dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-full"
             title="Minimize concierge drawer"
           >
             <X className="h-4.5 w-4.5" />
@@ -998,7 +1002,7 @@ export default function ArticleView({
           />
           <button 
             type="submit" 
-            className="h-9 w-9 bg-neutral-900 dark:bg-[#F3F4F6] hover:bg-neutral-950 text-white dark:text-[#0A0A0B] rounded-full flex items-center justify-center transition active:scale-95 cursor-pointer shadow-3xs shrink-0"
+            className="h-9 w-9 bg-neutral-900 hover:bg-neutral-950 text-white flex items-center justify-center active:scale-95 cursor-pointer shadow-3xs shrink-0 dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-full"
             title="Send query"
           >
             <Send className="h-3.5 w-3.5" />
