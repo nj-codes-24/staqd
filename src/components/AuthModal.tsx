@@ -17,7 +17,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [password, setPassword] = useState('');
 
   const prefix = email.split('@')[0] || '';
-  const finalDerivedName = prefix.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'GUEST';
+  let sanitizedName = prefix
+    .replace(/[0-9]/g, '')
+    .replace(/[._-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  sanitizedName = sanitizedName.replace(/\b\w/g, l => l.toUpperCase());
+  const finalDerivedName = sanitizedName || 'MEMBER';
   const nameParts = finalDerivedName.split(' ');
 
   const handleFinalEntry = () => {
