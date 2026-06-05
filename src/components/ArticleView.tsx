@@ -518,7 +518,7 @@ export default function ArticleView({
         >
         {/* Minimalist Top Header Bar conforming to original workspace return controls */}
         <header 
-          className="h-20 bg-white dark:bg-[#09090B]/80 backdrop-blur-md flex items-center justify-between px-6 md:px-10 select-none sticky top-0 z-50 border-b-0 shadow-sm"
+          className="h-20 bg-white dark:bg-[#1C1C1E] flex items-center justify-between px-6 md:px-10 select-none sticky top-0 z-50 shadow-sm"
           style={{}}
         >
           {/* Left Group: ← RETURN TO HUB button */}
@@ -526,7 +526,7 @@ export default function ArticleView({
             <button
               id="btn-reader-back"
               onClick={onBack}
-              className="inline-flex items-center space-x-2 bg-white dark:bg-[#1C1C1E] hover:bg-neutral-50 border border-neutral-300 dark:border-[rgba(255,255,255,0.08)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-gray-200 transition-colors rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:bg-[rgba(255,255,255,0.1)]"
+              className="inline-flex items-center space-x-2 bg-white dark:bg-[#1C1C1E] border border-neutral-300 dark:border-transparent hover:bg-neutral-50 dark:hover:bg-[#1C1C1E] dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-gray-300 dark:hover:text-white transition-all duration-300 rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:active:bg-white/10"
             >
               <span>← RETURN TO HUB</span>
             </button>
@@ -653,12 +653,12 @@ export default function ArticleView({
                       }}
                     >
                       <div 
-                        className="h-full rounded-full transition-all duration-150"
-                        style={{ width: `${audioProgress}%`, backgroundColor: '#1C1C1E' }}
+                        className="h-full rounded-full transition-all duration-150 bg-[#1C1C1E] dark:bg-white"
+                        style={{ width: `${audioProgress}%` }}
                       />
                       <div 
-                        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-md group-hover:scale-110 transition-transform"
-                        style={{ left: `calc(${audioProgress}% - 5px)`, backgroundColor: '#1C1C1E' }}
+                        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-md group-hover:scale-110 transition-transform bg-[#1C1C1E] dark:bg-white"
+                        style={{ left: `calc(${audioProgress}% - 5px)` }}
                       />
                     </div>
                     <div className="flex items-center justify-between text-[10px] font-mono text-[#888888] pt-0.5">
@@ -730,8 +730,7 @@ export default function ArticleView({
                           setVolumeVal(Number(e.target.value));
                           if(isMuted) setIsMuted(false);
                         }}
-                        className="w-12 h-1 cursor-pointer bg-neutral-200 rounded-full"
-                        style={{ accentColor: '#1C1C1E' }}
+                        className="w-12 h-1 cursor-pointer bg-neutral-200 dark:bg-white/20 rounded-full accent-[#1C1C1E] dark:accent-white"
                       />
                       <span className="text-[10px] font-mono text-[#888888] w-7 text-right">
                         {isMuted ? "0%" : `${volumeVal}%`}
@@ -896,7 +895,7 @@ export default function ArticleView({
       {/* Squeezed side-by-side Chat Panel */}
       <div 
         id="chatbot-drawer-container"
-        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#050505] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'}`}
+        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#1C1C1E] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'}`}
         style={{
           width: isChatOpen ? '340px' : '0px',
           minWidth: isChatOpen ? '340px' : '0px',
@@ -946,10 +945,10 @@ export default function ArticleView({
                   className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div 
-                    className={`max-w-[85%] rounded-[12px] px-4 py-3 text-[13px] leading-[1.5] border-0 ${
+                    className={`leading-[1.5] ${
                       msg.sender === 'user' 
-                        ? 'text-white dark:text-gray-300 bg-[#2C2C2E] dark:bg-white/10' 
-                        : 'bg-neutral-100 dark:bg-transparent text-neutral-900 dark:text-gray-300'
+                        ? 'max-w-[85%] text-[13px] text-white dark:text-gray-300 bg-[#2C2C2E] dark:bg-white/10 rounded-[12px] px-4 py-3 border-0' 
+                        : 'w-full text-sm bg-neutral-100 dark:bg-white/5 border dark:border-white/10 rounded-2xl p-4 text-neutral-900 dark:text-gray-300'
                     }`}
                   >
                     {msg.sender === 'assistant' ? (
