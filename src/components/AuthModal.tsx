@@ -93,23 +93,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             className="relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-20 h-[100vh] bg-[#F9F9F9] absolute bottom-[100%] mb-[-36px] left-1/2 -translate-x-1/2 shadow-[inset_4px_0_10px_rgba(0,0,0,0.06),_inset_-4px_0_10px_rgba(0,0,0,0.06)] z-0 flex flex-col justify-end items-center overflow-hidden">
-              <div className="absolute top-[85%] -translate-y-1/2 flex items-center justify-center">
-                <span 
-                  className="text-[#1C1C1E]/20 font-black uppercase tracking-[0.4em] text-3xl"
-                  style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                >
-                  ZID HUB
-                </span>
+            <div className="absolute bottom-[100%] mb-[-24px] left-1/2 -translate-x-1/2 w-[200px] h-[300px] flex justify-center z-30 pointer-events-none drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)]">
+              <div className="absolute bottom-[20px] left-1/2 origin-bottom-right -rotate-[20deg] w-[40px] h-[100vh] bg-[#1A1A1A] shadow-inner border-r border-white/5"></div>
+              <div className="absolute bottom-[20px] right-1/2 origin-bottom-left rotate-[20deg] w-[40px] h-[100vh] bg-[#151515] shadow-inner border-l border-white/5"></div>
+              
+              <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 flex flex-col items-center">
+                <div className="w-[50px] h-[16px] bg-[#222] rounded-t-md border-t border-white/10"></div>
+                <div className="w-[30px] h-[24px] bg-gradient-to-b from-[#2A2A2A] to-[#111] border border-white/10 rounded-b-lg shadow-inner"></div>
+                <div className="w-[14px] h-[20px] border-[3px] border-[#333] rounded-full -mt-2 shadow-md"></div>
               </div>
             </div>
 
-            <div className="absolute -top-[105px] left-1/2 -translate-x-1/2 z-30 pointer-events-none drop-shadow-[0_12px_10px_rgba(0,0,0,0.6)]">
-              <ProcessedClaspImage className="w-[120px] object-contain opacity-95 saturate-[0.85] contrast-[1.1] brightness-[1.1]" />
-            </div>
-
-            <div className="relative w-[360px] h-[570px] bg-[#2A2A2A]/80 rounded-[20px] shadow-[inset_0_4px_10px_rgba(255,255,255,0.1),_0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 p-3 z-20 mt-4 backdrop-blur-md">
-              <div className="w-[48px] h-[12px] rounded-full bg-[#151515] absolute top-3 left-1/2 -translate-x-1/2 shadow-[inset_0_6px_8px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.2)] border border-black/80 z-30"></div>
+            <div className="relative w-[360px] h-[570px] bg-[#2A2A2A]/80 rounded-[20px] shadow-2xl shadow-black/50 border border-transparent ring-1 ring-white/20 p-3 z-20 mt-4 backdrop-blur-xl">
+              <div className="w-16 h-3 rounded-full bg-black/60 shadow-inner absolute top-3 left-1/2 -translate-x-1/2 z-30 border border-black/80"></div>
 
               <div className="w-full h-full rounded-[10px] overflow-hidden relative shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] bg-[#121212] before:absolute before:inset-0 before:bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] before:opacity-[0.08] before:z-30 before:pointer-events-none">
                 {/* The Morphing Success Background */}
@@ -217,34 +213,35 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                   )}
                 </AnimatePresence>
 
-                <div className="absolute bottom-8 left-0 w-full px-8 z-30">
-                  <button 
-                    onClick={isSuccess ? handleFinalEntry : handleSubmit}
-                    disabled={isLoading}
-                    className={`w-full py-3 h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]'}`}
-                  >
-                    {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
-                    ) : isSuccess ? (
-                      <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
-                    ) : (
-                      mode === 'login' ? 'AUTHENTICATE' : 'SIGN UP'
+                <div className="absolute bottom-6 left-0 w-full px-8 z-30">
+                  <div className="flex flex-row items-center gap-3 w-full">
+                    <button 
+                      onClick={isSuccess ? handleFinalEntry : handleSubmit}
+                      disabled={isLoading}
+                      className={`flex-1 h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]'}`}
+                    >
+                      {isLoading ? (
+                        <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
+                      ) : isSuccess ? (
+                        <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
+                      ) : (
+                        mode === 'login' ? 'AUTHENTICATE' : 'SIGN UP'
+                      )}
+                    </button>
+                    
+                    {!isSuccess && (
+                      <>
+                        <button title="Continue with Google" className="w-11 h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition-all shadow-lg text-white/50 hover:text-white">
+                          <Chrome className="w-5 h-5" />
+                        </button>
+                        <button title="Continue with GitHub" className="w-11 h-[42px] flex-shrink-0 flex items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 transition-all shadow-lg text-white/50 hover:text-white">
+                          <Github className="w-5 h-5" />
+                        </button>
+                      </>
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="absolute top-1/2 -translate-y-1/2 -right-[72px] bg-[#1C1C1E]/80 backdrop-blur-md rounded-2xl p-3 border border-white/10 flex flex-col gap-4 shadow-xl z-0">
-              <button title="Continue with Google" className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all cursor-pointer border border-transparent hover:border-white/20 shadow-sm">
-                <Chrome className="w-5 h-5" />
-              </button>
-              <button 
-                title="Continue with GitHub"
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all cursor-pointer border border-transparent hover:border-white/20 shadow-sm"
-              >
-                <Github className="w-5 h-5" />
-              </button>
             </div>
 
           </motion.div>
@@ -252,47 +249,4 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       )}
     </AnimatePresence>
   );
-}
-
-function ProcessedClaspImage({ className }: { className?: string }) {
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const img = new Image();
-    
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) {
-        setDataUrl('/clasp_raw.png');
-        return;
-      }
-      
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      for (let i = 0; i < data.length; i += 4) {
-        const maxVal = Math.max(data[i], data[i + 1], data[i + 2]);
-        if (maxVal < 25) {
-          data[i + 3] = 0;
-        } else if (maxVal < 60) {
-          data[i + 3] = Math.floor(((maxVal - 25) / 35) * 255);
-        }
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-      setDataUrl(canvas.toDataURL('image/png'));
-    };
-    img.onerror = () => {
-      // Fallback to raw image if canvas manipulation fails
-      setDataUrl('/clasp_raw.png');
-    };
-    img.src = '/clasp_raw.png';
-  }, []);
-
-  if (!dataUrl) return null;
-  return <img src={dataUrl} className={className} alt="Realistic Metallic Clasp" draggable={false} />;
 }
