@@ -13,17 +13,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const prefix = email.split('@')[0] || '';
+  const finalDerivedName = prefix.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'GUEST';
+  const nameParts = finalDerivedName.split(' ');
+
   const handleFinalEntry = () => {
     localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('authName', name || 'GUEST');
+    localStorage.setItem('authName', finalDerivedName);
     onAuthSuccess?.();
     setIsSuccess(false);
     setMode('login');
-    setName('');
     setEmail('');
     setPassword('');
     onClose();
@@ -33,20 +35,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     e.preventDefault();
     if (isLoading) return;
     
-    if (!name.trim()) {
-      setError("ERROR: NAME REQUIRED");
-      return;
-    }
-    
     if (!email.trim()) {
-      setError("ERROR: MAIL REQUIRED");
+      setError(mode === 'login' ? "ERROR: USER OR MAIL REQUIRED" : "ERROR: MAIL REQUIRED");
       return;
     }
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError("ERROR: INVALID MAIL FORMAT");
-      return;
+    if (mode === 'signup') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        setError("ERROR: INVALID MAIL FORMAT");
+        return;
+      }
     }
     
     if (!password.trim()) {
@@ -67,9 +66,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     if (str.length > 12) return '2rem';
     return '3rem';
   };
-
-  const firstName = name.trim().split(' ')[0] || 'GUEST';
-  const lastName = name.trim().split(' ').slice(1).join(' ') || 'USER';
 
   return (
     <AnimatePresence>
@@ -144,8 +140,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                       className="absolute inset-0 flex flex-col items-center justify-end w-full px-8 pb-24 z-0 pointer-events-none text-center"
                     >
                       <h1 className="font-bold text-white uppercase drop-shadow-md tracking-tighter flex flex-col items-center justify-center text-center w-full">
-                        <span className="block whitespace-nowrap text-center" style={{ fontSize: getDynamicFontSize(firstName), lineHeight: 1 }}>{firstName}</span>
-                        <span className="block whitespace-nowrap text-center" style={{ fontSize: getDynamicFontSize(lastName), lineHeight: 1 }}>{lastName}</span>
+                        {nameParts.length === 1 ? (
+                          <span className="block whitespace-nowrap text-center" style={{ fontSize: getDynamicFontSize(nameParts[0]), lineHeight: 1 }}>{nameParts[0]}</span>
+                        ) : (
+                          <>
+                            <span className="block whitespace-nowrap text-center" style={{ fontSize: getDynamicFontSize(nameParts[0]), lineHeight: 1 }}>{nameParts[0]}</span>
+                            <span className="block whitespace-nowrap text-center" style={{ fontSize: getDynamicFontSize(nameParts.slice(1).join(' ')), lineHeight: 1 }}>{nameParts.slice(1).join(' ')}</span>
+                          </>
+                        )}
                       </h1>
                       <div className="text-[10px] text-white/50 tracking-[0.4em] uppercase mt-2 font-bold text-center">
                         WELCOME
@@ -185,18 +187,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                       </div>
 
                       <div className="absolute top-[280px] left-0 w-full px-8 flex flex-col z-20">
-                        <div className="space-y-6">
-                          <div className="flex items-end gap-4 w-full">
-                            <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">NAME :</label>
-                            <input type="text" value={name} onChange={(e) => { setName(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
+                        <div className="space-y-10 mt-4">
+                          <div className="flex flex-col items-start w-full gap-3">
+                            <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">{mode === 'login' ? 'USER / MAIL' : 'MAIL'}</label>
+                            <input type="text" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={mode === 'login' ? "ENTER ID OR EMAIL..." : "ENTER EMAIL..."} className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
                           </div>
-                          <div className="flex items-end gap-4 w-full">
-                            <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">MAIL :</label>
-                            <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
-                          </div>
-                          <div className="flex items-end gap-4 w-full">
-                            <label className="text-white/70 font-mono font-black tracking-[0.2em] uppercase text-sm shrink-0 leading-none pb-1">CODE :</label>
-                            <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} className="flex-1 bg-transparent outline-none ring-0 border-b-2 border-white/40 focus:border-white transition-colors text-white font-bold tracking-wide text-sm pb-1 px-1 leading-none" />
+                          <div className="flex flex-col items-start w-full gap-3">
+                            <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">CODE</label>
+                            <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="ENTER AUTH CODE..." className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
                           </div>
                         </div>
                       </div>
