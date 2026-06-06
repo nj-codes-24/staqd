@@ -17,6 +17,11 @@ export interface UserProfile {
   email: string;
   handle: string;
   avatarUrl: string;
+  cropMetadata?: {
+    zoom: number;
+    crop: { x: number; y: number };
+    originalImage: string;
+  };
   githubConnected: boolean;
   githubUsername: string;
   level: number;

@@ -415,12 +415,7 @@ export default function ProfileView({
               </div>
             </div>
 
-            <button 
-              onClick={() => setIsEditingModalOpen(true)}
-              className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-[#111] dark:hover:text-white transition-colors uppercase font-bold cursor-pointer bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 px-4 py-2 rounded-md"
-            >
-              EDIT PROFILE
-            </button>
+
             <button 
               onClick={onLogout}
               className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-red-600 transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
@@ -433,7 +428,7 @@ export default function ProfileView({
         {/* Top Section (The Editorial Header) */}
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-12 md:gap-20 items-start text-left">
           {/* Left Column (Typography) */}
-          <div className="flex flex-col justify-start w-full" style={{ alignSelf: 'center' }}>
+          <div className="flex flex-col justify-start w-full h-full">
             <h1 
               className="font-serif font-black text-[#111] dark:text-[#F3F4F6] tracking-tighter uppercase"
               style={{ 
@@ -454,20 +449,36 @@ export default function ProfileView({
                 {user?.bio || "No bio added yet."}
               </p>
             </div>
+            <button 
+              onClick={() => setIsEditingModalOpen(true)}
+              className="mt-6 px-4 py-2 w-fit text-[10px] uppercase tracking-[0.2em] border border-black/10 dark:border-white/10 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[#111] dark:text-white cursor-pointer"
+            >
+              Edit Profile
+            </button>
           </div>
 
           {/* Right Column (Photo) */}
           <div className="w-full flex justify-end">
             <div 
-              className="w-full bg-[#f0ede6] overflow-hidden border border-neutral-200 dark:border-white/10 rounded-none shadow-none relative"
-              style={{ maxWidth: '360px', width: '100%', aspectRatio: '1/1' }}
+              className="w-full overflow-hidden rounded-none relative max-w-md ml-auto aspect-square"
+              style={{ maxWidth: '360px', width: '100%' }}
             >
-              <img className="dark:brightness-90 transition-all duration-300 grayscale contrast-[1.15]" 
-                src={user?.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=600"}
-                alt="Profile Portrait"
-                referrerPolicy="no-referrer"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              {user?.avatarUrl ? (
+                <div className="w-full h-full bg-[#f0ede6] border border-neutral-200 dark:border-white/10">
+                  <img className="dark:brightness-90 transition-all duration-300 contrast-[1.15]" 
+                    src={user.avatarUrl}
+                    alt="Profile Portrait"
+                    referrerPolicy="no-referrer"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-full bg-black/[0.02] border border-black/10 dark:bg-white/[0.02] dark:border-white/10 flex items-center justify-center transition-colors duration-300">
+                  <span className="text-black/10 dark:text-white/10 text-6xl font-serif uppercase transition-colors duration-300">
+                    {(user?.name || "Member").charAt(0)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

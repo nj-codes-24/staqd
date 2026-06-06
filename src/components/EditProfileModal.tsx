@@ -27,9 +27,15 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
     if (isOpen) {
       setName(user?.name || '');
       setBio(user?.bio || '');
-      setImageSrc(null);
-      setScale(1);
-      setPosition({ x: 0, y: 0 });
+      if (user?.cropMetadata) {
+        setImageSrc(user.cropMetadata.originalImage);
+        setScale(user.cropMetadata.zoom);
+        setPosition(user.cropMetadata.crop);
+      } else {
+        setImageSrc(user?.avatarUrl || null);
+        setScale(1);
+        setPosition({ x: 0, y: 0 });
+      }
     }
   }, [isOpen, user]);
 
@@ -38,6 +44,8 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
       const reader = new FileReader();
       reader.addEventListener('load', () => setImageSrc(reader.result?.toString() || null));
       reader.readAsDataURL(e.target.files[0]);
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
     }
   };
 
@@ -104,7 +112,12 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
       drawHeight
     );
 
-    return canvas.toDataURL('image/jpeg', 0.9);
+    try {
+      return canvas.toDataURL('image/jpeg', 0.9);
+    } catch (e) {
+      console.warn("Canvas tainted, returning original image", e);
+      return img.src;
+    }
   };
 
   const handleSave = () => {
@@ -118,8 +131,14 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
       ...user,
       name,
       bio,
-      avatarUrl
+      avatarUrl,
+      cropMetadata: imageSrc ? {
+        zoom: scale,
+        crop: position,
+        originalImage: imageSrc
+      } : undefined
     });
+    onClose();
   };
 
   return (
@@ -164,9 +183,13 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
+                    maxLength={160}
                     className="w-full bg-transparent border-b border-white/10 rounded-none px-0 py-2 focus:outline-none focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all text-white resize-none min-h-[120px]"
                     placeholder="Tell us about your background..."
                   />
+                  <div className="text-[10px] text-right mt-1 text-black/40 dark:text-white/40 tracking-widest">
+                    {bio.length} / 160
+                  </div>
                 </div>
               </div>
 
@@ -200,7 +223,7 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
                     >
                       {/* Darkened overlay outside the mask */}
                       <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center overflow-hidden">
-                        <div className="absolute w-[250px] h-[250px] border-2 border-white/50 box-content" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.8)' }}></div>
+                        <div className="absolute w-[250px] h-[250px] border border-white/50 shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] box-content"></div>
                       </div>
 
                       <div className="absolute inset-0 flex items-center justify-center w-full h-full">
@@ -209,6 +232,7 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
                           src={imageSrc} 
                           alt="Upload preview" 
                           draggable={false}
+                          crossOrigin="anonymous"
                           className="max-w-full max-h-full object-contain select-none"
                           style={{
                             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
@@ -218,18 +242,31 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
                       </div>
                     </div>
                     
-                    {/* Zoom Control */}
-                    <div className="w-full mt-6 flex items-center space-x-4">
-                      <span className="text-xs text-white/40 tracking-widest uppercase">Zoom</span>
-                      <input 
-                        type="range" 
-                        min="1" 
-                        max="3" 
-                        step="0.01" 
-                        value={scale} 
-                        onChange={(e) => setScale(parseFloat(e.target.value))}
-                        className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
-                      />
+                    {/* Controls */}
+                    <div className="w-full mt-6 flex flex-col space-y-4">
+                      <div className="flex justify-end">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all cursor-pointer">
+                          Replace Image
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleFileChange} 
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-xs text-white/40 tracking-widest uppercase">Zoom</span>
+                        <input 
+                          type="range" 
+                          min="1" 
+                          max="3" 
+                          step="0.01" 
+                          value={scale} 
+                          onChange={(e) => setScale(parseFloat(e.target.value))}
+                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#FBBF24]"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
