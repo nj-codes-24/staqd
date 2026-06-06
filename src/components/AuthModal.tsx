@@ -70,7 +70,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const handleNavigation = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Navigation triggered manually");
-    onAuthSuccess?.(true); // Force it to act as signup so it goes to the profile page
+    onAuthSuccess?.(mode === 'signup');
     onClose();
   };
 
@@ -101,7 +101,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     
     setTimeout(() => {
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('authName', finalDerivedName);
+      if (mode === 'signup') {
+        localStorage.setItem('authName', finalDerivedName);
+      } else {
+        // For login, try to retrieve their existing saved profile name
+        const existingProfileStr = localStorage.getItem('zid_user_profile');
+        if (existingProfileStr) {
+          try {
+            const existingProfile = JSON.parse(existingProfileStr);
+            localStorage.setItem('authName', existingProfile.name || finalDerivedName);
+          } catch (e) {
+            localStorage.setItem('authName', finalDerivedName);
+          }
+        } else {
+          localStorage.setItem('authName', finalDerivedName);
+        }
+      }
       setIsLoading(false);
       setIsSuccess(true);
     }, 1500);
@@ -121,7 +136,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, pointerEvents: 'none' }}
           className={`fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl ${!isOpen ? 'pointer-events-none' : ''}`}
-          onClick={onClose}
+          onClick={() => {
+            if (isSuccess) {
+              onAuthSuccess?.(mode === 'signup');
+            }
+            onClose();
+          }}
         >
           <motion.div
             initial={{ y: '-100vh' }}
