@@ -82,13 +82,18 @@ export default function SubscriptionModal({
   }, [isBookOpen, setIsCheckRevealed]);
 
   const handleClose = () => {
-    if (isClosing || isClosingInstantly) return;
-    setIsClosing(true);
-    setIsBookOpen(false);
-    // Total unmount delay: Fold (800ms) + Vanish (250ms)
-    animationTimerRef.current = setTimeout(() => {
-      onClose();
-    }, 1050);
+    if (isClosing || isClosingInstantly || isSubmitting) return;
+    
+    if (isBookOpen) {
+      setIsClosing(true);
+      setIsBookOpen(false);
+      // Total unmount delay: Fold (800ms) + Vanish (250ms)
+      animationTimerRef.current = setTimeout(() => {
+        onClose();
+      }, 1050);
+    } else {
+      handleImmediateClose();
+    }
   };
 
   const handleImmediateClose = () => {
@@ -220,7 +225,7 @@ export default function SubscriptionModal({
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              handleImmediateClose();
+              handleClose();
             }}
             className={`absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer ${(isClosing || isSubmitting) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
