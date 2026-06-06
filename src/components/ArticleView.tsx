@@ -644,7 +644,7 @@ export default function ArticleView({
                     }}
                     className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative shrink-0 hover:scale-105 transition-transform"
                   >
-                     <UserIcon className="w-4 h-4 text-neutral-500" />
+                     <User className="w-4 h-4 text-neutral-500" />
                   </div>
                 </>
               )}
