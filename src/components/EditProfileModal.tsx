@@ -72,35 +72,28 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
     if (!imageRef.current) return null;
     
     const canvas = document.createElement('canvas');
-    const cropSize = 300; // Final output size
-    canvas.width = cropSize;
-    canvas.height = cropSize;
+    const maskSize = 250; // Must exactly match the UI mask size
+    const pixelRatio = 2; // Higher resolution output (500x500)
+    canvas.width = maskSize * pixelRatio;
+    canvas.height = maskSize * pixelRatio;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     const img = imageRef.current;
     
-    // We are simulating a fixed 250x250 mask inside a container.
-    // The image itself is scaled and translated.
-    // Let's assume the container is 100% width and height. To be precise, let's just 
-    // extract exactly what is rendered within the central 250x250 bounding box.
-    // A simpler way: just draw the image on canvas with the exact transforms applied,
-    // centered in the canvas, and the canvas acts as the crop mask!
+    // Clear the canvas to be transparent by default
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Canvas center is cropSize / 2
-    ctx.translate(cropSize / 2, cropSize / 2);
+    // Center the canvas context
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    // Scale up coordinate system for higher resolution
+    ctx.scale(pixelRatio, pixelRatio);
+    
     // Apply user translation
     ctx.translate(position.x, position.y);
     // Apply user scale
     ctx.scale(scale, scale);
     
-    // Draw image centered at 0,0
-    // We need to know the rendered width/height before scale.
-    // We'll assume the image object-fit is 'contain' in a 300x300 box, or we just draw it naturally.
-    // To match DOM exactly: The image has max-width 100%, max-height 100%.
-    const rect = img.getBoundingClientRect();
-    // width/height of the actual image element on screen (ignoring scale transforms if we measure before scale, but rect includes scale).
-    // Let's use offsetWidth/offsetHeight for unscaled dimension.
     const drawWidth = img.offsetWidth;
     const drawHeight = img.offsetHeight;
     
@@ -113,7 +106,8 @@ export default function EditProfileModal({ isOpen, onClose, user, onSave }: Edit
     );
 
     try {
-      return canvas.toDataURL('image/jpeg', 0.9);
+      // Return as PNG to preserve any transparent bounds without rendering black strips
+      return canvas.toDataURL('image/png');
     } catch (e) {
       console.warn("Canvas tainted, returning original image", e);
       return img.src;
