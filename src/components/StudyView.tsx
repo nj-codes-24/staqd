@@ -8,10 +8,10 @@ interface StudyViewProps {
 
 export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
   return (
-    <div className="min-h-screen bg-[#ded9d0] py-6 md:py-12 px-4 md:px-8 font-sans antialiased text-[#1c1c1c]">
+    <div className="min-h-screen bg-[#ded9d0] dark:bg-[#0a0a0a] py-6 md:py-12 px-4 md:px-8 font-sans antialiased text-[#1c1c1c] dark:text-[#f3f3f3] transition-colors duration-300">
       
       {/* Presentation Header bar */}
-      <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] uppercase">
+      <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] dark:text-neutral-400 uppercase">
         <span>01 / Core Workspace</span>
         <span>ZID Technical Hud</span>
         <span>Generating Session...</span>
@@ -22,23 +22,23 @@ export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
         style={{ maxWidth: '1300px' }}
       >
         <div 
-          className="bg-white flex flex-col relative border border-[#F3F3F3] min-h-screen rounded-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.04)] w-full"
+          className="bg-white dark:bg-[#121214] flex flex-col relative border border-[#F3F3F3] dark:border-white/10 min-h-screen rounded-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),_inset_0_0_12px_rgba(0,0,0,0.04)] w-full"
         >
           {/* Header */}
-          <header className="h-20 bg-white flex items-center justify-between px-6 md:px-10 select-none relative border-b border-[#F3F3F3] sticky top-0 z-50">
+          <header className="h-20 bg-white dark:bg-[#121214] flex items-center justify-between px-6 md:px-10 select-none relative border-b border-[#F3F3F3] dark:border-white/10 sticky top-0 z-50">
             <div className="flex items-center">
               <button
                 onClick={onBack}
-                className="inline-flex items-center space-x-2 bg-white hover:bg-neutral-50 border border-neutral-300 text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 transition-colors rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs"
+                className="inline-flex items-center space-x-2 bg-white dark:bg-transparent hover:bg-neutral-50 dark:hover:bg-white/10 border border-neutral-300 dark:border-white/20 text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-white transition-colors rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs"
               >
                 <span>← RETURN TO HUB</span>
               </button>
             </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-2.5 sm:space-x-3 pointer-events-none whitespace-nowrap">
-              <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 uppercase">
+              <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 dark:text-white uppercase">
                 ZID
               </span>
-              <span className="h-4 w-[1px] bg-neutral-200"></span>
+              <span className="h-4 w-[1px] bg-neutral-200 dark:bg-white/20"></span>
               <span className="text-[10px] font-sans font-bold text-[#8E8E93] tracking-widest uppercase">
                 PROCESSING...
               </span>
@@ -49,21 +49,24 @@ export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
             </div>
           </header>
 
-          <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white relative pb-24 animate-fade-in">
+          <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white dark:bg-[#121214] relative pb-24 animate-fade-in">
             <style>{`
               @keyframes gemini-shimmer {
                 0% { background-position: 200% 0; }
                 100% { background-position: -200% 0; }
               }
               .gemini-skeleton {
-                background: linear-gradient(110deg, #F1ECE1 25%, #E3E7FF 40%, #FFE6F0 50%, #E3E7FF 60%, #F1ECE1 75%);
+                background-image: linear-gradient(110deg, #F1ECE1 25%, #E3E7FF 40%, #FFE6F0 50%, #E3E7FF 60%, #F1ECE1 75%);
                 background-size: 200% 100%;
                 animation: gemini-shimmer 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+              }
+              .dark .gemini-skeleton {
+                background-image: linear-gradient(110deg, #1A1A1C 25%, #2A2A35 40%, #3A2A35 50%, #2A2A35 60%, #1A1A1C 75%);
               }
             `}</style>
 
             {/* Giant Centered Main Title Skeleton */}
-            <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] mb-[28px] flex flex-col items-center">
+            <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] dark:border-white/10 mb-[28px] flex flex-col items-center">
               <div className="w-3/4 h-12 md:h-14 lg:h-16 rounded-xl gemini-skeleton mb-6" />
               <div className="w-1/2 h-4 rounded-md gemini-skeleton" />
             </div>
@@ -76,7 +79,7 @@ export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
               <div className="flex flex-col justify-start pt-0 space-y-6">
                 
                 {/* Audio Player Skeleton */}
-                <div className="border-b border-[#F0F0F0] pb-6">
+                <div className="border-b border-[#F0F0F0] dark:border-white/10 pb-6">
                   <div className="w-32 h-3 rounded-md gemini-skeleton mb-4" />
                   <div className="w-full h-[140px] rounded-[16px] gemini-skeleton shadow-sm" />
                 </div>
