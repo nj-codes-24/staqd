@@ -618,13 +618,18 @@ export default function ProfileView({
                         className="cursor-pointer flex-1 flex flex-col"
                         onClick={() => onSelectArticle(article)}
                       >
-                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                          <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
-                            src={article.imageUrl} 
-                            alt={article.title}
-                            referrerPolicy="no-referrer"
-                            
-                          />
+                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative">
+                          {article.imageUrl ? (
+                            <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
+                              src={article.imageUrl} 
+                              alt={article.title}
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
+                              <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                            </div>
+                          )}
                         </div>
                         <div className="p-5 flex-1 flex flex-col space-y-3">
                           <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
@@ -680,13 +685,18 @@ export default function ProfileView({
                         className="cursor-pointer flex-1 flex flex-col"
                         onClick={() => onSelectArticle(article)}
                       >
-                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
-                          <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
-                            src={article.imageUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400&h=400"} 
-                            alt={article.title}
-                            referrerPolicy="no-referrer"
-                            
-                          />
+                        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative">
+                          {article.imageUrl ? (
+                            <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
+                              src={article.imageUrl} 
+                              alt={article.title}
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
+                              <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                            </div>
+                          )}
                         </div>
                         <div className="p-5 flex-1 flex flex-col space-y-3">
                           <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">

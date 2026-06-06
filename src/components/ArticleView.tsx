@@ -896,20 +896,7 @@ export default function ArticleView({
               <button
                 id="btn-read-full-paper"
                 onClick={() => {}}
-                className="block w-full mt-8 p-[18px] rounded-[8px] font-medium text-[13px] uppercase tracking-[0.05em] cursor-pointer text-center transition duration-200 select-none border"
-                style={{
-                  background: 'transparent',
-                  borderColor: '#D1D1D6',
-                  color: '#8E8E93'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#111';
-                  e.currentTarget.style.color = '#111';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#D1D1D6';
-                  e.currentTarget.style.color = '#8E8E93';
-                }}
+                className="block w-full mt-8 p-[18px] rounded-[8px] font-medium text-[13px] uppercase tracking-[0.05em] cursor-pointer text-center transition-all duration-500 select-none border border-neutral-300 dark:border-white/20 bg-transparent dark:bg-white/5 text-[#8E8E93] dark:text-white/60 hover:border-[#111] dark:hover:border-white/30 hover:text-[#111] dark:hover:text-white dark:hover:bg-white/10 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] dark:hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)]"
               >
                 Read Full Research Paper
               </button>

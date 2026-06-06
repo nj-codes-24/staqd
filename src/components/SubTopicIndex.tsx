@@ -39,9 +39,16 @@ function PaperThumbnail({ src, alt }: { src: string; alt: string }) {
 
   if (failed || !src) {
     return (
-      <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200/50 flex flex-col items-center justify-center text-neutral-400 dark:text-[#9CA3AF] select-none p-2 border border-neutral-200/30 rounded">
-        <span className="text-[11px] font-mono font-black tracking-widest text-[#7c7569] dark:text-[#9CA3AF] uppercase">ZID</span>
-        <span className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 dark:text-[#9CA3AF] font-bold mt-0.5">RESEARCH</span>
+      <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200/50 dark:from-[#1a1a1a] dark:to-[#0f0f0f] flex flex-col items-center justify-center text-neutral-400 dark:text-[#9CA3AF] select-none p-2 border border-neutral-200/30 dark:border-white/5 rounded">
+        <span className="text-[11px] font-mono font-black tracking-widest text-[#7c7569] dark:text-white/20 uppercase">ZID</span>
+        <span className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 dark:text-white/10 font-bold mt-0.5">RESEARCH</span>
+        <div className="mt-4 opacity-10 dark:opacity-5 blur-[1px]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 16L16 12L12 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
       </div>
     );
   }
@@ -827,27 +834,7 @@ export default function SubTopicIndex({
                                 onClick={() => {
                                   handleLoadRemaining(group.headingName);
                                 }}
-                                className="hover:bg-[#333] transition duration-200 !bg-[#111] !text-white !rounded-none !shadow-none"
-                                style={{
-                                  backgroundColor: '#111',
-                                  color: '#FFF',
-                                  padding: '16px 36px',
-                                  borderRadius: '0px',
-                                  boxShadow: 'none',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.1em',
-                                  fontWeight: 700,
-                                  fontSize: '11px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  transition: 'transform 0.2s ease, background-color 0.2s ease',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'none';
-                                }}
+                                className="w-full sm:w-auto px-10 py-4 bg-[#111] dark:bg-white/5 text-white dark:text-gray-300 font-bold font-mono text-[11px] uppercase tracking-widest border border-transparent dark:border-white/10 cursor-pointer transition-all duration-500 hover:-translate-y-0.5 hover:bg-[#333] dark:hover:bg-white/10 hover:shadow-[inset_0_0_10px_rgba(255,255,255,0.1)] dark:hover:border-white/20"
                               >
                                 ↓ SEE MORE PAPERS
                               </button>

@@ -567,7 +567,7 @@ export default function Dashboard({
                                   <button 
                                     key={i}
                                     onClick={() => setSearchQuery(suggestion)}
-                                    className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black dark:text-gray-100 dark:hover:text-white transition-colors"
+                                    className="text-left font-serif text-lg md:text-xl text-neutral-600 hover:text-black dark:text-gray-100 dark:hover:text-white transition-all duration-200 hover:pl-4 hover:bg-black/5 dark:hover:bg-white/5 py-2 -my-2 rounded-r"
                                   >
                                     <span className="text-neutral-400 mr-4 font-sans text-sm">↳</span>
                                     {suggestion}
@@ -619,12 +619,17 @@ export default function Dashboard({
                                   className="group bg-white dark:bg-[#1C1C1E] rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] cursor-pointer h-full border border-neutral-100 dark:border-white/5"
                                 >
                                   <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative">
-                                    <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
-                                      src={article.imageUrl} 
-                                      alt={article.title}
-                                      referrerPolicy="no-referrer"
-                                      
-                                    />
+                                    {article.imageUrl ? (
+                                      <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
+                                        src={article.imageUrl} 
+                                        alt={article.title}
+                                        referrerPolicy="no-referrer"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
+                                        <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="p-5 flex-1 flex flex-col space-y-3">
                                     <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
@@ -715,12 +720,17 @@ export default function Dashboard({
                                     <div 
                                       className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 dark:bg-[#27272A] relative"
                                     >
-                                      <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
-                                        src={article.imageUrl} 
-                                        alt={article.title}
-                                        referrerPolicy="no-referrer"
-                                        
-                                      />
+                                      {article.imageUrl ? (
+                                        <img className="dark:brightness-90 transition-all duration-300 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-103" 
+                                          src={article.imageUrl} 
+                                          alt={article.title}
+                                          referrerPolicy="no-referrer"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
+                                          <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                                        </div>
+                                      )}
                                     </div>
 
                                     {/* Title / Description & Widgets */}
@@ -768,9 +778,9 @@ export default function Dashboard({
             {/* FAB Trigger for Custom Paper Upload */}
             <button 
               onClick={() => handleAuthGuardedAction(() => setIsUploadModalOpen(true))}
-              className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-white dark:bg-white/5 backdrop-blur-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/60 dark:border-white/20 flex items-center justify-center text-slate-800 dark:text-white transition-all duration-300 ease-out hover:bg-white dark:hover:bg-gray-100 dark:hover:text-black hover:scale-105 dark:hover:scale-105 active:scale-95"
+              className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-white dark:bg-white/5 backdrop-blur-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/60 dark:border-white/20 flex items-center justify-center text-slate-800 dark:text-white transition-all duration-300 ease-out hover:bg-white dark:hover:bg-white/5 dark:hover:border-white/60 hover:scale-110 dark:hover:shadow-[inset_0_0_2px_rgba(255,255,255,0.2)] dark:hover:drop-shadow-[0_0_2px_rgba(255,255,255,0.4)] active:scale-95 group"
             >
-              <Plus size={32} strokeWidth={2} className="dark:text-white dark:group-hover:text-black" />
+              <Plus size={32} strokeWidth={2} className="dark:text-white/80 dark:group-hover:text-white transition-all duration-300 ease-out" />
             </button>
 
             {/* Custom Paper Upload Modal */}
