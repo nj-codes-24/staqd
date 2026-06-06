@@ -284,7 +284,7 @@ export default function SubscriptionModal({
                       
                       {/* Tightened header with clear spacing */}
                       <div className="text-center mb-4 mt-2">
-                        <h3 className="font-sans font-black text-base tracking-[0.2em] uppercase mb-1 text-neutral-900 border-b-[3px] border-black pb-1 inline-block whitespace-nowrap">[ STΛQD ] HUB CHECK</h3>
+                        <h3 className="font-sans font-black text-base tracking-[0.2em] uppercase mb-1 text-neutral-900 border-b-[3px] border-black pb-1 inline-block whitespace-nowrap"><span className="text-[#FF5500]">[</span> STΛQD <span className="text-[#FF5500]">]</span> BILL</h3>
                         <p className="text-neutral-500 text-[10px] mt-1 pr-1">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                       </div>
 
@@ -478,15 +478,35 @@ export default function SubscriptionModal({
                   <div className="w-[82%] h-[88%] border border-[#3E4F5E] rounded-xl flex flex-col items-center p-10 relative overflow-hidden z-10">
                     <div className="absolute top-0 w-full h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:100%_4px]"></div>
                     
-                    <div className="mt-12 text-center z-10 w-full">
-                      <h2 className="font-sans text-5xl font-black text-[#F4EFE6] tracking-[0.2em] uppercase mb-1 whitespace-nowrap">[ STΛQD ] HUB</h2>
-                      <div className="h-[2px] w-16 bg-amber-600/70 mx-auto my-6"></div>
-                      <p className="font-mono text-xs uppercase tracking-[0.4em] text-[#A69B88] font-bold">Premium Workspace</p>
+                    <div className="mt-8 text-center z-10 w-full">
+                      <div 
+                        className="flex items-center justify-center h-24 mb-6 space-x-2 opacity-50"
+                        style={{ filter: 'drop-shadow(0 -1px 2px rgba(0,0,0,0.8)) drop-shadow(0 1px 1px rgba(255,255,255,0.05))' }}
+                      >
+                        {/* Left Bracket */}
+                        <svg className="h-full w-auto shrink-0" viewBox="0 0 14 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M 12 4 H 4 V 36 H 12" stroke="#B04818" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        
+                        {/* The 3 Bars */}
+                        <svg className="h-[85%] w-auto text-[#A69B88]" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M 12 11 L 33 11 L 29 16 L 8 16 Z" fill="currentColor" />
+                          <path d="M 5 19 L 2 21 L 5 23 L 3 25 L 36 25 L 32 19 Z" fill="#B04818" />
+                          <path d="M 10 28 L 31 28 L 27 33 L 6 33 Z" fill="currentColor" />
+                        </svg>
+
+                        {/* Right Bracket */}
+                        <svg className="h-full w-auto shrink-0" viewBox="0 0 14 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M 2 4 H 10 V 36 H 2" stroke="#B04818" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div className="h-[3px] w-24 bg-amber-700/30 mx-auto mb-8"></div>
+                      <p className="font-mono text-xs uppercase tracking-[0.4em] text-[#A69B88]/40 font-bold">Premium Workspace</p>
                     </div>
 
-                    <div className="mt-auto mb-8 z-10 space-y-4 flex flex-col items-center">
-                      <div className="w-14 h-14 rounded-full bg-[#2A3641] border border-[#485B6C] flex items-center justify-center text-[#F4EFE6] group-hover:scale-110 group-hover:bg-[#3E4F5E] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300">
-                        <ChevronRight className="w-6 h-6" />
+                    <div className="mt-auto mb-10 z-10 space-y-4 flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full bg-[#31404D] border-2 border-[#6B859E] flex items-center justify-center text-[#F4EFE6] group-hover:scale-110 group-hover:bg-[#3E4F5E] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300 button-pulse-glow">
+                        <ChevronRight className="w-8 h-8" />
                       </div>
                       <span className="font-mono text-[9px] uppercase tracking-[0.3em] font-bold shimmer-text-dark">TAP TO OPEN</span>
                     </div>
@@ -827,19 +847,19 @@ export default function SubscriptionModal({
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: 0.2, duration: 0.5 }}
-                                  className="font-serif font-black uppercase flex flex-col whitespace-nowrap"
+                                  className="font-serif font-black uppercase flex flex-wrap"
                                   style={{ 
                                     color: '#1E272E',
-                                    lineHeight: '0.75', 
+                                    lineHeight: '1.1', 
                                     letterSpacing: '-0.03em',
                                     fontSize: 'clamp(36px, 11vw, 48px)',
                                     transform: 'scaleY(1.15)',
-                                    transformOrigin: 'bottom left'
+                                    transformOrigin: 'bottom left',
+                                    gap: '0 0.3em'
                                   }}
                                 >
-                                  <span>WELCOME</span>
-                                  <span>TO</span>
-                                  <span className="font-sans font-black tracking-widest whitespace-nowrap">[ STΛQD ] HUB PRO</span>
+                                  <span>WELCOME TO</span>
+                                  <span className="font-sans font-black tracking-widest whitespace-nowrap"><span className="text-[#FF5500]">[</span> STΛQD <span className="text-[#FF5500]">]</span></span>
                                 </motion.div>
                               </div>
                             </motion.div>
