@@ -3,8 +3,9 @@ import { UserProfile } from '../types';
 import { INITIAL_USER } from '../data';
 
 interface UserContextType {
-  user: UserProfile;
-  updateUser: (updatedUser: UserProfile) => void;
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  updateUser: (updatedUser: UserProfile | null) => void;
   getInitials: (name?: string) => string;
   handleOAuthLogin: (provider: 'google' | 'github', providerData: { displayName: string; photoURL: string }) => void;
   handleLogout: () => void;
@@ -13,19 +14,21 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile>(() => {
+  const [user, setUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('zid_user_profile');
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch (e) {
-        return INITIAL_USER;
+        return null;
       }
     }
-    return INITIAL_USER;
+    return localStorage.getItem('isAuthenticated') === 'true' ? INITIAL_USER : null;
   });
 
-  const updateUser = (updatedUser: UserProfile) => {
+  const isAuthenticated = !!user;
+
+  const updateUser = (updatedUser: UserProfile | null) => {
     setUser(updatedUser);
     localStorage.setItem('zid_user_profile', JSON.stringify(updatedUser));
   };
@@ -46,13 +49,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('zid_user');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('authName');
-    updateUser(INITIAL_USER);
+    localStorage.removeItem('zid_user_profile');
+    setUser(null);
+    window.location.href = '/';
   };
 
   return (
-    <UserContext.Provider value={{ user, updateUser, getInitials, handleOAuthLogin, handleLogout }}>
+    <UserContext.Provider value={{ user, isAuthenticated, updateUser, getInitials, handleOAuthLogin, handleLogout }}>
       {children}
     </UserContext.Provider>
   );

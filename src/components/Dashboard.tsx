@@ -29,7 +29,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
-import { KNOWLEDGE_HUB_DATA } from '../data';
+import { INITIAL_USER, KNOWLEDGE_HUB_DATA } from '../data';
 import BookmarkButton from './BookmarkButton';
 import { useUser } from '../contexts/UserContext';
 
@@ -60,7 +60,7 @@ export default function Dashboard({
   onStartProcessing,
   setIsEditingProfile
 }: DashboardProps) {
-  const { user, getInitials } = useUser();
+  const { user, updateUser, getInitials } = useUser();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
@@ -875,8 +875,13 @@ export default function Dashboard({
             setIsAuthenticated(true);
             if (isSignup) {
               const authName = localStorage.getItem('authName') || 'MEMBER';
-              onUpdateUser({
+              updateUser(user ? {
                 ...user,
+                name: authName,
+                bio: '',
+                avatarUrl: ''
+              } : {
+                ...INITIAL_USER,
                 name: authName,
                 bio: '',
                 avatarUrl: ''

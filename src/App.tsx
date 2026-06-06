@@ -25,6 +25,10 @@ export default function App() {
   const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
+  React.useEffect(() => {
+    console.log("Current Auth State:", user);
+  }, [user]);
+
 
   React.useEffect(() => {
     if (processingArticle) {

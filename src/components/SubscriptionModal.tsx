@@ -51,6 +51,8 @@ export default function SubscriptionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isClosingInstantly, setIsClosingInstantly] = useState(false);
+  const animationTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     if (isOpen) {
@@ -68,6 +70,7 @@ export default function SubscriptionModal({
       setIsSubmitting(false);
       setSubmitSuccess(false);
       setIsClosing(false);
+      setIsClosingInstantly(false);
     }
   }, [isOpen, setIsBookOpen, setIsCheckRevealed]);
 
@@ -79,14 +82,22 @@ export default function SubscriptionModal({
   }, [isBookOpen, setIsCheckRevealed]);
 
   const handleClose = () => {
-    if (isClosing) return;
+    if (isClosing || isClosingInstantly) return;
     setIsClosing(true);
     setIsBookOpen(false);
-    // Total unmount delay: Fold (400ms) + Micro-Hold (100ms) + Vanish (250ms)
-    setTimeout(() => {
+    // Total unmount delay: Fold (800ms) + Vanish (250ms)
+    animationTimerRef.current = setTimeout(() => {
       onClose();
-    }, 750);
+    }, 1050);
   };
+
+  const handleImmediateClose = () => {
+    if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+    setIsClosingInstantly(true);
+    onClose();
+  };
+
+  if (isClosingInstantly) return null;
 
   return (
     <AnimatePresence>
@@ -96,8 +107,9 @@ export default function SubscriptionModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-md overflow-hidden"
-          onClick={handleClose}
         >
+          {/* Invisible Overlay to block background interactions without closing */}
+          <div className="absolute inset-0 z-40" />
           {/* Custom style block for smooth animations and technical texture */}
           <style>{`
             @keyframes shimmer-sweep {
@@ -208,17 +220,16 @@ export default function SubscriptionModal({
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              handleClose();
+              handleImmediateClose();
             }}
-            className={`absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer ${isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`absolute top-6 right-6 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all backdrop-blur-md border border-white/10 cursor-pointer ${(isClosing || isSubmitting) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <X size={20} strokeWidth={2} />
           </button>
 
           {/* Scaler Wrapper for Responsiveness */}
           <div 
-            className="w-full flex items-center justify-center scale-[0.6] sm:scale-[0.8] md:scale-[0.9] lg:scale-100 transition-transform duration-500 relative"
-            onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-center scale-[0.6] sm:scale-[0.8] md:scale-[0.9] lg:scale-100 transition-transform duration-500 relative z-50 pointer-events-none"
           >
             {/* 
               THE 3D PARENT CONTAINER 
@@ -226,19 +237,18 @@ export default function SubscriptionModal({
               perfectly centered on screen when it doubles in width (opens to the left).
             */}
             <motion.div 
-              className="relative w-[380px] h-[600px]"
+              className="relative w-[380px] h-[600px] pointer-events-auto"
               style={{ perspective: 1000 }}
+              onClick={(e) => e.stopPropagation()}
               animate={{ 
                 x: isBookOpen ? '50%' : 0,
                 scale: isClosing ? 0.95 : 1,
                 opacity: isClosing ? 0 : 1
               }}
               transition={{ 
-                x: isClosing 
-                  ? { duration: 0.4, ease: [0.4, 0, 0.2, 1] } 
-                  : { type: 'spring', stiffness: 50, damping: 20 },
-                scale: { duration: 0.25, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.25, delay: isClosing ? 0.5 : 0, ease: [0.4, 0, 0.2, 1] }
+                x: { duration: 0.8, ease: "easeInOut" },
+                scale: { duration: 0.25, delay: isClosing ? 0.8 : 0, ease: "easeInOut" },
+                opacity: { duration: 0.25, delay: isClosing ? 0.8 : 0, ease: "easeInOut" }
               }}
             >
               
@@ -448,11 +458,7 @@ export default function SubscriptionModal({
                 style={{ transformOrigin: 'left center', transformStyle: 'preserve-3d' }}
                 initial={false}
                 animate={{ rotateY: isBookOpen ? -180 : 0 }}
-                transition={
-                  isClosing
-                    ? { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
-                    : { type: 'spring', stiffness: 45, damping: 16 }
-                }
+                transition={{ duration: 0.8, ease: "easeInOut" }}
               >
                 
                 {/* OUTSIDE COVER (Visible when closed) */}

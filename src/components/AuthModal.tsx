@@ -17,7 +17,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticatingSocial, setIsAuthenticatingSocial] = useState<'google' | 'github' | null>(null);
-  const { handleOAuthLogin } = useUser();
+  const { handleOAuthLogin, isAuthenticated } = useUser();
 
   useEffect(() => {
     if (!isOpen) {
@@ -39,7 +39,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   
   sanitizedName = sanitizedName.replace(/\b\w/g, l => l.toUpperCase());
   const finalDerivedName = sanitizedName || 'MEMBER';
-  const nameParts = finalDerivedName.split(' ');
+  
+  const displayAuthName = isSuccess 
+    ? (localStorage.getItem('authName') || finalDerivedName || 'MEMBER').toUpperCase()
+    : (finalDerivedName || 'MEMBER').toUpperCase();
+  const nameParts = displayAuthName.split(' ');
 
   const handleSocialAuth = (provider: 'google' | 'github') => {
     setIsAuthenticatingSocial(provider);
@@ -61,6 +65,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       setIsSuccess(true);
       setIsAuthenticatingSocial(null);
     }, 2000);
+  };
+
+  const handleNavigation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Navigation triggered manually");
+    onAuthSuccess?.(true); // Force it to act as signup so it goes to the profile page
+    onClose();
   };
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
@@ -315,10 +326,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                          onClick={() => {
-                            onAuthSuccess?.(mode === 'signup');
-                            onClose();
-                          }}
+                          onClick={handleNavigation}
                           className={`flex-1 w-full h-[42px] flex justify-center items-center border border-[#FBBF24] bg-gradient-to-br from-[#1c1c1c] to-[#121212] text-[#FBBF24] transition-all duration-300 uppercase tracking-[0.2em] font-bold text-xs rounded-md shadow-lg hover:from-[#FBBF24] hover:to-[#FBBF24] hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-[0.98]`}
                         >
                           <ArrowRight className="w-5 h-5 mx-auto text-current drop-shadow-md" />
