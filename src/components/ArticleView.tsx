@@ -176,7 +176,6 @@ export default function ArticleView({
     const startPercent = Math.round((chapters[index].startSec / totalDurationSeconds) * 100);
     setAudioProgress(startPercent);
     setIsPlaying(true);
-    triggerToast(`Playing chapter: ${chapters[index].title.split(': ')[1] || chapters[index].title}`);
   };
 
   const scrollCueCards = (direction: 'left' | 'right') => {
@@ -741,7 +740,6 @@ export default function ArticleView({
                       <button 
                         onClick={() => {
                           setAudioProgress(Math.max(0, audioProgress - 10));
-                          triggerToast('Skipped back');
                         }}
                         className="p-1 hover:bg-neutral-100 text-neutral-700 cursor-pointer dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg"
                         title="Skip back"
@@ -752,7 +750,6 @@ export default function ArticleView({
                       <button 
                         onClick={() => {
                           setIsPlaying(!isPlaying);
-                          triggerToast(isPlaying ? "Narration paused" : "Narration initiated");
                         }}
                         className={`h-9 w-9 text-white dark:text-white rounded-full flex items-center justify-center hover:scale-105 shadow-sm cursor-pointer bg-[#1C1C1E] transition-all duration-300 ${isPlaying ? 'dark:bg-transparent dark:border dark:border-white/30' : 'dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]'}`}
                         title={isPlaying ? 'Pause' : 'Play'}
@@ -767,7 +764,6 @@ export default function ArticleView({
                       <button 
                         onClick={() => {
                           setAudioProgress(Math.min(100, audioProgress + 10));
-                          triggerToast('Skipped forward');
                         }}
                         className="p-1 hover:bg-neutral-100 text-neutral-700 cursor-pointer dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-lg"
                         title="Skip forward"
@@ -869,7 +865,6 @@ export default function ArticleView({
                         onClick={() => {
                           if (currentStackPosition === 0) {
                             setActiveCardIndex(p => (p + 1) % cueCards.length);
-                            triggerToast('Swiped forward to next deck card');
                           }
                         }}
                       >
@@ -894,7 +889,7 @@ export default function ArticleView({
               {/* Read Full Research Paper Button */}
               <button
                 id="btn-read-full-paper"
-                onClick={() => triggerToast('Opening full scientific paper registry...')}
+                onClick={() => {}}
                 className="block w-full mt-8 p-[18px] rounded-[8px] font-medium text-[13px] uppercase tracking-[0.05em] cursor-pointer text-center transition duration-200 select-none border"
                 style={{
                   background: 'transparent',

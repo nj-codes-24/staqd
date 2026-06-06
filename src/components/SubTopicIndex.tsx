@@ -818,9 +818,6 @@ export default function SubTopicIndex({
                               <button
                                 onClick={() => {
                                   handleLoadRemaining(group.headingName);
-                                  if (typeof (window as any).triggerToast === 'function') {
-                                    (window as any).triggerToast('Loaded remaining papers.');
-                                  }
                                 }}
                                 className="hover:bg-[#333] transition duration-200 !bg-[#111] !text-white !rounded-none !shadow-none"
                                 style={{
