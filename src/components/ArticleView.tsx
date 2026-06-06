@@ -638,7 +638,18 @@ export default function ArticleView({
                     }}
                     className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative shrink-0 hover:scale-105 transition-transform"
                   >
-                     <User className="w-4 h-4 text-neutral-500" />
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.handle || 'Profile'} 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">
+                      {user?.handle?.slice(0, 2) || 'Z'}
+                    </span>
+                  )}
                   </div>
                 </>
               )}

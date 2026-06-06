@@ -246,7 +246,18 @@ export default function Dashboard({
                   }}
                   className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center cursor-pointer overflow-hidden relative hover:scale-105 transition-transform"
                 >
-                   <User className="w-5 h-5 text-neutral-500" />
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.handle || 'Profile'} 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-xs font-mono font-bold text-neutral-500 uppercase">
+                      {user?.handle?.slice(0, 2) || 'Z'}
+                    </span>
+                  )}
                 </div>
               </>
             )}
