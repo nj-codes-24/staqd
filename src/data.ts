@@ -45,11 +45,11 @@ export const ALL_TOPICS = [
 export const INITIAL_USER: UserProfile = {
   name: 'Alex Morgan',
   bio: 'Lead researcher and platform curator. Exploring the intersection of digital architecture and minimal interface design.',
-  email: 'curator@zid.hub',
+  email: 'curator@[ staqd ].hub',
   handle: 'curator_alpha',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
   githubConnected: true,
-  githubUsername: 'zid-developer',
+  githubUsername: '[ staqd ]-developer',
   level: 12,
   exp: 820,
   maxExp: 1000,
@@ -87,7 +87,7 @@ export function createArticle(
     author: {
       name: 'Dr. Evelyn Moss',
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
-      role: 'ZID Core Researcher'
+      role: '[ STΛQD ] Core Researcher'
     },
     content: `## ${title} - A Technical Analysis
 In contemporary industrial circles, the convergence of advanced computing and physical engineering is enabling a massive transformation. This documentation analyzes key variables, methodology models, and implementation structures.

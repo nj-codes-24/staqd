@@ -11,7 +11,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check local storage or system preference on mount
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('ziddy_theme');
+      const savedTheme = localStorage.getItem('[ staqd ]_theme');
       if (savedTheme) {
         return savedTheme === 'dark';
       }
@@ -24,10 +24,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = window.document.documentElement;
     if (isDarkMode) {
       root.classList.add('dark');
-      localStorage.setItem('ziddy_theme', 'dark');
+      localStorage.setItem('[ staqd ]_theme', 'dark');
     } else {
       root.classList.remove('dark');
-      localStorage.setItem('ziddy_theme', 'light');
+      localStorage.setItem('[ staqd ]_theme', 'light');
     }
   }, [isDarkMode]);
 

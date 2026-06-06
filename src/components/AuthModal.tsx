@@ -105,7 +105,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         localStorage.setItem('authName', finalDerivedName);
       } else {
         // For login, try to retrieve their existing saved profile name
-        const existingProfileStr = localStorage.getItem('zid_user_profile');
+        const existingProfileStr = localStorage.getItem('[ staqd ]_user_profile');
         if (existingProfileStr) {
           try {
             const existingProfile = JSON.parse(existingProfileStr);
@@ -181,8 +181,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
                 {/* Typography & Branding (Static, Always Visible) */}
                 <div className="absolute top-12 right-6 flex flex-col items-end z-30 pointer-events-none">
-                  <h2 className="text-[#121212] text-3xl font-black font-sans tracking-tighter leading-none">
-                    ZID HUB
+                  <h2 className="text-[#121212] text-3xl font-black font-sans tracking-widest leading-none whitespace-nowrap">
+                    [ STΛQD ] HUB
                   </h2>
                   <h3 className="text-[#121212]/80 font-mono text-[10px] uppercase tracking-[0.3em] mt-1 font-bold">
                     Platform Access

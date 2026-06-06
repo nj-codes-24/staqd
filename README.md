@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" alt="ZID Platform Banner" width="100%" />
+  <img src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" alt="[ STAQD ] Platform Banner" width="100%" />
 
-  # ZID: Neural Sourcing & Knowledge Hub
+  # [ STAQD ]: Neural Sourcing & Knowledge Hub
   
   **A premium, glassmorphic editorial platform for modern research and academic analysis.**
 
@@ -15,7 +15,7 @@
 
 ## 📖 Overview
 
-ZID is a state-of-the-art Single Page Application (SPA) designed to elevate the academic and research reading experience. Featuring a highly tactile, dark-mode focused aesthetic, the platform integrates dynamic filtering, immersive editorial layouts, and AI-driven insights to help researchers organize, read, and analyze complex scientific papers.
+[ STAQD ] is a state-of-the-art Single Page Application (SPA) designed to elevate the academic and research reading experience. Featuring a highly tactile, dark-mode focused aesthetic, the platform integrates dynamic filtering, immersive editorial layouts, and AI-driven insights to help researchers organize, read, and analyze complex scientific papers.
 
 ## ✨ Key Features
 
@@ -35,7 +35,7 @@ ZID is a state-of-the-art Single Page Application (SPA) designed to elevate the 
 
 ## 🚀 Quick Start
 
-Follow these steps to run the ZID platform locally:
+Follow these steps to run the [ STAQD ] platform locally:
 
 ### Prerequisites
 - Node.js (v18 or higher recommended)
@@ -45,8 +45,8 @@ Follow these steps to run the ZID platform locally:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/nj-codes-24/Ziddy.git
-   cd Ziddy
+   git clone https://github.com/nj-codes-24/[ STAQD ].git
+   cd [ STAQD ]
    ```
 
 2. **Install dependencies:**

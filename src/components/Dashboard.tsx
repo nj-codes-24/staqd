@@ -32,6 +32,7 @@ import { UserProfile, Article } from '../types';
 import { INITIAL_USER, KNOWLEDGE_HUB_DATA } from '../data';
 import BookmarkButton from './BookmarkButton';
 import { useUser } from '../contexts/UserContext';
+import Logo from './Logo';
 
 const getArticleSource = (articleId: string) => {
   const sources = ['arXiv', 'IEEE Spec', 'Nature Portfolio', 'MIT Tech Review', 'ACM Library', 'ScienceDirect'];
@@ -174,7 +175,7 @@ export default function Dashboard({
       {/* Behance Presentation Header bar */}
       <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] dark:text-[#9CA3AF] border-[#ccc5b6] mb-4">
         <span>01 / CORE WORKSPACE</span>
-        <span className="uppercase text-center">ZID TECHNICAL HUD</span>
+        <span className="uppercase text-center"><span className="font-sans font-black tracking-[0.2em] whitespace-nowrap">[ STΛQD ]</span> TECHNICAL HUD</span>
         <span className="uppercase">Design Concept V1</span>
       </div>
 
@@ -187,20 +188,13 @@ export default function Dashboard({
         {/* Main Dashboard Navigation Header */}
         <header className="h-16 border-b border-[#ece8df] dark:border-[rgba(255,255,255,0.08)] px-6 md:px-10 flex items-center justify-between sticky top-0 bg-[#fbfaf8] dark:bg-[#121214]/95 backdrop-blur-md z-50 relative transition-colors">
           
-          {/* Logo element replacement - FLANELLE converted to ZID */}
-          <a 
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.reload();
-            }}
-            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-gray-100 cursor-pointer select-none no-underline"
-          >
-            ZID
-          </a>
+          {/* Logo element replacement - FLANELLE converted to [ STAQD ] */}
+          <div className="flex-1 flex items-center justify-start relative z-10">
+            <Logo />
+          </div>
 
           {/* Top navigation - limited strictly to "Knowledge Hub" */}
-          <nav className="flex items-center space-x-8 text-[11px] font-mono uppercase tracking-widest">
+          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-8 text-[11px] font-mono uppercase tracking-widest z-0">
             <button 
               className="transition relative py-2 text-black dark:text-white font-bold border-b-2 border-black dark:border-white"
             >
@@ -209,7 +203,7 @@ export default function Dashboard({
           </nav>
 
           {/* Far Right widgets */}
-          <div className="flex items-center space-x-4 md:space-x-6">
+          <div className="flex-1 flex items-center justify-end space-x-4 md:space-x-6 relative z-10">
             {!isAuthenticated ? (
               <div className="flex items-center gap-4">
                 <button
@@ -627,7 +621,7 @@ export default function Dashboard({
                                       />
                                     ) : (
                                       <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
-                                        <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                                        <span className="text-[40px] font-sans font-black text-white/5 uppercase tracking-widest whitespace-nowrap">[ STΛQD ]</span>
                                       </div>
                                     )}
                                   </div>
@@ -728,7 +722,7 @@ export default function Dashboard({
                                         />
                                       ) : (
                                         <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
-                                          <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                                          <span className="text-[40px] font-sans font-black text-white/5 uppercase tracking-widest whitespace-nowrap">[ STΛQD ]</span>
                                         </div>
                                       )}
                                     </div>
@@ -838,8 +832,8 @@ export default function Dashboard({
 
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between items-start gap-4">
               <div>
-                <h2 className="text-3xl md:text-4xl font-mono font-black tracking-widest text-[#fbfaf8] uppercase italic">
-                  ZID*
+                <h2 className="text-3xl md:text-4xl font-sans font-black tracking-widest text-[#fbfaf8] uppercase italic whitespace-nowrap">
+                  [ STΛQD ]*
                 </h2>
                 <p className="text-[9px] font-mono tracking-widest text-neutral-400 uppercase mt-1">
                   curated microscale research hub & terminal insights for absolute builders
@@ -847,12 +841,12 @@ export default function Dashboard({
               </div>
 
               <div className="text-[10px] font-serif italic text-neutral-400 max-w-xs sm:text-right">
-                "Deterministic state correctness under compile stress is ZID system policy."
+                "Deterministic state correctness under compile stress is <span className="font-sans font-black tracking-[0.1em] whitespace-nowrap">[ STΛQD ]</span> system policy."
               </div>
             </div>
 
             <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 dark:text-[#9CA3AF] gap-2">
-              <span>© {new Date().getFullYear()} ZID RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
+              <span>© {new Date().getFullYear()} <span className="font-sans font-black tracking-[0.1em] whitespace-nowrap">[ STΛQD ]</span> RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
               <span>ESTABLISHED MAY 2026</span>
             </div>
 

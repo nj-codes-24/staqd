@@ -13,7 +13,7 @@ export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
       {/* Presentation Header bar */}
       <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] dark:text-neutral-400 uppercase">
         <span>01 / Core Workspace</span>
-        <span>ZID Technical Hud</span>
+        <span><span className="font-sans font-black tracking-[0.2em] whitespace-nowrap">[ STΛQD ]</span> Technical Hud</span>
         <span>Generating Session...</span>
       </div>
 
@@ -35,8 +35,8 @@ export default function StudyView({ isGenerating, onBack }: StudyViewProps) {
               </button>
             </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-2.5 sm:space-x-3 pointer-events-none whitespace-nowrap">
-              <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 dark:text-white uppercase">
-                ZID
+              <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 dark:text-white uppercase whitespace-nowrap">
+                [ STΛQD ]
               </span>
               <span className="h-4 w-[1px] bg-neutral-200 dark:bg-white/20"></span>
               <span className="text-[10px] font-sans font-bold text-[#8E8E93] tracking-widest uppercase">

@@ -517,7 +517,7 @@ export default function ArticleView({
       {/* Presentation Header bar in clean sans-serif style from image_17 */}
       <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] uppercase">
         <span>01 / Core Workspace</span>
-        <span>ZID Technical Hud</span>
+        <span>[ STAQD ] Technical Hud</span>
         <span>Design Concept v1</span>
       </div>
 
@@ -569,10 +569,10 @@ export default function ArticleView({
             </button>
           </div>
 
-          {/* Center Group: Place the "ZID | RESEARCH READER" typography in the absolute center of the header */}
+          {/* Center Group: Place the "[ STAQD ] | RESEARCH READER" typography in the absolute center of the header */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-2.5 sm:space-x-3 pointer-events-none whitespace-nowrap">
             <span className="text-sm font-sans font-extrabold tracking-[0.25em] text-neutral-950 dark:text-gray-200 uppercase">
-              ZID
+              [ STAQD ]
             </span>
             <span className="h-4 w-[1px] bg-neutral-200"></span>
             <span className="text-[10px] font-sans font-bold text-[#8E8E93] tracking-widest uppercase">

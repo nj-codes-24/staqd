@@ -320,7 +320,7 @@ export default function ProfileView({
       {/* Meta-Header bar */}
       <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] border-[#ccc5b6] mb-4">
         <span>02 / CURATOR DOSSIER</span>
-        <span className="uppercase text-center">ZID TECHNICAL HUD</span>
+        <span className="uppercase text-center"><span className="font-sans font-black tracking-[0.2em] whitespace-nowrap">[ STΛQD ]</span> TECHNICAL HUD</span>
         <span className="uppercase">DESIGN CONCEPT V1</span>
       </div>
 
@@ -627,7 +627,7 @@ export default function ProfileView({
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
-                              <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                              <span className="text-[40px] font-sans font-black text-white/5 uppercase tracking-widest whitespace-nowrap">[ STΛQD ]</span>
                             </div>
                           )}
                         </div>
@@ -694,7 +694,7 @@ export default function ProfileView({
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center border border-white/5 group-hover:scale-103 transition-transform duration-500 ease-out">
-                              <span className="text-[40px] font-serif font-black text-white/5 uppercase tracking-tighter">ZID</span>
+                              <span className="text-[40px] font-sans font-black text-white/5 uppercase tracking-widest whitespace-nowrap">[ STΛQD ]</span>
                             </div>
                           )}
                         </div>

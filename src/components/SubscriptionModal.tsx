@@ -284,7 +284,7 @@ export default function SubscriptionModal({
                       
                       {/* Tightened header with clear spacing */}
                       <div className="text-center mb-4 mt-2">
-                        <h3 className="font-bold text-base tracking-widest uppercase mb-1 text-neutral-900 border-b-[3px] border-black pb-1 inline-block">ZID HUB CHECK</h3>
+                        <h3 className="font-sans font-black text-base tracking-[0.2em] uppercase mb-1 text-neutral-900 border-b-[3px] border-black pb-1 inline-block whitespace-nowrap">[ STΛQD ] HUB CHECK</h3>
                         <p className="text-neutral-500 text-[10px] mt-1 pr-1">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                       </div>
 
@@ -450,7 +450,7 @@ export default function SubscriptionModal({
                   {/* Aesthetic label at final corner */}
                   <div className="mt-auto w-full flex justify-end">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 truncate">
-                      ZID / F-001
+                      <span className="font-sans font-black tracking-[0.1em] whitespace-nowrap">[ STΛQD ]</span> / F-001
                     </p>
                   </div>
                 </button>
@@ -479,7 +479,7 @@ export default function SubscriptionModal({
                     <div className="absolute top-0 w-full h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:100%_4px]"></div>
                     
                     <div className="mt-12 text-center z-10 w-full">
-                      <h2 className="font-serif text-5xl font-black text-[#F4EFE6] tracking-widest uppercase mb-1">ZID HUB</h2>
+                      <h2 className="font-sans text-5xl font-black text-[#F4EFE6] tracking-[0.2em] uppercase mb-1 whitespace-nowrap">[ STΛQD ] HUB</h2>
                       <div className="h-[2px] w-16 bg-amber-600/70 mx-auto my-6"></div>
                       <p className="font-mono text-xs uppercase tracking-[0.4em] text-[#A69B88] font-bold">Premium Workspace</p>
                     </div>
@@ -839,7 +839,7 @@ export default function SubscriptionModal({
                                 >
                                   <span>WELCOME</span>
                                   <span>TO</span>
-                                  <span>ZID HUB PRO</span>
+                                  <span className="font-sans font-black tracking-widest whitespace-nowrap">[ STΛQD ] HUB PRO</span>
                                 </motion.div>
                               </div>
                             </motion.div>

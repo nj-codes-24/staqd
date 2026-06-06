@@ -40,7 +40,7 @@ function PaperThumbnail({ src, alt }: { src: string; alt: string }) {
   if (failed || !src) {
     return (
       <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200/50 dark:from-[#1a1a1a] dark:to-[#0f0f0f] flex flex-col items-center justify-center text-neutral-400 dark:text-[#9CA3AF] select-none p-2 border border-neutral-200/30 dark:border-white/5 rounded">
-        <span className="text-[11px] font-mono font-black tracking-widest text-[#7c7569] dark:text-white/20 uppercase">ZID</span>
+        <span className="text-[11px] font-sans font-black tracking-[0.2em] whitespace-nowrap text-[#7c7569] dark:text-white/20 uppercase">[ STΛQD ]</span>
         <span className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 dark:text-white/10 font-bold mt-0.5">RESEARCH</span>
         <div className="mt-4 opacity-10 dark:opacity-5 blur-[1px]">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,7 +106,7 @@ const generateMockPapersForSubTopic = (subTopic: string, initialCount: number): 
   ];
 
   const authors = [
-    { name: 'Dr. Evelyn Moss', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150', role: 'ZID Team Principal' },
+    { name: 'Dr. Evelyn Moss', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150', role: '[ STΛQD ] Team Principal' },
     { name: 'Prof. Liam Vance', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150', role: 'Senior Compiler Scientist' },
     { name: 'Hana Mitchell', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150', role: 'V8 Hardware Architect' }
   ];
@@ -382,7 +382,7 @@ export default function SubTopicIndex({
       {/* Behance Presentation Header bar */}
       <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] dark:text-gray-400 border-[#ccc5b6] mb-4">
         <span>02 / TECHNICAL CATALOG INDEX</span>
-        <span className="uppercase text-center">ZID SUB-TOPIC PORTAL</span>
+        <span className="uppercase text-center"><span className="font-sans font-black tracking-[0.2em] whitespace-nowrap">[ STΛQD ]</span> SUB-TOPIC PORTAL</span>
         <span className="uppercase">COMPILER LEVEL {user?.level || 0}</span>
       </div>
 
@@ -407,9 +407,9 @@ export default function SubTopicIndex({
           {/* Logo element replacement - centered */}
           <div 
             onClick={onBack}
-            className="text-lg font-mono font-black tracking-[0.25em] text-neutral-900 dark:text-[#F3F4F6] cursor-pointer select-none absolute left-1/2 -translate-x-1/2"
+            className="text-lg font-sans font-black tracking-[0.25em] text-neutral-900 dark:text-[#F3F4F6] cursor-pointer select-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
           >
-            ZID
+            [ STΛQD ]
           </div>
 
           {/* Far Right widgets */}
@@ -977,19 +977,19 @@ export default function SubTopicIndex({
             <div className="border-t border-[#31353a] w-full"></div>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between items-start gap-4">
               <div>
-                <h2 className="text-3xl md:text-4xl font-mono font-black tracking-widest text-[#fbfaf8] uppercase italic">
-                  ZID*
+                <h2 className="text-3xl md:text-4xl font-sans font-black tracking-widest text-[#fbfaf8] uppercase italic whitespace-nowrap">
+                  [ STΛQD ]*
                 </h2>
                 <p className="text-[9px] font-mono tracking-widest text-neutral-400 dark:text-gray-300 uppercase mt-1">
                   curated microscale research hub & terminal insights for absolute builders
                 </p>
               </div>
               <div className="text-[10px] font-serif italic text-neutral-400 dark:text-[#9CA3AF] max-w-xs sm:text-right">
-                "Deterministic state correctness under compile stress is ZID system policy."
+                "Deterministic state correctness under compile stress is <span className="font-sans font-black tracking-[0.1em] whitespace-nowrap">[ STΛQD ]</span> system policy."
               </div>
             </div>
             <div className="pt-4 border-t border-[#2d3136] text-[9px] font-mono uppercase tracking-widest flex flex-col sm:flex-row justify-between text-neutral-500 dark:text-[#9CA3AF] gap-2">
-              <span>© {new Date().getFullYear()} ZID RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
+              <span>© {new Date().getFullYear()} <span className="font-sans font-black tracking-[0.1em] whitespace-nowrap">[ STΛQD ]</span> RESEARCH INDEX. ALL RIGHTS RESERVED.</span>
               <span>ESTABLISHED MAY 2026</span>
             </div>
           </div>

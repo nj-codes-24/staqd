@@ -15,7 +15,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('zid_user_profile');
+    const saved = localStorage.getItem('[ staqd ]_user_profile');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -30,7 +30,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUser = (updatedUser: UserProfile | null) => {
     setUser(updatedUser);
-    localStorage.setItem('zid_user_profile', JSON.stringify(updatedUser));
+    localStorage.setItem('[ staqd ]_user_profile', JSON.stringify(updatedUser));
   };
 
   const getInitials = (name?: string) => {
@@ -49,10 +49,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('zid_user');
+    localStorage.removeItem('[ staqd ]_user');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('authName');
-    localStorage.removeItem('zid_user_profile');
+    localStorage.removeItem('[ staqd ]_user_profile');
     setUser(null);
     window.location.href = '/';
   };

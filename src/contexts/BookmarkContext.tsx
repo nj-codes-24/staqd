@@ -21,11 +21,11 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   // Hydrate from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('ziddy_saved_articles');
+      const stored = localStorage.getItem('[ staqd ]_saved_articles');
       if (stored) {
         setSavedArticles(JSON.parse(stored));
       }
-      const storedUploads = localStorage.getItem('ziddy_uploaded_articles');
+      const storedUploads = localStorage.getItem('[ staqd ]_uploaded_articles');
       if (storedUploads) {
         setUploadedArticles(JSON.parse(storedUploads));
       }
@@ -36,11 +36,11 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 
   // Save to localStorage on change
   useEffect(() => {
-    localStorage.setItem('ziddy_saved_articles', JSON.stringify(savedArticles));
+    localStorage.setItem('[ staqd ]_saved_articles', JSON.stringify(savedArticles));
   }, [savedArticles]);
 
   useEffect(() => {
-    localStorage.setItem('ziddy_uploaded_articles', JSON.stringify(uploadedArticles));
+    localStorage.setItem('[ staqd ]_uploaded_articles', JSON.stringify(uploadedArticles));
   }, [uploadedArticles]);
 
   const toggleSave = (article: Article) => {
