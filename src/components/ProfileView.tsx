@@ -182,6 +182,21 @@ export default function ProfileView({
   const [editBio, setEditBio] = useState(user?.bio || "No bio added yet.");
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
 
+  const displayName = user?.name || "Member";
+  const nameParts = (displayName || "").trim().split(' ');
+  const firstName = nameParts[0] || '';
+  const restOfName = nameParts.slice(1).join(' ') || '';
+
+  const hasBio = Boolean(user?.bio && user.bio.trim().length > 0);
+  
+  const firstNameSize = hasBio 
+    ? 'text-[clamp(3rem,6vw,6rem)]'
+    : 'text-[clamp(3rem,7vw,8rem)]';
+
+  const restOfNameSize = hasBio
+    ? 'text-[clamp(2rem,4vw,4rem)]'
+    : 'text-[clamp(2.5rem,5vw,5rem)]';
+
   // Pre-fill parsed name from auth setup if we just entered edit mode
   useEffect(() => {
     if (isEditingProfile) {
@@ -426,42 +441,39 @@ export default function ProfileView({
         </div>
 
         {/* Top Section (The Editorial Header) */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-12 md:gap-20 items-start text-left">
+        <div className="flex flex-col md:flex-row justify-between items-start w-full gap-8 lg:gap-16 text-left">
           {/* Left Column (Typography) */}
-          <div className="flex flex-col justify-start w-full h-full">
-            <h1 
-              className="font-serif font-black text-[#111] dark:text-[#F3F4F6] tracking-tighter uppercase"
-              style={{ 
-                fontSize: 'clamp(4rem, 8vw, 8rem)',
-                fontFamily: 'var(--font-serif)',
-                lineHeight: '0.9'
-              }}
-            >
-              {(user?.name || "Member").split(' ').map((part, i) => (
-                <React.Fragment key={i}>
-                  {part}
-                  {i < (user?.name || "Member").split(' ').length - 1 && <br />}
-                </React.Fragment>
-              ))}
-            </h1>
-            <div className="mt-8 w-full max-w-[480px]">
-              <p className={`text-sm font-sans leading-relaxed ${user?.bio ? 'text-[#444] dark:text-gray-400' : 'text-black/40 dark:text-white/40 italic'}`}>
-                {user?.bio || "No bio added yet."}
-              </p>
+          <div className="flex-1 min-w-0 flex flex-col justify-start w-full h-[320px] lg:h-[400px] py-2 pr-8 lg:pr-16">
+            <div className="flex flex-col pb-2 mb-10">
+              <span 
+                className={`block px-2 -mx-2 leading-[1.1] font-serif font-black text-[#111] dark:text-white tracking-tighter uppercase whitespace-nowrap ${firstNameSize}`}
+              >
+                {firstName}
+              </span>
+              {restOfName && (
+                <span 
+                  className={`block px-2 -mx-2 leading-[1.1] font-serif font-black text-[#111]/80 dark:text-white/80 tracking-tighter uppercase whitespace-nowrap ${restOfNameSize}`}
+                >
+                  {restOfName}
+                </span>
+              )}
             </div>
+            
+            <p className={`w-full max-w-md text-sm font-sans leading-loose mb-6 ${user?.bio ? 'text-[#A1A1AA] dark:text-white/50' : 'text-[#A1A1AA]/60 dark:text-white/40 italic'}`}>
+              {user?.bio || "No bio added yet."}
+            </p>
             <button 
               onClick={() => setIsEditingModalOpen(true)}
-              className="mt-6 px-4 py-2 w-fit text-[10px] uppercase tracking-[0.2em] border border-black/10 dark:border-white/10 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[#111] dark:text-white cursor-pointer"
+              className="px-4 py-2 w-fit text-[10px] uppercase tracking-[0.2em] border border-black/10 dark:border-white/10 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[#111] dark:text-white cursor-pointer m-0"
             >
               Edit Profile
             </button>
           </div>
 
           {/* Right Column (Photo) */}
-          <div className="w-full flex justify-end">
+          <div className="flex justify-end h-[320px] lg:h-[400px] shrink-0">
             <div 
-              className="w-full overflow-hidden rounded-none relative max-w-md ml-auto aspect-square"
-              style={{ maxWidth: '360px', width: '100%' }}
+              className="w-[320px] h-[320px] lg:w-[400px] lg:h-[400px] shrink-0 overflow-hidden rounded-none relative"
             >
               {user?.avatarUrl ? (
                 <div className="w-full h-full bg-[#f0ede6] border border-neutral-200 dark:border-white/10">

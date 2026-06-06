@@ -16,7 +16,17 @@ import { BookmarkProvider } from './contexts/BookmarkContext';
 import GlobalToast from './components/GlobalToast';
 
 export default function App() {
-  const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER);
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem('zid_user_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return INITIAL_USER;
+      }
+    }
+    return INITIAL_USER;
+  });
   const [activeTab, setActiveTab] = useState<'hud' | 'saved' | 'profile'>('hud');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
@@ -109,6 +119,7 @@ export default function App() {
 
   const handleUpdateUserProfile = (updatedUser: UserProfile) => {
     setUserProfile(updatedUser);
+    localStorage.setItem('zid_user_profile', JSON.stringify(updatedUser));
   };
 
   return (
