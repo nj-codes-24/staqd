@@ -70,6 +70,17 @@ export default function Dashboard({
   const [isSearching, setIsSearching] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const defaultFilters = {
+    sortBy: 'Relevance',
+    publishers: [] as string[],
+    subTopics: [] as string[],
+    attributes: {
+      'Includes Code': false,
+      'Includes Dataset': false
+    }
+  };
+  const [filters, setFilters] = useState(defaultFilters);
   
   const { isDarkMode, toggleDarkMode } = useTheme();
   
@@ -368,10 +379,17 @@ export default function Dashboard({
                                     <div className="space-y-4">
                                       {['Relevance', 'Newest First', 'Most Cited'].map(option => (
                                           <label key={option} className="flex items-center space-x-3 cursor-pointer group">
+                                            <input 
+                                              type="radio" 
+                                              name="sortBy"
+                                              className="hidden"
+                                              checked={filters.sortBy === option}
+                                              onChange={() => setFilters({ ...filters, sortBy: option })}
+                                            />
                                             <div className="w-4 h-4 rounded-full border border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 flex items-center justify-center group-hover:border-[#111827] dark:group-hover:border-white transition-colors">
-                                              {option === 'Relevance' && <div className="w-2 h-2 rounded-full bg-[#111827] dark:bg-white" />}
+                                              {filters.sortBy === option && <div className="w-2 h-2 rounded-full bg-[#111827] dark:bg-white" />}
                                             </div>
-                                            <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
+                                            <span className={`text-[13px] font-mono transition-colors ${filters.sortBy === option ? 'text-[#111827] dark:text-white font-bold' : 'text-[#374151] dark:text-gray-400'}`}>{option}</span>
                                           </label>
                                       ))}
                                     </div>
@@ -381,14 +399,27 @@ export default function Dashboard({
                                   <div>
                                     <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Publisher / Source</h3>
                                     <div className="space-y-4">
-                                      {['arXiv', 'IEEE', 'Nature', 'ScienceDirect'].map(option => (
+                                      {['arXiv', 'IEEE', 'Nature', 'ScienceDirect'].map(option => {
+                                        const isChecked = filters.publishers.includes(option);
+                                        return (
                                         <label key={option} className="flex items-center space-x-3 cursor-pointer group">
-                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'arXiv' ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
-                                            {option === 'arXiv' && <Check size={12} color="currentColor" strokeWidth={3} />}
+                                          <input 
+                                            type="checkbox"
+                                            className="hidden"
+                                            checked={isChecked}
+                                            onChange={() => {
+                                              const newPublishers = isChecked 
+                                                ? filters.publishers.filter(p => p !== option) 
+                                                : [...filters.publishers, option];
+                                              setFilters({ ...filters, publishers: newPublishers });
+                                            }}
+                                          />
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isChecked ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
+                                            {isChecked && <Check size={12} color="currentColor" strokeWidth={3} />}
                                           </div>
-                                          <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
+                                          <span className={`text-[13px] font-mono transition-colors ${isChecked ? 'text-[#111827] dark:text-white font-bold' : 'text-[#374151] dark:text-gray-400'}`}>{option}</span>
                                         </label>
-                                      ))}
+                                      )})}
                                     </div>
                                   </div>
 
@@ -396,14 +427,27 @@ export default function Dashboard({
                                   <div>
                                     <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Sub-Topics</h3>
                                     <div className="space-y-4">
-                                      {['Computer Sciences', 'Electrical', 'Mechanical', 'Aerospace'].map(option => (
+                                      {['Computer Sciences', 'Electrical', 'Mechanical', 'Aerospace'].map(option => {
+                                        const isChecked = filters.subTopics.includes(option);
+                                        return (
                                         <label key={option} className="flex items-center space-x-3 cursor-pointer group">
-                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${option === 'Computer Sciences' ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
-                                            {option === 'Computer Sciences' && <Check size={12} color="currentColor" strokeWidth={3} />}
+                                          <input 
+                                            type="checkbox"
+                                            className="hidden"
+                                            checked={isChecked}
+                                            onChange={() => {
+                                              const newSubTopics = isChecked 
+                                                ? filters.subTopics.filter(t => t !== option) 
+                                                : [...filters.subTopics, option];
+                                              setFilters({ ...filters, subTopics: newSubTopics });
+                                            }}
+                                          />
+                                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isChecked ? 'bg-[#111827] dark:bg-white border-[#111827] dark:border-white text-white dark:text-black' : 'border-[#D1D5DB] dark:border-white/30 dark:bg-white/5 group-hover:border-[#111827] dark:group-hover:border-white'}`}>
+                                            {isChecked && <Check size={12} color="currentColor" strokeWidth={3} />}
                                           </div>
-                                          <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{option}</span>
+                                          <span className={`text-[13px] font-mono transition-colors ${isChecked ? 'text-[#111827] dark:text-white font-bold' : 'text-[#374151] dark:text-gray-400'}`}>{option}</span>
                                         </label>
-                                      ))}
+                                      )})}
                                     </div>
                                   </div>
 
@@ -411,21 +455,37 @@ export default function Dashboard({
                                   <div>
                                     <h3 className="text-[#9CA3AF] text-[11px] font-sans font-bold tracking-[0.1em] uppercase mb-6">Attributes</h3>
                                     <div className="space-y-5">
-                                      {['Includes Code', 'Includes Dataset'].map((asset) => (
+                                      {['Includes Code', 'Includes Dataset'].map((asset) => {
+                                          const isChecked = filters.attributes[asset as keyof typeof filters.attributes];
+                                          return (
                                           <label key={asset} className="flex items-center justify-between cursor-pointer group">
-                                            <span className="text-[13px] text-[#374151] dark:text-gray-400 font-mono">{asset}</span>
-                                            <div className={`w-8 h-4 rounded-full relative transition-colors ${asset === 'Includes Code' ? 'bg-[#111827] dark:bg-white' : 'bg-[#D1D5DB] dark:bg-white/10'}`}>
-                                              <div className={`absolute top-0.5 w-3 h-3 rounded-full shadow-sm transition-all ${asset === 'Includes Code' ? 'right-0.5 bg-white dark:bg-gray-900' : 'left-0.5 bg-white dark:bg-gray-400'}`} />
+                                            <input 
+                                              type="checkbox"
+                                              className="hidden"
+                                              checked={isChecked}
+                                              onChange={() => {
+                                                setFilters({
+                                                  ...filters,
+                                                  attributes: {
+                                                    ...filters.attributes,
+                                                    [asset]: !isChecked
+                                                  }
+                                                });
+                                              }}
+                                            />
+                                            <span className={`text-[13px] font-mono transition-colors ${isChecked ? 'text-[#111827] dark:text-white font-bold' : 'text-[#374151] dark:text-gray-400'}`}>{asset}</span>
+                                            <div className={`w-8 h-4 rounded-full relative transition-colors ${isChecked ? 'bg-[#111827] dark:bg-white' : 'bg-[#D1D5DB] dark:bg-white/10'}`}>
+                                              <div className={`absolute top-0.5 w-3 h-3 rounded-full shadow-sm transition-all ${isChecked ? 'right-0.5 bg-white dark:bg-gray-900' : 'left-0.5 bg-white dark:bg-gray-400'}`} />
                                             </div>
                                           </label>
-                                      ))}
+                                      )})}
                                     </div>
                                   </div>
                                 </div>
 
                                 <div className="border-t border-[#E5E7EB] pt-6 mt-6 flex justify-between items-center">
                                   <button 
-                                    onClick={() => {}}
+                                    onClick={() => setFilters(defaultFilters)}
                                     className="text-[11px] font-mono uppercase underline text-[#9CA3AF] hover:text-[#374151] transition-colors"
                                   >
                                     Clear All
