@@ -60,15 +60,14 @@ import AuthModal from './AuthModal';
 import SubscriptionModal from './SubscriptionModal';
 import { useBookmark } from '../contexts/BookmarkContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useUser } from '../contexts/UserContext';
 
 interface ArticleViewProps {
   article: Article;
-  user: UserProfile;
   activeTab: 'hud' | 'saved' | 'profile';
   setActiveTab: (tab: 'hud' | 'saved' | 'profile') => void;
   onBack: () => void;
   onToggleBookmark: (articleId: string) => void;
-  onLogout: () => void;
 }
 
 interface ChatMessage {
@@ -93,13 +92,14 @@ interface CueCardItem {
 
 export default function ArticleView({ 
   article, 
-  user, 
   activeTab, 
   setActiveTab, 
   onBack, 
-  onToggleBookmark,
-  onLogout 
+  onToggleBookmark
 }: ArticleViewProps) {
+  const { user, getInitials } = useUser();
+  const [activeRightPanel, setActiveRightPanel] = useState<'study' | 'tools' | null>(null);
+  
   // Volume state
   const [volumeVal, setVolumeVal] = useState<number>(80);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -646,8 +646,8 @@ export default function ArticleView({
                       className="w-full h-full object-cover" 
                     />
                   ) : (
-                    <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">
-                      {user?.handle?.slice(0, 2) || 'Z'}
+                    <span className="text-xs font-mono font-bold text-neutral-500 uppercase">
+                      {getInitials(user?.name)}
                     </span>
                   )}
                   </div>

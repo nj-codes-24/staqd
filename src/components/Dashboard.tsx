@@ -31,6 +31,7 @@ import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
 import { KNOWLEDGE_HUB_DATA } from '../data';
 import BookmarkButton from './BookmarkButton';
+import { useUser } from '../contexts/UserContext';
 
 const getArticleSource = (articleId: string) => {
   const sources = ['arXiv', 'IEEE Spec', 'Nature Portfolio', 'MIT Tech Review', 'ACM Library', 'ScienceDirect'];
@@ -39,32 +40,28 @@ const getArticleSource = (articleId: string) => {
 };
 
 interface DashboardProps {
-  user: UserProfile;
   activeTab: 'hud' | 'saved' | 'profile';
   setActiveTab: (tab: 'hud' | 'saved' | 'profile') => void;
   onSelectArticle: (article: Article) => void;
-  onLogout: () => void;
   articles: Article[];
   onToggleBookmark: (articleId: string) => void;
   onViewSubTopicAll?: (subTopic: string) => void;
   onStartProcessing: (newArticle: Article) => void;
   setIsEditingProfile: (val: boolean) => void;
-  onUpdateUser: (user: UserProfile) => void;
 }
 
 export default function Dashboard({ 
-  user, 
   activeTab, 
   setActiveTab, 
   onSelectArticle, 
-  onLogout,
   articles,
   onToggleBookmark,
   onViewSubTopicAll,
   onStartProcessing,
-  setIsEditingProfile,
-  onUpdateUser
+  setIsEditingProfile
 }: DashboardProps) {
+  const { user, getInitials } = useUser();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
   const [isSearching, setIsSearching] = useState(false);
@@ -82,8 +79,7 @@ export default function Dashboard({
   };
   const [filters, setFilters] = useState(defaultFilters);
   
-  const { isDarkMode, toggleDarkMode } = useTheme();
-  
+
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
@@ -255,7 +251,7 @@ export default function Dashboard({
                     />
                   ) : (
                     <span className="text-xs font-mono font-bold text-neutral-500 uppercase">
-                      {user?.handle?.slice(0, 2) || 'Z'}
+                      {getInitials(user?.name)}
                     </span>
                   )}
                 </div>

@@ -11,15 +11,13 @@ import { useTheme } from '../contexts/ThemeContext';
 import BookmarkButton from './BookmarkButton';
 import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
 import EditProfileModal from './EditProfileModal';
+import { useUser } from '../contexts/UserContext';
 
 interface ProfileViewProps {
-  user: UserProfile;
   activeTab: 'hud' | 'saved' | 'profile';
   setActiveTab: (tab: 'hud' | 'saved' | 'profile') => void;
   articles: Article[];
   onAddCustomArticle: (title: string, excerpt: string, category: string, content: string) => void;
-  onLogout: () => void;
-  onUpdateUser: (updatedUser: UserProfile) => void;
   onSelectArticle: (article: Article) => void;
   isEditingProfile?: boolean;
   setIsEditingProfile?: (val: boolean) => void;
@@ -117,17 +115,17 @@ const getCommenterAvatar = (username: string) => {
 };
 
 export default function ProfileView({ 
-  user, 
   activeTab, 
   setActiveTab, 
   articles, 
   onAddCustomArticle,
-  onLogout,
-  onUpdateUser,
   onSelectArticle,
   isEditingProfile,
   setIsEditingProfile
 }: ProfileViewProps) {
+  const { user, updateUser, handleLogout, getInitials } = useUser();
+  const { isDarkMode, toggleDarkMode } = useTheme();
+
   const postsData = [
     { id: 1, title: "Neural Style Transfer Pipelines", tag: "Computer Vision", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400&h=400" },
     { id: 2, title: "Custom LLM Agent Workflows", tag: "AI Research", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400&h=400" },
@@ -157,7 +155,6 @@ export default function ProfileView({
 
   const { savedArticles, uploadedArticles, removeUpload, saveUpload } = useBookmark();
   const [profileTab, setProfileTab] = useState<'STATS' | 'SAVES' | 'UPLOADS'>('STATS');
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const [researchPapersOpen, setResearchPapersOpen] = useState(true);
   const [hacksOpen, setHacksOpen] = useState(false);
 
@@ -432,7 +429,7 @@ export default function ProfileView({
 
 
             <button 
-              onClick={onLogout}
+              onClick={handleLogout}
               className="text-[11px] font-mono tracking-widest text-[#888] dark:text-[#9CA3AF] hover:text-red-600 transition-colors uppercase font-bold cursor-pointer bg-transparent border-none outline-none"
             >
               LOGOUT
@@ -485,11 +482,11 @@ export default function ProfileView({
                   />
                 </div>
               ) : (
-                <div className="w-full h-full bg-black/[0.02] border border-black/10 dark:bg-white/[0.02] dark:border-white/10 flex items-center justify-center transition-colors duration-300">
-                  <span className="text-black/10 dark:text-white/10 text-6xl font-serif uppercase transition-colors duration-300">
-                    {(user?.name || "Member").charAt(0)}
-                  </span>
-                </div>
+                <div className="w-full h-full bg-[#f0ede6] dark:bg-[#1A1A1A] border border-neutral-200 dark:border-white/10 flex items-center justify-center">
+                    <span className="text-[120px] font-serif font-black text-black/10 dark:text-white/10 uppercase tracking-tighter">
+                      {getInitials(user?.name)}
+                    </span>
+                  </div>
               )}
             </div>
           </div>
@@ -1162,10 +1159,7 @@ export default function ProfileView({
         isOpen={isEditingModalOpen}
         onClose={() => setIsEditingModalOpen(false)}
         user={user}
-        onSave={(updatedUser) => {
-          onUpdateUser(updatedUser);
-          setIsEditingModalOpen(false);
-        }}
+        onSave={updateUser}
       />
     </div>
   );

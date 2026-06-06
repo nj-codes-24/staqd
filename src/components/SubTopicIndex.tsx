@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, Article } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useUser } from '../contexts/UserContext';
 
 interface SubTopicIndexProps {
   subTopic: string;
@@ -24,7 +25,6 @@ interface SubTopicIndexProps {
   onSelectArticle: (article: Article) => void;
   onToggleBookmark: (articleId: string) => void;
   articles: Article[];
-  user: UserProfile;
   setActiveTab: (tab: 'hud' | 'saved' | 'profile') => void;
 }
 
@@ -138,9 +138,10 @@ export default function SubTopicIndex({
   onSelectArticle,
   onToggleBookmark,
   articles,
-  user,
   setActiveTab
 }: SubTopicIndexProps) {
+  const { user, getInitials } = useUser();
+  const { isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const isSearching = searchQuery.trim().length > 0;
   const [isFocused, setIsFocused] = useState(false);
@@ -148,7 +149,6 @@ export default function SubTopicIndex({
   
   // Popover Filter Dropdown visibility
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const { isDarkMode } = useTheme();
 
   // Active filter states in use
   const [activeSortBy, setActiveSortBy] = useState('newest');
@@ -376,7 +376,7 @@ export default function SubTopicIndex({
       <div className="hidden md:flex max-w-[1240px] mx-auto items-center justify-between px-6 py-2.5 text-[10px] font-mono tracking-widest text-[#605a50] dark:text-gray-400 border-[#ccc5b6] mb-4">
         <span>02 / TECHNICAL CATALOG INDEX</span>
         <span className="uppercase text-center">ZID SUB-TOPIC PORTAL</span>
-        <span className="uppercase">COMPILER LEVEL {user.level}</span>
+        <span className="uppercase">COMPILER LEVEL {user?.level || 0}</span>
       </div>
 
       {/* Main Container Sheet */}
@@ -414,12 +414,20 @@ export default function SubTopicIndex({
               className="h-8.5 w-8.5 rounded-full border border-neutral-300 overflow-hidden shadow-xs hover:scale-105 transition cursor-pointer"
               title="Open Creator Profile"
             >
-              <img 
-                src={user.avatarUrl} 
-                alt={user.handle} 
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover" 
-              />
+              {user?.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt={user.handle} 
+                  referrerPolicy="no-referrer"
+                  className="h-full w-full object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full bg-black flex items-center justify-center">
+                  <span className="text-white text-[10px] font-mono font-bold uppercase">
+                    {getInitials(user?.name)}
+                  </span>
+                </div>
+              )}
             </button>
           </div>
         </header>

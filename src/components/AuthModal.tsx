@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Chrome, Github, ArrowRight } from 'lucide-react';
+import { useUser } from '../contexts/UserContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticatingSocial, setIsAuthenticatingSocial] = useState<'google' | 'github' | null>(null);
+  const { handleOAuthLogin } = useUser();
 
   useEffect(() => {
     if (!isOpen) {
@@ -41,9 +43,21 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
   const handleSocialAuth = (provider: 'google' | 'github') => {
     setIsAuthenticatingSocial(provider);
+    
+    // Simulate OAuth callback
     setTimeout(() => {
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('authName', 'MEMBER');
+      const mockProviderData = {
+        google: {
+          displayName: 'Google Researcher',
+          photoURL: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=200&h=200'
+        },
+        github: {
+          displayName: 'GitHub Builder',
+          photoURL: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=200&h=200'
+        }
+      };
+      
+      handleOAuthLogin(provider, mockProviderData[provider]);
       setIsSuccess(true);
       setIsAuthenticatingSocial(null);
     }, 2000);

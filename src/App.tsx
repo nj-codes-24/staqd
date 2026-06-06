@@ -14,19 +14,10 @@ import { UserProfile, Article } from './types';
 import { INITIAL_USER, MOCK_ARTICLES } from './data';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import GlobalToast from './components/GlobalToast';
+import { useUser } from './contexts/UserContext';
 
 export default function App() {
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('zid_user_profile');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return INITIAL_USER;
-      }
-    }
-    return INITIAL_USER;
-  });
+  const { user, updateUser, handleLogout } = useUser();
   const [activeTab, setActiveTab] = useState<'hud' | 'saved' | 'profile'>('hud');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
@@ -56,13 +47,13 @@ export default function App() {
           const updatedBookmark = !article.isBookmarked;
           // Sync with reading statistics if bookmark is added
           if (updatedBookmark) {
-            setUserProfile(prevUser => ({
-              ...prevUser,
+            updateUser({
+              ...user,
               stats: {
-                ...prevUser.stats,
-                articlesRead: prevUser.stats.articlesRead + 1
+                ...user.stats,
+                articlesRead: user.stats.articlesRead + 1
               }
-            }));
+            });
           }
           return { ...article, isBookmarked: updatedBookmark };
         }
@@ -96,8 +87,8 @@ export default function App() {
       category,
       readTime: '4 min read',
       author: {
-        name: userProfile.handle,
-        avatar: userProfile.avatarUrl,
+        name: user.handle,
+        avatar: user.avatarUrl,
         role: 'Verified Builder'
       },
       publishedAt: 'Today',
@@ -109,18 +100,7 @@ export default function App() {
     setArticles(prev => [newArticle, ...prev]);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('authName');
-    setActiveTab('hud');
-    setSelectedArticle(null);
-    setUserProfile(INITIAL_USER);
-  };
 
-  const handleUpdateUserProfile = (updatedUser: UserProfile) => {
-    setUserProfile(updatedUser);
-    localStorage.setItem('zid_user_profile', JSON.stringify(updatedUser));
-  };
 
   return (
     <BookmarkProvider>
@@ -155,7 +135,6 @@ export default function App() {
             ) : selectedArticle ? (
               <ArticleView 
                 article={selectedArticle}
-                user={userProfile}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 onBack={() => {
@@ -163,7 +142,6 @@ export default function App() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onToggleBookmark={handleToggleBookmark}
-                onLogout={handleLogout}
               />
             ) : (activeTab === 'hud' && activeSubTopic) ? (
               <SubTopicIndex 
@@ -177,7 +155,6 @@ export default function App() {
                 }}
                 onToggleBookmark={handleToggleBookmark}
                 articles={articles}
-                user={userProfile}
                 setActiveTab={(tab) => {
                   setActiveSubTopic(null);
                   setActiveTab(tab);
@@ -185,23 +162,20 @@ export default function App() {
               />
             ) : activeTab === 'profile' ? (
               <ProfileView 
-                user={userProfile}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 articles={articles}
                 onAddCustomArticle={handleAddCustomArticle}
-                onLogout={handleLogout}
-                onUpdateUser={handleUpdateUserProfile}
                 onSelectArticle={(article) => setSelectedArticle(article)}
                 isEditingProfile={isEditingProfile}
                 setIsEditingProfile={setIsEditingProfile}
               />
             ) : (
               <Dashboard 
-                user={userProfile}
+                user={user}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                onUpdateUser={handleUpdateUserProfile}
+                onUpdateUser={updateUser}
                 onSelectArticle={(article) => {
                   setSelectedArticle(article);
                 }}
