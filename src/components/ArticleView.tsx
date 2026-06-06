@@ -630,12 +630,7 @@ export default function ArticleView({
                 </div>
               ) : (
                 <>
-                  <button 
-                    onClick={() => setIsSubscriptionModalOpen(true)}
-                    className="px-6 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all hover:scale-105 text-[11px] font-mono uppercase tracking-[0.2em] font-bold cursor-pointer whitespace-nowrap"
-                  >
-                    Subscribe
-                  </button>
+
                   <div 
                     onClick={() => {
                       setActiveTab('profile');
