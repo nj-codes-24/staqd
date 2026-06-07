@@ -180,11 +180,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </AnimatePresence>
 
                 {/* Typography & Branding (Static, Always Visible) */}
-                <div className="absolute top-12 right-6 flex flex-col items-end z-30 pointer-events-none">
+                <div className="absolute top-12 right-6 flex flex-col items-center z-30 pointer-events-none">
                   <h2 className="text-[#121212] text-3xl font-black font-sans tracking-widest leading-none whitespace-nowrap">
-                    [ STΛQD ] HUB
+                    [ STΛQD ]
                   </h2>
-                  <h3 className="text-[#121212]/80 font-mono text-[10px] uppercase tracking-[0.3em] mt-1 font-bold">
+                  <h3 className="text-[#121212]/80 font-mono text-[10px] uppercase tracking-[0.3em] mt-1 font-bold text-center">
                     Platform Access
                   </h3>
                 </div>
