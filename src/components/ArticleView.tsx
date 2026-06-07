@@ -58,7 +58,7 @@ import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
 import AuthModal from './AuthModal';
 import SubscriptionModal from './SubscriptionModal';
-import { Download } from 'lucide-react';
+import { Download, ZoomIn, ZoomOut, Type } from 'lucide-react';
 import { useBookmark } from '../contexts/BookmarkContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useUser } from '../contexts/UserContext';
@@ -117,12 +117,170 @@ export default function ArticleView({
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
   const [isPDFReaderOpen, setIsPDFReaderOpen] = useState(false);
+  const [txtContent, setTxtContent] = useState<string | null>(null);
+  const pptxContainerRef = useRef<HTMLDivElement>(null);
+  const viewerInstanceRef = useRef<any>(null);
   
-  const isPPT = article.title.toLowerCase().includes('ppt') || article.title.toLowerCase().includes('presentation') || article.documentUrl?.endsWith('.ppt') || article.documentUrl?.endsWith('.pptx');
+  // Text Viewer States
+  const [txtFontSize, setTxtFontSize] = useState<number>(13);
+  const [txtFontFamily, setTxtFontFamily] = useState<'font-mono' | 'font-sans' | 'font-serif'>('font-mono');
+  const [txtSearchQuery, setTxtSearchQuery] = useState('');
+  
+  // Premium Features States
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [spokenCharIndex, setSpokenCharIndex] = useState(-1);
+  const [spokenCharLength, setSpokenCharLength] = useState(0);
+  
+  const docUrlLower = article.documentUrl?.toLowerCase() || '';
+  const titleLower = article.title.toLowerCase();
+  
+  const isPPTX = docUrlLower.endsWith('.pptx') || titleLower.includes('ppt') || titleLower.includes('presentation');
+  const isTXT = docUrlLower.endsWith('.txt') || titleLower.includes('txt');
+  const isPDF = !isPPTX && !isTXT; // Default to PDF
+  
   const fallbackPdf = "/paper.pdf";
   const documentUrl = article.documentUrl || fallbackPdf;
   const pdfHash = documentUrl.includes('#') ? '&navpanes=0' : '#navpanes=0';
-  const embedUrl = isPPT ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(documentUrl)}` : `${documentUrl}${pdfHash}`;
+  const embedUrl = `${documentUrl}${pdfHash}`;
+  
+  useEffect(() => {
+    if (isTXT && isPDFReaderOpen && !txtContent) {
+      fetch(documentUrl)
+        .then(res => res.text())
+        .then(text => setTxtContent(text))
+        .catch(err => setTxtContent("Failed to load text document: " + err.message));
+    }
+  }, [isTXT, isPDFReaderOpen, documentUrl, txtContent]);
+
+  useEffect(() => {
+    if (isPPTX && isPDFReaderOpen && pptxContainerRef.current) {
+      if (!viewerInstanceRef.current) {
+        import('pptx-viewer').then(({ PPTXViewer }) => {
+           if (pptxContainerRef.current) {
+             const viewer = new PPTXViewer(pptxContainerRef.current);
+             viewer.load(documentUrl).catch(err => console.error("PPTX Load Error:", err));
+             viewerInstanceRef.current = viewer;
+           }
+        }).catch(err => console.error("Failed to import pptx-viewer", err));
+      }
+    }
+    return () => {
+      if (viewerInstanceRef.current && typeof viewerInstanceRef.current.destroy === 'function') {
+        try {
+          viewerInstanceRef.current.destroy();
+        } catch(e) {}
+        viewerInstanceRef.current = null;
+      }
+    };
+  }, [isPPTX, isPDFReaderOpen, documentUrl]);
+  
+  // Clean up speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+  
+  const toggleListenMode = () => {
+    if (isListening) {
+      window.speechSynthesis.cancel();
+      setIsListening(false);
+      setSpokenCharIndex(-1);
+    } else {
+      if (!txtContent) return;
+      const utterance = new SpeechSynthesisUtterance(txtContent);
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          const length = event.charLength || txtContent.slice(event.charIndex).split(/\s/)[0].length;
+          setSpokenCharIndex(event.charIndex);
+          setSpokenCharLength(length);
+        }
+      };
+      utterance.onend = () => {
+        setIsListening(false);
+        setSpokenCharIndex(-1);
+      };
+      window.speechSynthesis.speak(utterance);
+      setIsListening(true);
+    }
+  };
+  
+  // Helper to highlight search keywords in text
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, i) => 
+      part.toLowerCase() === query.toLowerCase() 
+        ? <mark key={`mark-${i}`} className="bg-indigo-500/30 text-inherit rounded-sm px-0.5">{part}</mark> 
+        : part
+    );
+  };
+
+  const renderDocumentContent = () => {
+    if (!txtContent) return null;
+    
+    // Split into paragraphs by double newlines
+    const paragraphs = txtContent.split(/\n\n/);
+    let runningCharCount = 0;
+    
+    // Find the active paragraph index
+    let activeParagraphIndex = -1;
+    if (isListening && spokenCharIndex >= 0) {
+      let tempCount = 0;
+      for (let i = 0; i < paragraphs.length; i++) {
+        const pLength = paragraphs[i].length + 2; // +2 for the \n\n
+        if (spokenCharIndex >= tempCount && spokenCharIndex < tempCount + pLength) {
+          activeParagraphIndex = i;
+          break;
+        }
+        tempCount += pLength;
+      }
+    }
+
+    return paragraphs.map((paragraph, index) => {
+      const pLength = paragraph.length + 2; // +2 for the \n\n that was split
+      const currentStartIdx = runningCharCount;
+      runningCharCount += pLength;
+      
+      const isParagraphActive = activeParagraphIndex === index;
+      const isDimmed = isListening && !isParagraphActive && activeParagraphIndex !== -1;
+      
+      let pContent: React.ReactNode = renderHighlightedText(paragraph, txtSearchQuery);
+      
+      if (isParagraphActive && spokenCharIndex >= currentStartIdx && spokenCharIndex < currentStartIdx + pLength) {
+        // Find local index within this paragraph
+        const localIdx = spokenCharIndex - currentStartIdx;
+        const before = paragraph.slice(0, localIdx);
+        const word = paragraph.slice(localIdx, localIdx + spokenCharLength);
+        const after = paragraph.slice(localIdx + spokenCharLength);
+        
+        pContent = (
+          <>
+            {renderHighlightedText(before, txtSearchQuery)}
+            <mark className="bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-md px-1 py-0.5 shadow-[0_0_12px_rgba(245,158,11,0.25)] transition-all duration-150 inline-block font-semibold">{word}</mark>
+            {renderHighlightedText(after, txtSearchQuery)}
+          </>
+        );
+      }
+      
+      // Don't wrap empty string in a paragraph tag with margin
+      if (!paragraph.trim()) {
+        return <br key={`p-${index}`} />;
+      }
+
+      return (
+        <p 
+          key={`p-${index}`} 
+          className={`mb-6 transition-opacity duration-700 ease-in-out ${isDimmed ? 'opacity-30' : 'opacity-100'}`}
+        >
+          {pContent}
+        </p>
+      );
+    });
+  };
   
   // Scroll to top when opening or closing the reader
   useEffect(() => {
@@ -526,6 +684,19 @@ export default function ArticleView({
 
   return (
     <div className="min-h-screen bg-[#ded9d0] dark:bg-[#09090B] py-6 md:py-12 px-4 md:px-8 font-sans antialiased text-[#1c1c1c] dark:text-[#F3F4F6] selection:bg-neutral-250 relative">
+      
+      {/* Focus Mode Overlay */}
+      <AnimatePresence>
+        {isFocusMode && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[60] bg-[#ded9d0]/95 dark:bg-[#09090B]/95 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
       
       {/* Presentation Header bar in clean sans-serif style from image_17 */}
       <div className="hidden md:flex max-w-[1300px] mx-auto items-center justify-between px-2 py-3 text-[10px] font-sans tracking-[0.22em] font-semibold text-[#6a6254] uppercase">
@@ -978,13 +1149,100 @@ export default function ArticleView({
               >
 
 
-                {/* The Document Iframe */}
-                <div className="w-full relative flex-1 min-h-[800px] bg-neutral-100 dark:bg-[#111111] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-inner">
-                  <iframe 
-                    src={embedUrl} 
-                    className="absolute top-0 left-0 w-full h-full border-none" 
-                    title="Document Viewer"
-                  />
+                {/* The Document Viewers */}
+                <div className={`w-full relative flex-1 min-h-[800px] bg-neutral-200 dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-inner transition-all duration-500 ${isFocusMode ? 'z-[70] ring-1 ring-white/10 shadow-2xl' : 'z-10'}`}>
+                  {isPDF && (
+                    <iframe 
+                      src={embedUrl} 
+                      className="absolute top-0 left-0 w-full h-full border-none" 
+                      title="Document Viewer"
+                    />
+                  )}
+                  {isTXT && (
+                    <div className="w-full h-full relative flex flex-col">
+                      {/* Glassmorphic Top Navigation */}
+                      <div className="sticky top-0 z-20 w-full flex items-center justify-between px-6 py-4 bg-[#f8f9fa]/80 dark:bg-[#121212]/70 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 transition-all">
+                        
+                        {/* Left Side: Focus & Listen */}
+                        <div className="flex items-center space-x-3">
+                          <button 
+                            onClick={() => setIsFocusMode(!isFocusMode)} 
+                            className={`px-4 py-2 rounded-lg transition-all flex items-center space-x-2 border ${isFocusMode ? 'bg-[#18181A] border-white/10 text-indigo-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6),_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white dark:bg-[#2A2A2A] border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 shadow-[0_2px_4px_rgba(0,0,0,0.05),_inset_0_1px_0_rgba(255,255,255,0.1)] hover:bg-neutral-50 dark:hover:bg-[#333]'}`}
+                            title="Toggle Focus Mode"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                            <span className="text-[11px] font-bold font-sans uppercase tracking-wider">{isFocusMode ? 'Exit Focus' : 'Focus Mode'}</span>
+                          </button>
+                          
+                          <div className="w-px h-5 bg-neutral-300 dark:bg-white/10 mx-1"></div>
+                          
+                          <button 
+                            onClick={toggleListenMode} 
+                            className={`px-4 py-2 rounded-lg transition-all flex items-center space-x-2 border ${isListening ? 'bg-[#18181A] border-emerald-500/30 text-emerald-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6),_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white dark:bg-[#2A2A2A] border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 shadow-[0_2px_4px_rgba(0,0,0,0.05),_inset_0_1px_0_rgba(255,255,255,0.1)] hover:bg-neutral-50 dark:hover:bg-[#333]'}`}
+                            title={isListening ? "Stop Listening" : "Listen to Document"}
+                          >
+                            {isListening ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                            <span className="text-[11px] font-bold font-sans uppercase tracking-wider">{isListening ? 'Stop' : 'Listen'}</span>
+                          </button>
+                        </div>
+
+                        {/* Right Side: Search & Typography */}
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center bg-white dark:bg-[#1A1A1A] rounded-md px-3 py-1.5 border border-neutral-200 dark:border-white/10 mr-2 transition-all focus-within:ring-1 focus-within:ring-indigo-500/50 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">
+                            <Search className="w-3.5 h-3.5 text-neutral-400 mr-2" />
+                            <input 
+                              type="text" 
+                              placeholder="Search document..." 
+                              value={txtSearchQuery}
+                              onChange={(e) => setTxtSearchQuery(e.target.value)}
+                              className="bg-transparent border-none outline-none text-[13px] font-sans text-neutral-700 dark:text-neutral-200 w-36 placeholder:text-neutral-400"
+                            />
+                          </div>
+                          <div className="flex items-center space-x-1 border-r border-neutral-200 dark:border-white/10 pr-2 mr-2">
+                            <button onClick={() => setTxtFontSize(f => Math.max(10, f - 1))} className="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 transition-colors" title="Decrease Font Size">
+                              <ZoomOut className="w-4 h-4" />
+                            </button>
+                            <span className="text-[11px] font-mono w-6 text-center text-neutral-500 font-bold">{txtFontSize}</span>
+                            <button onClick={() => setTxtFontSize(f => Math.min(24, f + 1))} className="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 transition-colors" title="Increase Font Size">
+                              <ZoomIn className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex items-center space-x-1 bg-white dark:bg-[#1C1C1E] p-0.5 rounded-lg border border-neutral-200 dark:border-white/10">
+                            <button onClick={() => setTxtFontFamily('font-sans')} className={`px-2 py-1 rounded text-[11px] font-bold font-sans transition-colors ${txtFontFamily === 'font-sans' ? 'bg-neutral-200 dark:bg-[#2A2A2A] text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5'}`} title="Sans-serif">Aa</button>
+                            <button onClick={() => setTxtFontFamily('font-serif')} className={`px-2 py-1 rounded text-[11px] font-bold font-serif transition-colors ${txtFontFamily === 'font-serif' ? 'bg-neutral-200 dark:bg-[#2A2A2A] text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5'}`} title="Serif">Aa</button>
+                            <button onClick={() => setTxtFontFamily('font-mono')} className={`px-2 py-1 rounded text-[11px] font-bold font-mono transition-colors ${txtFontFamily === 'font-mono' ? 'bg-neutral-200 dark:bg-[#2A2A2A] text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5'}`} title="Monospace">Aa</button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Document Content Scroll Area */}
+                      <div 
+                        className={`w-full flex-1 overflow-y-auto p-8 md:p-12 pb-32 bg-transparent text-neutral-800 dark:text-neutral-200 ${txtFontFamily} leading-[1.8] whitespace-pre-wrap selection:bg-indigo-500/30 transition-all duration-300`}
+                        style={{ fontSize: txtFontSize + 'px' }}
+                      >
+                        <div className="max-w-3xl mx-auto">
+                          {txtContent ? renderDocumentContent() : (
+                            <div className="flex items-center justify-center h-full text-neutral-400 font-sans text-sm">
+                              <RefreshCw className="w-5 h-5 animate-spin mr-3" /> Loading text document...
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {isPPTX && (
+                    <div 
+                      ref={pptxContainerRef} 
+                      className="w-full h-full absolute top-0 left-0 bg-[#F3F4F6] dark:bg-[#111111] flex items-center justify-center"
+                    >
+                      {!viewerInstanceRef.current && (
+                        <div className="text-neutral-400 flex items-center space-x-3">
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          <span className="font-sans text-sm tracking-wide">Loading Presentation Viewer...</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -996,7 +1254,7 @@ export default function ArticleView({
       {/* Squeezed side-by-side Chat Panel */}
       <div 
         id="chatbot-drawer-container"
-        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#1C1C1E] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'}`}
+        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#1C1C1E] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'} ${isFocusMode ? 'z-[70] relative shadow-2xl' : 'z-10'}`}
         style={{
           width: isChatOpen ? '340px' : '0px',
           minWidth: isChatOpen ? '340px' : '0px',

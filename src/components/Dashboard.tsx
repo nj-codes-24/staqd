@@ -122,11 +122,56 @@ export default function Dashboard({
       }
     }
     
-    const docUrl = file ? URL.createObjectURL(file) : undefined;
+    const fallbackText = `NEURAL SOURCING STRUCTURES & CRYPTOGRAPHIC HALLMARK REGISTRIES IN SUSTAINABLE JEWELRY MANUFACTURING
+
+Abstract
+This paper explores the intersection of high-frequency assay diagnostic laboratories and decentralized ledger protocols to establish immutable sourcing chains in the fine jewelry sector. By combining localized XRF spectrometry with block-by-block verification, we eliminate supply chain vulnerabilities, bypassing traditional certification bottlenecks and ensuring complete ethical compliance.
+
+1. Introduction
+The global jewelry supply chain has historically suffered from opaque sourcing, particularly concerning conflict minerals and unverified carat density metrics. Consumers and regulatory bodies increasingly demand absolute transparency. Traditional paper-based certification, such as the Kimberley Process certificates, are prone to forgery, loss, and delays. 
+
+In response, we propose a Neural Sourcing Structure (NSS)—a hybrid framework utilizing machine learning algorithms to predict supply chain bottlenecks, coupled with a Cryptographic Hallmark Registry (CHR) that records real-time assay testing data onto a secure ledger.
+
+2. Operational Strategies: Gold Purity Assay & Labs
+Recent research highlights that securing gold pureness metrics demands a structured, end-to-end trace mechanism. Assay diagnostic laboratories increasingly leverage advanced high-frequency spectrometers on the operational floor. 
+
+By validating metal compositions dynamically prior to custom shaping, companies can successfully bypass expensive middleman certification bottlenecks. These high-frequency devices use X-ray fluorescence (XRF) to analyze the elemental composition of alloys non-destructively.
+
+The data generated from each XRF scan is immediately hashed and pushed to the CHR. This ensures that the exact purity percentage—down to the decimal—is permanently attached to the specific batch of raw material before it even reaches the crucible.
+
+3. Sourcing Ethics & The Kimberley Process Traceability
+Ethical logistics protocols must rigidly adhere to standard international governance guidelines. Implementing block-by-block ledger verification secures diamond provenance, totally preventing conflict gemstones from entering retail pipelines. 
+
+Our operational model integrates a centralized digital certificate track that maps Kimberley invoices with active carat density certifications. Such strategies shield brands from systemic sourcing vulnerabilities while guaranteeing uncompromised product authenticity.
+
+4. Implementation of the Cryptographic Hallmark Registry
+The CHR is designed as a permissioned blockchain. Only vetted assay laboratories and certified wholesale suppliers are granted writing privileges. When a batch of rough diamonds is processed, the system generates a unique non-fungible token (NFT) representing the physical asset.
+
+As the gemstone moves from the cutter to the setter to the final retail display, the token is transferred across the network. Retailers can eventually provide end-consumers with a QR code. Scanning this code reveals the entire lifecycle of the piece, from the exact mine of origin to the date of the final polish.
+
+5. Machine Learning in Supply Chain Optimization
+The "Neural" aspect of our proposed structure involves predictive modeling. By analyzing years of logistical data, shipping delays, and assay testing times, our neural network can predict the optimal routing for raw materials.
+
+For example, if a specific assay lab in Antwerp is experiencing a backlog, the system automatically reroutes shipments to an available facility in Mumbai, factoring in shipping costs, insurance premiums, and turnaround times. This reduces the overall time-to-market by an estimated 14%.
+
+6. Consumer Trust and the Verification Interface
+Enhancing customer engagement hinges on absolute corporate transparency. Discerning clientele require vetted proof of hallmark credentials before finalizing transactions. Clearly displaying gold assays, Kimberley certifications, and carat metrics inside custom jewelry concierge dashboards significantly advances buyer trust index ratings.
+
+Future developments aim to empower buyers with direct QR scans of the assay certificate log, establishing a direct emotional link between custom craftsmanship, material authenticity, and ethical production values.
+
+7. Conclusion
+The integration of Neural Sourcing Structures and Cryptographic Hallmark Registries represents a paradigm shift in jewelry manufacturing. It transforms a historically opaque industry into a model of transparency and efficiency.
+
+8. References
+[1] Moss, E. (2025). Decentralized Ledgers in Luxury Goods. Journal of Supply Chain Tech.
+[2] Chen, L. & Smith, R. (2024). XRF Spectrometry in Modern Assaying. Metallurgy Today.
+[3] The Kimberley Process Certification Scheme: A Review. (2023). Global Trade Reports.
+[4] AI Routing Protocols. (2026). Logistics Weekly.`;
+    const docUrl = file ? URL.createObjectURL(file) : "data:text/plain;charset=utf-8," + encodeURIComponent(fallbackText);
     
     const newArticle: Article = {
       id: `custom-paper-${Date.now()}`,
-      title: file ? file.name : "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
+      title: file ? file.name : "mock_document.txt",
       author: {
         name: "DR. EVELYN MOSS",
         avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
@@ -672,7 +717,7 @@ export default function Dashboard({
                               onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
                               onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(e); }}
                             >
-                              <input type="file" accept=".pdf,.ppt,.pptx,.txt" className="hidden" onChange={handleFileUpload} />
+                              <input type="file" accept=".pdf,.txt,.pptx" className="hidden" onChange={handleFileUpload} />
                               
                               <div className="bg-[#f3f4f6] dark:bg-[#27272A] rounded-full p-5 mb-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                                 <UploadCloud size={32} className="text-[#4b3e33] dark:text-white" strokeWidth={2} />
@@ -682,7 +727,7 @@ export default function Dashboard({
                                 Click or drag paper here
                               </h3>
                               <p className="text-[#9CA3AF] dark:text-gray-400 text-[14px] font-normal tracking-wide">
-                                Supports PDF, DOCX, TXT
+                                Supports PDF, TXT, PPTX
                               </p>
                             </label>
                           </div>
