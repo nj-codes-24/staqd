@@ -131,6 +131,7 @@ export default function ArticleView({
   const [isListening, setIsListening] = useState(false);
   const [spokenCharIndex, setSpokenCharIndex] = useState(-1);
   const [spokenCharLength, setSpokenCharLength] = useState(0);
+  const [ttsOffset, setTtsOffset] = useState(0);
   
   const docUrlLower = article.documentUrl?.toLowerCase() || '';
   const titleLower = article.title.toLowerCase();
@@ -184,28 +185,49 @@ export default function ArticleView({
     };
   }, []);
   
+  const startTTS = (startIndex = 0) => {
+    if (!txtContent) return;
+    window.speechSynthesis.cancel();
+    
+    const textToSpeak = txtContent.slice(startIndex);
+    if (!textToSpeak.trim()) return;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.onboundary = (event) => {
+      if (event.name === 'word') {
+        const length = event.charLength || textToSpeak.slice(event.charIndex).split(/\s/)[0].length;
+        setSpokenCharIndex(startIndex + event.charIndex);
+        setSpokenCharLength(length);
+      }
+    };
+    utterance.onend = () => {
+      setIsListening(false);
+      setSpokenCharIndex(-1);
+    };
+    
+    window.speechSynthesis.speak(utterance);
+    setIsListening(true);
+    setTtsOffset(startIndex);
+    
+    // Optimistically highlight the first word
+    const firstWord = textToSpeak.trimStart().split(/\s/)[0];
+    const firstWordStart = startIndex + textToSpeak.indexOf(firstWord);
+    setSpokenCharIndex(firstWordStart);
+    setSpokenCharLength(firstWord.length);
+  };
+
   const toggleListenMode = () => {
     if (isListening) {
       window.speechSynthesis.cancel();
       setIsListening(false);
       setSpokenCharIndex(-1);
     } else {
-      if (!txtContent) return;
-      const utterance = new SpeechSynthesisUtterance(txtContent);
-      utterance.onboundary = (event) => {
-        if (event.name === 'word') {
-          const length = event.charLength || txtContent.slice(event.charIndex).split(/\s/)[0].length;
-          setSpokenCharIndex(event.charIndex);
-          setSpokenCharLength(length);
-        }
-      };
-      utterance.onend = () => {
-        setIsListening(false);
-        setSpokenCharIndex(-1);
-      };
-      window.speechSynthesis.speak(utterance);
-      setIsListening(true);
+      startTTS(0);
     }
+  };
+
+  const seekTo = (charIndex: number) => {
+    startTTS(charIndex);
   };
   
   // Helper to highlight search keywords in text
@@ -222,61 +244,80 @@ export default function ArticleView({
   const renderDocumentContent = () => {
     if (!txtContent) return null;
     
-    // Split into paragraphs by double newlines
-    const paragraphs = txtContent.split(/\n\n/);
+    // Split into paragraphs AND preserve the newlines exactly
+    const blocks = txtContent.split(/(\n\n)/);
     let runningCharCount = 0;
     
-    // Find the active paragraph index
-    let activeParagraphIndex = -1;
+    // Find the active block index
+    let activeBlockIndex = -1;
     if (isListening && spokenCharIndex >= 0) {
       let tempCount = 0;
-      for (let i = 0; i < paragraphs.length; i++) {
-        const pLength = paragraphs[i].length + 2; // +2 for the \n\n
-        if (spokenCharIndex >= tempCount && spokenCharIndex < tempCount + pLength) {
-          activeParagraphIndex = i;
+      for (let i = 0; i < blocks.length; i++) {
+        const bLength = blocks[i].length;
+        if (spokenCharIndex >= tempCount && spokenCharIndex < tempCount + bLength) {
+          activeBlockIndex = i;
           break;
         }
-        tempCount += pLength;
+        tempCount += bLength;
       }
     }
 
-    return paragraphs.map((paragraph, index) => {
-      const pLength = paragraph.length + 2; // +2 for the \n\n that was split
-      const currentStartIdx = runningCharCount;
-      runningCharCount += pLength;
+    return blocks.map((block, index) => {
+      const isParagraphActive = activeBlockIndex === index;
+      const isDimmed = isListening && !isParagraphActive && activeBlockIndex !== -1;
       
-      const isParagraphActive = activeParagraphIndex === index;
-      const isDimmed = isListening && !isParagraphActive && activeParagraphIndex !== -1;
-      
-      let pContent: React.ReactNode = renderHighlightedText(paragraph, txtSearchQuery);
-      
-      if (isParagraphActive && spokenCharIndex >= currentStartIdx && spokenCharIndex < currentStartIdx + pLength) {
-        // Find local index within this paragraph
-        const localIdx = spokenCharIndex - currentStartIdx;
-        const before = paragraph.slice(0, localIdx);
-        const word = paragraph.slice(localIdx, localIdx + spokenCharLength);
-        const after = paragraph.slice(localIdx + spokenCharLength);
-        
-        pContent = (
-          <>
-            {renderHighlightedText(before, txtSearchQuery)}
-            <mark className="bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-md px-1 py-0.5 shadow-[0_0_12px_rgba(245,158,11,0.25)] transition-all duration-150 inline-block font-semibold">{word}</mark>
-            {renderHighlightedText(after, txtSearchQuery)}
-          </>
-        );
+      if (block === '\n\n') {
+        runningCharCount += 2;
+        return <br key={`sep-${index}`} className="my-2" />;
       }
       
-      // Don't wrap empty string in a paragraph tag with margin
-      if (!paragraph.trim()) {
-        return <br key={`p-${index}`} />;
+      const tokens = block.match(/(\S+|\s+)/g) || [];
+      
+      const paragraphContent = tokens.map((token, tIndex) => {
+        const tokenStart = runningCharCount;
+        runningCharCount += token.length;
+        
+        if (!/\S/.test(token)) {
+          return <span key={tIndex}>{token}</span>;
+        }
+        
+        const isActiveWord = isListening && 
+                            spokenCharIndex >= tokenStart && 
+                            spokenCharIndex < tokenStart + token.length;
+                            
+        if (isActiveWord) {
+          return (
+            <mark 
+              key={tIndex}
+              onClick={() => seekTo(tokenStart)}
+              className="bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-md px-1 py-0.5 shadow-[0_0_12px_rgba(245,158,11,0.25)] transition-all duration-150 inline-block font-semibold cursor-pointer"
+            >
+              {token}
+            </mark>
+          );
+        }
+        
+        return (
+          <span 
+            key={tIndex} 
+            onClick={isListening ? () => seekTo(tokenStart) : undefined}
+            className={`${isListening ? 'hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 rounded-sm px-0.5 transition-colors cursor-pointer' : ''} inline-block`}
+          >
+            {renderHighlightedText(token, txtSearchQuery)}
+          </span>
+        );
+      });
+
+      if (!block.trim()) {
+        return null;
       }
 
       return (
         <p 
           key={`p-${index}`} 
-          className={`mb-6 transition-opacity duration-700 ease-in-out ${isDimmed ? 'opacity-30' : 'opacity-100'}`}
+          className={`mb-6 transition-opacity duration-700 ease-in-out ${isDimmed ? 'opacity-30' : 'opacity-100'} ${isListening ? 'cursor-pointer hover:opacity-100' : ''}`}
         >
-          {pContent}
+          {paragraphContent}
         </p>
       );
     });
