@@ -54,6 +54,7 @@ export interface Article {
   imageUrl: string;
   likes: number;
   isBookmarked?: boolean;
+  documentUrl?: string;
 }
 
 export interface HubCategory {

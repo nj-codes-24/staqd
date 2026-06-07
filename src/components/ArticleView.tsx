@@ -58,6 +58,7 @@ import { Article, UserProfile } from '../types';
 import BookmarkButton from './BookmarkButton';
 import AuthModal from './AuthModal';
 import SubscriptionModal from './SubscriptionModal';
+import { Download } from 'lucide-react';
 import { useBookmark } from '../contexts/BookmarkContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useUser } from '../contexts/UserContext';
@@ -115,6 +116,18 @@ export default function ArticleView({
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
   const [modalTitle, setModalTitle] = useState(article.title);
   const [modalDesc, setModalDesc] = useState(article.excerpt);
+  const [isPDFReaderOpen, setIsPDFReaderOpen] = useState(false);
+  
+  const isPPT = article.title.toLowerCase().includes('ppt') || article.title.toLowerCase().includes('presentation') || article.documentUrl?.endsWith('.ppt') || article.documentUrl?.endsWith('.pptx');
+  const fallbackPdf = "/paper.pdf";
+  const documentUrl = article.documentUrl || fallbackPdf;
+  const pdfHash = documentUrl.includes('#') ? '&navpanes=0' : '#navpanes=0';
+  const embedUrl = isPPT ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(documentUrl)}` : `${documentUrl}${pdfHash}`;
+  
+  // Scroll to top when opening or closing the reader
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [isPDFReaderOpen]);
   
   const { isDarkMode, toggleDarkMode } = useTheme();
 
@@ -558,14 +571,14 @@ export default function ArticleView({
           className="h-20 bg-white dark:bg-[#1C1C1E] flex items-center justify-between px-6 md:px-10 select-none sticky top-0 z-50 shadow-sm"
           style={{}}
         >
-          {/* Left Group: ← RETURN TO HUB button */}
+          {/* Left Group: ← RETURN button */}
           <div className="flex items-center">
             <button
               id="btn-reader-back"
-              onClick={onBack}
+              onClick={() => isPDFReaderOpen ? setIsPDFReaderOpen(false) : onBack()}
               className="inline-flex items-center space-x-2 bg-white dark:bg-transparent hover:bg-neutral-50 border border-neutral-300 dark:border dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-[10px] font-sans uppercase tracking-[0.22em] font-extrabold text-neutral-800 dark:text-white transition-all duration-300 rounded-[4px] px-4 py-2 cursor-pointer shadow-3xs active:bg-neutral-100 dark:active:bg-white/10"
             >
-              <span>← RETURN TO HUB</span>
+              <span>← RETURN</span>
             </button>
           </div>
 
@@ -658,7 +671,17 @@ export default function ArticleView({
         </header>
 
         {/* Dynamic Interactive Dashboard Layout - 3-Column Asymmetric Grid Layout */}
-        <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white dark:bg-[#1C1C1E] text-neutral-900 dark:text-[#F3F4F6] relative pb-24">
+        <main className="flex-1 px-6 md:px-8 lg:px-12 pt-10 md:pt-14 lg:pt-16 bg-white dark:bg-[#1C1C1E] text-neutral-900 dark:text-[#F3F4F6] relative pb-24 flex flex-col items-center min-h-[80vh]">
+          <AnimatePresence mode="wait">
+            {!isPDFReaderOpen ? (
+              <motion.div
+                key="dashboard-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full flex-1 max-w-[1300px]"
+              >
           
           {/* Giant Centered Main Title block - Scaled elegantly in geometric sans-serif */}
           <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] dark:border-white/10 select-none" style={{ marginBottom: '28px' }}>
@@ -895,10 +918,10 @@ export default function ArticleView({
               {/* Read Full Research Paper Button */}
               <button
                 id="btn-read-full-paper"
-                onClick={() => {}}
+                onClick={() => setIsPDFReaderOpen(!isPDFReaderOpen)}
                 className="block w-full mt-8 p-[18px] rounded-[8px] font-medium text-[13px] uppercase tracking-[0.05em] cursor-pointer text-center transition-all duration-500 select-none border border-neutral-300 dark:border-white/20 bg-transparent dark:bg-white/5 text-[#8E8E93] dark:text-white/60 hover:border-[#111] dark:hover:border-white/30 hover:text-[#111] dark:hover:text-white dark:hover:bg-white/10 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] dark:hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)]"
               >
-                Read Full Research Paper
+                {isPDFReaderOpen ? 'Close Research Paper' : 'Read Full Research Paper'}
               </button>
 
             </div> {/* Close Column 1 (col-left-sidebar) */}
@@ -943,6 +966,29 @@ export default function ArticleView({
 
           </div>
 
+              </motion.div>
+            ) : (
+              <motion.div
+                key="pdf-full-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full flex flex-col items-center flex-1 h-full"
+              >
+
+
+                {/* The Document Iframe */}
+                <div className="w-full relative flex-1 min-h-[800px] bg-neutral-100 dark:bg-[#111111] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-inner">
+                  <iframe 
+                    src={embedUrl} 
+                    className="absolute top-0 left-0 w-full h-full border-none" 
+                    title="Document Viewer"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
         </main>
       </div>
@@ -971,6 +1017,7 @@ export default function ArticleView({
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-sans text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#888888]">RESEARCH ASSISTANT</span>
           </div>
+
           <button 
             onClick={() => setIsChatOpen(false)}
             className="p-1.5 hover:bg-black/5 text-neutral-600 cursor-pointer flex items-center justify-center dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-full"

@@ -107,12 +107,26 @@ export default function Dashboard({
     }
   };
 
-  const handleFileUpload = () => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement> | null = null) => {
     setIsUploadModalOpen(false);
+    
+    let file: File | null = null;
+    if (e) {
+      if ('dataTransfer' in e && e.dataTransfer.files.length > 0) {
+        file = e.dataTransfer.files[0];
+      } else if ('target' in e) {
+        const target = e.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+          file = target.files[0];
+        }
+      }
+    }
+    
+    const docUrl = file ? URL.createObjectURL(file) : undefined;
     
     const newArticle: Article = {
       id: `custom-paper-${Date.now()}`,
-      title: "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
+      title: file ? file.name : "Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing",
       author: {
         name: "DR. EVELYN MOSS",
         avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
@@ -125,7 +139,8 @@ export default function Dashboard({
       imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
       likes: 0,
       readTime: "15 min read",
-      isBookmarked: true
+      isBookmarked: true,
+      documentUrl: docUrl
     };
     
     onStartProcessing(newArticle);
@@ -655,9 +670,9 @@ export default function Dashboard({
                               onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
                               onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
                               onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                              onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
+                              onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(e); }}
                             >
-                              <input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileUpload} />
+                              <input type="file" accept=".pdf,.ppt,.pptx,.txt" className="hidden" onChange={handleFileUpload} />
                               
                               <div className="bg-[#f3f4f6] dark:bg-[#27272A] rounded-full p-5 mb-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                                 <UploadCloud size={32} className="text-[#4b3e33] dark:text-white" strokeWidth={2} />
