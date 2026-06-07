@@ -182,7 +182,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 {/* Typography & Branding (Static, Always Visible) */}
                 <div className="absolute top-12 right-6 flex flex-col items-center z-30 pointer-events-none">
                   <h2 className="text-[#121212] text-3xl font-black font-sans tracking-widest leading-none whitespace-nowrap">
-                    [ STΛQD ]
+                    <span className="text-[#F97316]">[</span> STΛQD <span className="text-[#F97316]">]</span>
                   </h2>
                   <h3 className="text-[#121212]/80 font-mono text-[10px] uppercase tracking-[0.3em] mt-1 font-bold text-center">
                     Platform Access
@@ -254,11 +254,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                           <div className="space-y-10 mt-4">
                             <div className="flex flex-col items-start w-full gap-3">
                               <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">{mode === 'login' ? 'USER / MAIL' : 'MAIL'}</label>
-                              <input type="text" disabled={isLoading} value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={mode === 'login' ? "ENTER ID OR EMAIL..." : "ENTER EMAIL..."} className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
+                              <input type="text" disabled={isLoading} value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder="NSIHSHC" className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white text-center tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
                             </div>
                             <div className="flex flex-col items-start w-full gap-3">
                               <label className="text-xs tracking-widest text-white/40 uppercase font-mono leading-none whitespace-nowrap">CODE</label>
-                              <input type="password" disabled={isLoading} value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="ENTER AUTH CODE..." className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
+                              <input type="password" disabled={isLoading} value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="NSIHSHC" className="w-full bg-transparent outline-none ring-0 border-b border-white/10 focus:border-[#FBBF24] focus:bg-white/[0.02] transition-all duration-300 rounded-t-sm text-white text-center tracking-widest text-sm font-mono pb-2 px-2 leading-none placeholder:text-xs placeholder:tracking-[0.2em] placeholder:text-white/15 placeholder:font-mono placeholder:font-normal" />
                             </div>
                           </div>
                         ) : (
