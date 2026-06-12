@@ -1,0 +1,15 @@
+# Normalize line endings across all contributors and OSes.
+# Prevents the CRLF/LF churn that shows every file as "modified".
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.pdf  binary
+*.pptx binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
