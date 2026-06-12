@@ -176,14 +176,11 @@ export default function App() {
               />
             ) : (
               <Dashboard 
-                user={user}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                onUpdateUser={updateUser}
                 onSelectArticle={(article) => {
                   setSelectedArticle(article);
                 }}
-                onLogout={handleLogout}
                 articles={articles}
                 onToggleBookmark={handleToggleBookmark}
                 onViewSubTopicAll={(subTopic) => {
