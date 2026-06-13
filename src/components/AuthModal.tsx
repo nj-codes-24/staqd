@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Chrome, Github, ArrowRight } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
+import { signUpWithEmail, signInWithEmail, signInWithProvider } from '../lib/api/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticatingSocial, setIsAuthenticatingSocial] = useState<'google' | 'github' | null>(null);
-  const { handleOAuthLogin, isAuthenticated } = useUser();
+  const { isAuthenticated } = useUser();
 
   useEffect(() => {
     if (!isOpen) {
@@ -45,26 +46,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     : (finalDerivedName || 'MEMBER').toUpperCase();
   const nameParts = displayAuthName.split(' ');
 
-  const handleSocialAuth = (provider: 'google' | 'github') => {
+  const handleSocialAuth = async (provider: 'google' | 'github') => {
     setIsAuthenticatingSocial(provider);
-    
-    // Simulate OAuth callback
-    setTimeout(() => {
-      const mockProviderData = {
-        google: {
-          displayName: 'Google Researcher',
-          photoURL: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=200&h=200'
-        },
-        github: {
-          displayName: 'GitHub Builder',
-          photoURL: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=200&h=200'
-        }
-      };
-      
-      handleOAuthLogin(provider, mockProviderData[provider]);
-      setIsSuccess(true);
+    setError(null);
+
+    try {
+      // Redirects the browser to the provider. On return, detectSessionInUrl
+      // completes the session and UserContext's listener logs the user in.
+      await signInWithProvider(provider);
+    } catch (err) {
       setIsAuthenticatingSocial(null);
-    }, 2000);
+      const message = err instanceof Error ? err.message : 'OAUTH FAILED';
+      setError(message.toUpperCase());
+    }
   };
 
   const handleNavigation = (e: React.MouseEvent) => {
@@ -74,7 +68,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     onClose();
   };
 
-  const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
+  const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     if (isLoading) return;
     
@@ -99,27 +93,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     setIsLoading(true);
     setError(null);
     
-    setTimeout(() => {
-      localStorage.setItem('isAuthenticated', 'true');
+    try {
       if (mode === 'signup') {
-        localStorage.setItem('authName', finalDerivedName);
+        await signUpWithEmail(email.trim(), password);
       } else {
-        // For login, try to retrieve their existing saved profile name
-        const existingProfileStr = localStorage.getItem('[ staqd ]_user_profile');
-        if (existingProfileStr) {
-          try {
-            const existingProfile = JSON.parse(existingProfileStr);
-            localStorage.setItem('authName', existingProfile.name || finalDerivedName);
-          } catch (e) {
-            localStorage.setItem('authName', finalDerivedName);
-          }
-        } else {
-          localStorage.setItem('authName', finalDerivedName);
-        }
+        await signInWithEmail(email.trim(), password);
       }
+      // authName drives the success-screen identity animation; the real profile
+      // is loaded centrally by UserContext via onAuthStateChange.
+      localStorage.setItem('authName', finalDerivedName);
       setIsLoading(false);
       setIsSuccess(true);
-    }, 1500);
+    } catch (err) {
+      setIsLoading(false);
+      const message = err instanceof Error ? err.message : 'AUTH FAILED';
+      setError(message.toUpperCase());
+    }
   };
 
   const getDynamicFontSize = (str: string) => {
