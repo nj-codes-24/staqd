@@ -5,6 +5,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import { 
   ArrowLeft, 
   Bookmark, 
@@ -91,6 +94,14 @@ interface CueCardItem {
   icon: React.ComponentType<any>;
 }
 
+function renderInlineMarkdown(text: string) {
+  return text.split(/\*\*(.*?)\*\*/g).map((part, j) =>
+    j % 2 === 1
+      ? <strong key={j} className="font-semibold text-black dark:text-white">{part}</strong>
+      : <React.Fragment key={j}>{part}</React.Fragment>
+  );
+}
+
 export default function ArticleView({ 
   article, 
   activeTab, 
@@ -128,6 +139,7 @@ export default function ArticleView({
   
   // Premium Features States
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [spokenCharIndex, setSpokenCharIndex] = useState(-1);
   const [spokenCharLength, setSpokenCharLength] = useState(0);
@@ -139,6 +151,37 @@ export default function ArticleView({
   const isPPTX = docUrlLower.endsWith('.pptx') || titleLower.includes('ppt') || titleLower.includes('presentation');
   const isTXT = docUrlLower.endsWith('.txt') || titleLower.includes('txt');
   const isPDF = !isPPTX && !isTXT; // Default to PDF
+
+  // For non-text documents, feed the reader/TTS the article's own content
+  // (cleaned of markdown) so Focus Mode + Listen work for PDFs too.
+  useEffect(() => {
+    if (isTXT || isPDFReaderOpen) return; // TXT loads from file; full PDF text loads when reader opens
+    const cleaned = (article.content || '').replace(/^#+\s*/gm, '').replace(/\*\*/g, '').trim();
+    setTxtContent(cleaned || null);
+  }, [article.id, article.content, isTXT, isPDFReaderOpen]);
+
+  // Extract the FULL text of a PDF when its reader opens, so Listen + the
+  // highlighting reader cover the whole paper (not just the AI summary).
+  useEffect(() => {
+    if (!isPDF || !isPDFReaderOpen || !article.documentUrl) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const pdf = await pdfjsLib.getDocument(article.documentUrl!).promise;
+        let full = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          if (cancelled) return;
+          const page = await pdf.getPage(i);
+          const tc = await page.getTextContent();
+          full += (tc.items as Array<{ str?: string }>).map((it) => it.str ?? '').join(' ') + '\n\n';
+        }
+        if (!cancelled && full.trim()) setTxtContent(full.trim());
+      } catch (e) {
+        console.error('PDF text extraction failed; keeping summary', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isPDF, isPDFReaderOpen, article.documentUrl]);
   
   const fallbackPdf = "/paper.pdf";
   const documentUrl = article.documentUrl || fallbackPdf;
@@ -225,6 +268,11 @@ export default function ArticleView({
       startTTS(0);
     }
   };
+
+  // Keep the audio-summary play icon in sync with real speech state.
+  useEffect(() => {
+    setIsPlaying(isListening);
+  }, [isListening]);
 
   const seekTo = (charIndex: number) => {
     startTTS(charIndex);
@@ -430,80 +478,45 @@ export default function ArticleView({
   const [selectedCueCard, setSelectedCueCard] = useState<CueCardItem | null>(null);
   
   // Custom Cue Cards State
-  const [cueCards, setCueCards] = useState<CueCardItem[]>([
-    {
-      id: 1,
-      term: 'Gold Purity',
-      desc: 'Ethical sourcing standards & karat weight certification logs.',
-      status: 'Needs Review',
-      colorName: 'orange',
-      bgColor: 'bg-[#fcdcb6]',
-      borderColor: 'border-[#f3be84]',
-      textColor: 'text-amber-950',
-      tagColor: 'bg-amber-500/10 text-amber-900 border-amber-500/30',
-      icon: Award
-    },
-    {
-      id: 2,
-      term: 'Hallmark Standards',
-      desc: 'Official fineness stamp mappings and legal jewelry audit logs.',
-      status: 'Approved',
-      colorName: 'blue',
-      bgColor: 'bg-[#b9d5f7]',
-      borderColor: 'border-[#8ebff3]',
-      textColor: 'text-blue-950',
-      tagColor: 'bg-blue-500/10 text-blue-900 border-blue-500/30',
-      icon: CheckCircle
-    },
-    {
-      id: 3,
-      term: 'Carat Density',
-      desc: 'Solid metal alloy fractional weight audits and standardizations.',
-      status: 'Approved',
-      colorName: 'purple',
-      bgColor: 'bg-[#d9bbf9]',
-      borderColor: 'border-[#bd91f4]',
-      textColor: 'text-purple-950',
-      tagColor: 'bg-purple-500/10 text-purple-900 border-purple-500/30',
-      icon: Layers
-    },
-    {
-      id: 4,
-      term: 'Conflict Diamonds',
-      desc: 'Kimberley Process certificate logs and supplier provenance traces.',
-      status: 'Needs Review',
-      colorName: 'peach',
-      bgColor: 'bg-[#f7c2aa]',
-      borderColor: 'border-[#f19b74]',
-      textColor: 'text-orange-950',
-      tagColor: 'bg-orange-500/10 text-orange-900 border-orange-500/30',
-      icon: Flame
-    },
-    {
-      id: 5,
-      term: 'Assay Testing',
-      desc: 'XRF spectrometer metal verification benchmarks in registry labs.',
-      status: 'High Priority',
-      colorName: 'pink',
-      bgColor: 'bg-[#f3b5ef]',
-      borderColor: 'border-[#e88ee3]',
-      textColor: 'text-fuchsia-950',
-      tagColor: 'bg-fuchsia-500/10 text-fuchsia-900 border-fuchsia-500/30',
-      icon: Activity
-    },
-    {
-      id: 6,
-      term: 'Traceability Proof',
-      desc: 'Decentralized source ledger registries for wholesale shipping security.',
-      status: 'Finalized',
-      colorName: 'coral',
-      bgColor: 'bg-[#fbaaae]',
-      borderColor: 'border-[#f68085]',
-      textColor: 'text-rose-950',
-      tagColor: 'bg-rose-500/10 text-rose-900 border-rose-500/30',
-      icon: Compass
+  const [cueCards, setCueCards] = useState<CueCardItem[]>([]);
+
+  // Visual templates reused when deriving cue cards from the article.
+  const CUE_CARD_STYLES = [
+    { status: 'Key Concept', colorName: 'orange', bgColor: 'bg-[#fcdcb6]', borderColor: 'border-[#f3be84]', textColor: 'text-amber-950', tagColor: 'bg-amber-500/10 text-amber-900 border-amber-500/30', icon: Award },
+    { status: 'Key Concept', colorName: 'blue', bgColor: 'bg-[#b9d5f7]', borderColor: 'border-[#8ebff3]', textColor: 'text-blue-950', tagColor: 'bg-blue-500/10 text-blue-900 border-blue-500/30', icon: CheckCircle },
+    { status: 'Key Concept', colorName: 'purple', bgColor: 'bg-[#d9bbf9]', borderColor: 'border-[#bd91f4]', textColor: 'text-purple-950', tagColor: 'bg-purple-500/10 text-purple-900 border-purple-500/30', icon: Layers },
+    { status: 'Key Concept', colorName: 'peach', bgColor: 'bg-[#f7c2aa]', borderColor: 'border-[#f19b74]', textColor: 'text-orange-950', tagColor: 'bg-orange-500/10 text-orange-900 border-orange-500/30', icon: Flame },
+    { status: 'Key Concept', colorName: 'pink', bgColor: 'bg-[#f3b5ef]', borderColor: 'border-[#e88ee3]', textColor: 'text-fuchsia-950', tagColor: 'bg-fuchsia-500/10 text-fuchsia-900 border-fuchsia-500/30', icon: Activity },
+    { status: 'Key Concept', colorName: 'coral', bgColor: 'bg-[#fbaaae]', borderColor: 'border-[#f68085]', textColor: 'text-rose-950', tagColor: 'bg-rose-500/10 text-rose-900 border-rose-500/30', icon: Compass },
+  ];
+
+  // Derive cue cards: prefer Gemini-generated cards, fall back to headings/metadata.
+  useEffect(() => {
+    let derived: CueCardItem[];
+
+    if (article.cueCards && article.cueCards.length > 0) {
+      derived = article.cueCards.slice(0, 6).map((c, i) => ({
+        id: i + 1, term: c.term, desc: c.desc, ...CUE_CARD_STYLES[i % CUE_CARD_STYLES.length],
+      }));
+    } else {
+      const headings = (article.content || '')
+        .split('\n').map((l) => l.trim())
+        .filter((l) => l.startsWith('#')).map((l) => l.replace(/^#+\s*/, ''))
+        .filter(Boolean).slice(0, 6);
+
+      if (headings.length > 0) {
+        derived = headings.map((h, i) => ({ id: i + 1, term: h, desc: article.excerpt || 'Section from this paper.', ...CUE_CARD_STYLES[i % CUE_CARD_STYLES.length] }));
+      } else {
+        const base = [
+          { term: article.category || 'Research', desc: 'Primary research domain.' },
+          ...(article.subTopic ? [{ term: article.subTopic, desc: 'Sub-field focus.' }] : []),
+          { term: article.readTime || 'Overview', desc: article.excerpt || 'Document overview.' },
+        ];
+        derived = base.map((b, i) => ({ id: i + 1, term: b.term, desc: b.desc, ...CUE_CARD_STYLES[i % CUE_CARD_STYLES.length] }));
+      }
     }
-  ]);
+    setCueCards(derived);
+  }, [article.id, article.content, article.cueCards]);
 
   // Add Cue Card Form State
   const [isAddingCard, setIsAddingCard] = useState<boolean>(false);
@@ -898,14 +911,14 @@ export default function ArticleView({
           {/* Giant Centered Main Title block - Scaled elegantly in geometric sans-serif */}
           <div className="text-center pt-2 pb-5 border-b border-[#F3F3F3] dark:border-white/10 select-none" style={{ marginBottom: '28px' }}>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black tracking-tight text-[#111111] dark:text-gray-100 leading-[1.2] mb-4">
-              Neural Sourcing Structures & Cryptographic Hallmark Registries in Sustainable Jewelry Manufacturing
+              {article.title}
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] font-bold">
-              <span className="text-neutral-900 dark:text-[#F3F4F6] font-bold">AUTHOR • DR. EVELYN MOSS</span>
+              <span className="text-neutral-900 dark:text-[#F3F4F6] font-bold">AUTHOR • {article.author.name}</span>
               <span>•</span>
-              <span>DATE • MAY 2026</span>
+              <span>DATE • {article.publishedAt}</span>
               <span>•</span>
-              <span className="text-neutral-700 dark:text-[#E5E7EB] font-extrabold whitespace-nowrap">SCIENCEDIRECT PUBLICATION</span>
+              <span className="text-neutral-700 dark:text-[#E5E7EB] font-extrabold whitespace-nowrap">{article.author.role}</span>
             </div>
           </div>
 
@@ -990,7 +1003,7 @@ export default function ArticleView({
                       
                       <button 
                         onClick={() => {
-                          setIsPlaying(!isPlaying);
+                          toggleListenMode();
                         }}
                         className={`h-9 w-9 text-white dark:text-white rounded-full flex items-center justify-center hover:scale-105 shadow-sm cursor-pointer bg-[#1C1C1E] transition-all duration-300 ${isPlaying ? 'dark:bg-transparent dark:border dark:border-white/30' : 'dark:bg-transparent dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]'}`}
                         title={isPlaying ? 'Pause' : 'Play'}
@@ -1144,33 +1157,34 @@ export default function ArticleView({
               {/* Long Summary content with clear white, crisp background and high contrast text */}
               <div className="font-serif text-base font-normal leading-relaxed text-neutral-950 dark:text-gray-300 space-y-6">
                 
-                <h3 className="text-sm font-sans font-semibold uppercase text-neutral-950 dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-4 select-none">
-                  1. Operational Strategies: Gold Purity Assay & Labs
-                </h3>
-                <p className="dark:text-gray-300 leading-relaxed font-normal">
-                  Recent research highlights that securing gold pureness metrics demands a structured, end-to-end trace mechanism. Assay diagnostic laboratories increasingly leverage advanced high-frequency spectrometers on the operational floor, validating metal compositions dynamically prior to custom shaping. By establishing localized testing nodes, companies can successfully bypass expensive middleman certification bottlenecks while logging high-integrity metrics that streamline downstream assembly line assignments.
-                </p>
- 
-                <h3 className="text-sm font-sans font-semibold uppercase text-[#111] dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-6 select-none">
-                  2. Sourcing Ethics & The Kimberley Process Traceability
-                </h3>
-                <p className="dark:text-gray-300 leading-relaxed font-normal">
-                  Ethical logistics protocols must rigidly adhere to standard international governance guidelines. Implementing block-by-block ledger verification secures diamond provenance, totally preventing conflict gemstones from entering retail pipelines. Our operational model integrates a centralized digital certificate track that maps Kimberley invoices with active carat density certifications. Such strategies shield brands from systemic sourcing vulnerabilities while guaranteeing uncompromised product authenticity.
-                </p>
- 
-                {/* Mathematical or operational registry scale blockquote in standard light gray palette */}
-                <div className="bg-[#F9F9F9] dark:bg-black/60 dark:shadow-inner border border-neutral-200 dark:border-white/5 p-5 my-6 text-xs font-mono text-neutral-800 dark:text-gray-300 leading-normal select-text shadow-3xs" style={{ borderRadius: '12px' }}>
-                  <span className="dark:text-gray-500"># Operational Assay Matrix Metrics Log</span><br />
-                  Assay_Verification_Token = d3.scaleLinear().domain([24k_Gold, 14k_Alloy])<br />
-                  Conflict_Free_Ratio = Count_Kimberley / Count_Total_Diamonds = 1.000 <span className="dark:text-gray-500">// 100% Certified Ethical Sourced</span>
-                </div>
- 
-                <h3 className="text-sm font-sans font-semibold uppercase text-neutral-950 dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-6 select-none">
-                  3. Customer Engagement: Bridging Sourcing & Presentation
-                </h3>
-                <p className="dark:text-gray-300 leading-relaxed font-normal">
-                  Enhancing customer engagement hinges on absolute corporate transparency. Discerning clientele require vetted proof of hallmark credentials before finalizing transactions. Clearly displaying gold assays, Kimberley certifications, and carat metrics inside custom jewelry concierge dashboards significantly advances buyer trust index ratings. Future developments aim to empower buyers with direct QR scans of the assay certificate log, establishing a direct emotional link between custom craftsmanship, material authenticity, and ethical production values.
-                </p>
+{article.content && article.content.trim()
+                  ? article.content.split('\n').filter((l) => l.trim()).map((line, idx) => {
+                      const t = line.trim();
+                      if (t.startsWith('#')) {
+                        return (
+                          <h3 key={idx} className="text-sm font-sans font-semibold uppercase text-neutral-950 dark:text-gray-200 tracking-wider border-l-2 border-[#111] dark:border-gray-200 pl-3 py-0.5 mt-6 select-none">
+                            {t.replace(/^#+\s*/, '')}
+                          </h3>
+                        );
+                      }
+                      if (t.startsWith('* ') || t.startsWith('- ')) {
+                        return (
+                          <li key={idx} className="ml-5 list-disc dark:text-gray-300 leading-relaxed font-normal">
+                            {renderInlineMarkdown(t.replace(/^[*-]\s+/, ''))}
+                          </li>
+                        );
+                      }
+                      return (
+                        <p key={idx} className="dark:text-gray-300 leading-relaxed font-normal">
+                          {renderInlineMarkdown(t)}
+                        </p>
+                      );
+                    })
+                  : (
+                    <p className="dark:text-gray-400 italic font-normal">
+                      No summary is available for this document yet.
+                    </p>
+                  )}
 
               </div>
 
@@ -1192,14 +1206,24 @@ export default function ArticleView({
 
                 {/* The Document Viewers */}
                 <div className={`w-full relative flex-1 min-h-[800px] bg-neutral-200 dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-inner transition-all duration-500 ${isFocusMode ? 'z-[70] ring-1 ring-white/10 shadow-2xl' : 'z-10'}`}>
-                  {isPDF && (
-                    <iframe 
-                      src={embedUrl} 
-                      className="absolute top-0 left-0 w-full h-full border-none" 
-                      title="Document Viewer"
-                    />
+                  {isPDF && (showPdf || !txtContent) && (
+                    <>
+                      <iframe 
+                        src={embedUrl} 
+                        className="absolute top-0 left-0 w-full h-full border-none" 
+                        title="Document Viewer"
+                      />
+                      {showPdf && txtContent && (
+                        <button
+                          onClick={() => setShowPdf(false)}
+                          className="absolute top-4 left-4 z-30 px-4 py-2 rounded-lg bg-[#18181A] text-white text-[11px] font-bold font-sans uppercase tracking-wider border border-white/10 shadow-lg hover:bg-black transition-colors"
+                        >
+                          ← Show Reader
+                        </button>
+                      )}
+                    </>
                   )}
-                  {isTXT && (
+                  {(isTXT || (!isPPTX && txtContent)) && !showPdf && (
                     <div className="w-full h-full relative flex flex-col">
                       {/* Glassmorphic Top Navigation */}
                       <div className="sticky top-0 z-20 w-full flex items-center justify-between px-6 py-4 bg-[#f8f9fa]/80 dark:bg-[#121212]/70 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 transition-all">
@@ -1225,6 +1249,19 @@ export default function ArticleView({
                             {isListening ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                             <span className="text-[11px] font-bold font-sans uppercase tracking-wider">{isListening ? 'Stop' : 'Listen'}</span>
                           </button>
+
+                          {isPDF && article.documentUrl && (
+                            <>
+                              <div className="w-px h-5 bg-neutral-300 dark:bg-white/10 mx-1"></div>
+                              <button
+                                onClick={() => setShowPdf(!showPdf)}
+                                className={`px-4 py-2 rounded-lg transition-all flex items-center space-x-2 border ${showPdf ? 'bg-[#18181A] border-white/10 text-indigo-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6),_0_1px_1px_rgba(255,255,255,0.05)]' : 'bg-white dark:bg-[#2A2A2A] border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#333]'}`}
+                                title={showPdf ? 'Back to reader' : 'View the original PDF'}
+                              >
+                                <span className="text-[11px] font-bold font-sans uppercase tracking-wider">{showPdf ? 'Show Reader' : 'Open PDF'}</span>
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {/* Right Side: Search & Typography */}
@@ -1628,4 +1665,3 @@ export default function ArticleView({
     </div>
   );
 }
-
