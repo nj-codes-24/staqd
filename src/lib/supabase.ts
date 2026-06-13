@@ -4,7 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-
+import type { Database } from './database';
 /**
  * Single shared Supabase client for the browser (Vite SPA).
  *
@@ -25,7 +25,7 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
