@@ -187,14 +187,18 @@ export default function SubTopicIndex({
 
   // Filter existing state articles for this category/sub-topic, and augment with simulated articles
   const allSubTopicArticles = useMemo(() => {
-    // Collect active state articles matched by subtopic/category
+    // Collect active state articles for this sub-topic (falls back to a loose
+    // category match for any legacy articles without a subTopic).
     const matched = articles.filter(
-      (a) => a.category.toLowerCase().includes(subTopic.toLowerCase()) || 
-             subTopic.toLowerCase().includes(a.category.toLowerCase())
+      (a) =>
+        a.subTopic === subTopic ||
+        (!a.subTopic &&
+          (a.category.toLowerCase().includes(subTopic.toLowerCase()) ||
+            subTopic.toLowerCase().includes(a.category.toLowerCase())))
     );
 
-    // Complement with high-quality generated research papers to guarantee 30 papers
-    const generatedPool = generateMockPapersForSubTopic(subTopic, matched.length);
+    // Real papers only — no generated padding now that the feed is live.
+    const generatedPool: Article[] = [];
     
     // Ensure all matched articles have standard month as MAY 2026 so they group beautifully
     const normalizedMatched = matched.map((a) => ({

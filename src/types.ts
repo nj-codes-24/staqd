@@ -44,6 +44,7 @@ export interface Article {
   excerpt: string;
   content: string;
   category: string;
+  subTopic?: string;
   readTime: string;
   author: {
     name: string;
