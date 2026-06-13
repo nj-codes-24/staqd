@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Article } from '../types';
+import { useUser } from './UserContext';
+import { getSavedPapers, savePaper, unsavePaper } from '../lib/api/knowledge';
 
 interface BookmarkContextType {
   savedArticles: Article[];
@@ -14,77 +16,81 @@ interface BookmarkContextType {
 const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
 
 export function BookmarkProvider({ children }: { children: ReactNode }) {
+  const { user } = useUser();
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Uploads remain local for now (real upload pipeline is Phase 5).
   const [uploadedArticles, setUploadedArticles] = useState<Article[]>([]);
 
-  // Hydrate from localStorage on mount
+  // Load the user's saved papers from the DB whenever auth state changes.
+  useEffect(() => {
+    if (!user) {
+      setSavedArticles([]);
+      return;
+    }
+    getSavedPapers()
+      .then(setSavedArticles)
+      .catch((err) => console.error('Failed to load saved papers', err));
+  }, [user]);
+
+  // Hydrate uploads from localStorage on mount.
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('[ staqd ]_saved_articles');
-      if (stored) {
-        setSavedArticles(JSON.parse(stored));
-      }
       const storedUploads = localStorage.getItem('[ staqd ]_uploaded_articles');
-      if (storedUploads) {
-        setUploadedArticles(JSON.parse(storedUploads));
-      }
+      if (storedUploads) setUploadedArticles(JSON.parse(storedUploads));
     } catch (err) {
-      console.error('Failed to parse articles from localStorage', err);
+      console.error('Failed to parse uploads from localStorage', err);
     }
   }, []);
-
-  // Save to localStorage on change
-  useEffect(() => {
-    localStorage.setItem('[ staqd ]_saved_articles', JSON.stringify(savedArticles));
-  }, [savedArticles]);
 
   useEffect(() => {
     localStorage.setItem('[ staqd ]_uploaded_articles', JSON.stringify(uploadedArticles));
   }, [uploadedArticles]);
 
   const toggleSave = (article: Article) => {
-    setSavedArticles(prev => {
-      const exists = prev.some(a => a.id === article.id);
-      if (exists) {
-        return prev.filter(a => a.id !== article.id);
-      } else {
-        showToast('Saved to profile.');
-        return [article, ...prev];
-      }
-    });
+    const exists = savedArticles.some((a) => a.id === article.id);
+    if (exists) {
+      // Optimistic remove, then persist.
+      setSavedArticles((prev) => prev.filter((a) => a.id !== article.id));
+      unsavePaper(article.id).catch((err) => {
+        console.error('Failed to unsave', err);
+        setSavedArticles((prev) => [article, ...prev]); // revert
+      });
+    } else {
+      setSavedArticles((prev) => [article, ...prev]);
+      showToast('Saved to profile.');
+      savePaper(article.id).catch((err) => {
+        console.error('Failed to save', err);
+        setSavedArticles((prev) => prev.filter((a) => a.id !== article.id)); // revert
+      });
+    }
   };
 
-  const isSaved = (articleId: string) => savedArticles.some(a => a.id === articleId);
+  const isSaved = (articleId: string) => savedArticles.some((a) => a.id === articleId);
 
   const saveUpload = (article: Article) => {
-    setUploadedArticles(prev => {
-      const exists = prev.some(a => a.id === article.id);
-      if (exists) {
-        return prev.map(a => a.id === article.id ? article : a); // Update if exists
-      } else {
-        showToast('Saved to profile.');
-        return [article, ...prev];
-      }
+    setUploadedArticles((prev) => {
+      const exists = prev.some((a) => a.id === article.id);
+      if (exists) return prev.map((a) => (a.id === article.id ? article : a));
+      showToast('Saved to profile.');
+      return [article, ...prev];
     });
   };
 
-
-
   const removeUpload = (articleId: string) => {
-    setUploadedArticles(prev => prev.filter(a => a.id !== articleId));
+    setUploadedArticles((prev) => prev.filter((a) => a.id !== articleId));
     showToast('Removed from profile.');
   };
 
   const showToast = (message: string) => {
     setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2000);
+    setTimeout(() => setToastMessage(null), 2000);
   };
 
   return (
-    <BookmarkContext.Provider value={{ savedArticles, toggleSave, isSaved, toastMessage, uploadedArticles, saveUpload, removeUpload }}>
+    <BookmarkContext.Provider
+      value={{ savedArticles, toggleSave, isSaved, toastMessage, uploadedArticles, saveUpload, removeUpload }}
+    >
       {children}
     </BookmarkContext.Provider>
   );
