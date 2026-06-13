@@ -29,7 +29,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
-import { INITIAL_USER, KNOWLEDGE_HUB_DATA } from '../data';
+import { INITIAL_USER } from '../data';
+import { groupIntoFeed } from '../lib/api/knowledge';
 import BookmarkButton from './BookmarkButton';
 import { useUser } from '../contexts/UserContext';
 import Logo from './Logo';
@@ -213,10 +214,13 @@ The integration of Neural Sourcing Structures and Cryptographic Hallmark Registr
 
 
 
+  // Build the category → sub-topic feed from the live articles.
+  const knowledgeFeed = useMemo(() => groupIntoFeed(articles), [articles]);
+
   // Dynamically get the sub-topics for the currently selected category
   const currentSubTopics = useMemo(() => {
-    return KNOWLEDGE_HUB_DATA[selectedCategory] || [];
-  }, [selectedCategory]);
+    return knowledgeFeed[selectedCategory] || [];
+  }, [selectedCategory, knowledgeFeed]);
 
   const searchResults = useMemo(() => {
     if (!isSearching || !searchQuery.trim()) return null;

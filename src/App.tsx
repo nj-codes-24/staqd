@@ -11,7 +11,8 @@ import ArticleView from './components/ArticleView';
 import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
 import { UserProfile, Article } from './types';
-import { INITIAL_USER, MOCK_ARTICLES } from './data';
+import { INITIAL_USER } from './data';
+import { getAllArticles, markPaperSeen } from './lib/api/knowledge';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import GlobalToast from './components/GlobalToast';
 import { useUser } from './contexts/UserContext';
@@ -21,9 +22,22 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'hud' | 'saved' | 'profile'>('hud');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
-  const [articles, setArticles] = useState<Article[]>(MOCK_ARTICLES);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // Load the live Knowledge Hub feed from Supabase.
+  React.useEffect(() => {
+    getAllArticles()
+      .then(setArticles)
+      .catch((e) => console.error('Failed to load articles', e));
+  }, []);
+
+  // Open an article and record it as seen (powers the fresh feed + articlesRead).
+  const openArticle = (article: Article) => {
+    setSelectedArticle(article);
+    markPaperSeen(article.id).catch((e) => console.error('Failed to mark seen', e));
+  };
   
   React.useEffect(() => {
     console.log("Current Auth State:", user);
@@ -154,9 +168,7 @@ export default function App() {
                   setActiveSubTopic(null);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onSelectArticle={(article) => {
-                  setSelectedArticle(article);
-                }}
+                onSelectArticle={openArticle}
                 onToggleBookmark={handleToggleBookmark}
                 articles={articles}
                 setActiveTab={(tab) => {
@@ -170,7 +182,7 @@ export default function App() {
                 setActiveTab={setActiveTab}
                 articles={articles}
                 onAddCustomArticle={handleAddCustomArticle}
-                onSelectArticle={(article) => setSelectedArticle(article)}
+                onSelectArticle={openArticle}
                 isEditingProfile={isEditingProfile}
                 setIsEditingProfile={setIsEditingProfile}
               />
@@ -178,9 +190,7 @@ export default function App() {
               <Dashboard 
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                onSelectArticle={(article) => {
-                  setSelectedArticle(article);
-                }}
+                onSelectArticle={openArticle}
                 articles={articles}
                 onToggleBookmark={handleToggleBookmark}
                 onViewSubTopicAll={(subTopic) => {
