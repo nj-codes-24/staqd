@@ -45,6 +45,8 @@ export interface Article {
   content: string;
   category: string;
   subTopic?: string;
+  uploadedBy?: string | null;
+  cueCards?: { term: string; desc: string }[];
   readTime: string;
   author: {
     name: string;

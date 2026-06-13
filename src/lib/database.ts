@@ -98,6 +98,8 @@ export interface Database {
           citation_count: number;
           processed_at: string;
           is_active: boolean;
+          uploaded_by: string | null;
+          cue_cards: Json | null;
         };
         Insert: {
           id?: string;
@@ -121,6 +123,8 @@ export interface Database {
           citation_count?: number;
           processed_at?: string;
           is_active?: boolean;
+          uploaded_by?: string | null;
+          cue_cards?: Json | null;
         };
         Update: {
           id?: string;
@@ -144,6 +148,8 @@ export interface Database {
           citation_count?: number;
           processed_at?: string;
           is_active?: boolean;
+          uploaded_by?: string | null;
+          cue_cards?: Json | null;
         };
         Relationships: [];
       };
