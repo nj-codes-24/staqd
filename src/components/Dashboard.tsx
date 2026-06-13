@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Compass, 
   Search, 
@@ -30,7 +30,8 @@ import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
 import { INITIAL_USER } from '../data';
-import { groupIntoFeed } from '../lib/api/knowledge';
+import { groupIntoFeed, assembleArticle } from '../lib/api/knowledge';
+import { supabase } from '../lib/supabase';
 import BookmarkButton from './BookmarkButton';
 import { useUser } from '../contexts/UserContext';
 import Logo from './Logo';
@@ -49,6 +50,7 @@ interface DashboardProps {
   onToggleBookmark: (articleId: string) => void;
   onViewSubTopicAll?: (subTopic: string) => void;
   onStartProcessing: (newArticle: Article) => void;
+  onProcessingComplete: (article: Article) => void;
   setIsEditingProfile: (val: boolean) => void;
 }
 
@@ -60,6 +62,7 @@ export default function Dashboard({
   onToggleBookmark,
   onViewSubTopicAll,
   onStartProcessing,
+  onProcessingComplete,
   setIsEditingProfile
 }: DashboardProps) {
   const { user, updateUser, getInitials } = useUser();
@@ -68,6 +71,7 @@ export default function Dashboard({
   const [selectedCategory, setSelectedCategory] = useState('Computer Sciences');
   const [isSearching, setIsSearching] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const defaultFilters = {
@@ -108,88 +112,90 @@ export default function Dashboard({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement> | null = null) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement> | null = null) => {
     setIsUploadModalOpen(false);
-    
+
+    // Robustly pull the file from either a drop event or a file-input change,
+    // without relying on the `in` operator (unreliable across synthetic events).
+    const anyE = e as any;
     let file: File | null = null;
-    if (e) {
-      if ('dataTransfer' in e && e.dataTransfer.files.length > 0) {
-        file = e.dataTransfer.files[0];
-      } else if ('target' in e) {
-        const target = e.target as HTMLInputElement;
-        if (target.files && target.files.length > 0) {
-          file = target.files[0];
-        }
-      }
+    if (anyE?.dataTransfer?.files?.length) {
+      file = anyE.dataTransfer.files[0];
+    } else if (anyE?.target?.files?.length) {
+      file = anyE.target.files[0];
     }
-    
-    const fallbackText = `NEURAL SOURCING STRUCTURES & CRYPTOGRAPHIC HALLMARK REGISTRIES IN SUSTAINABLE JEWELRY MANUFACTURING
 
-Abstract
-This paper explores the intersection of high-frequency assay diagnostic laboratories and decentralized ledger protocols to establish immutable sourcing chains in the fine jewelry sector. By combining localized XRF spectrometry with block-by-block verification, we eliminate supply chain vulnerabilities, bypassing traditional certification bottlenecks and ensuring complete ethical compliance.
+    if (!file) {
+      return;
+    }
+    const picked = file;
 
-1. Introduction
-The global jewelry supply chain has historically suffered from opaque sourcing, particularly concerning conflict minerals and unverified carat density metrics. Consumers and regulatory bodies increasingly demand absolute transparency. Traditional paper-based certification, such as the Kimberley Process certificates, are prone to forgery, loss, and delays. 
-
-In response, we propose a Neural Sourcing Structure (NSS)—a hybrid framework utilizing machine learning algorithms to predict supply chain bottlenecks, coupled with a Cryptographic Hallmark Registry (CHR) that records real-time assay testing data onto a secure ledger.
-
-2. Operational Strategies: Gold Purity Assay & Labs
-Recent research highlights that securing gold pureness metrics demands a structured, end-to-end trace mechanism. Assay diagnostic laboratories increasingly leverage advanced high-frequency spectrometers on the operational floor. 
-
-By validating metal compositions dynamically prior to custom shaping, companies can successfully bypass expensive middleman certification bottlenecks. These high-frequency devices use X-ray fluorescence (XRF) to analyze the elemental composition of alloys non-destructively.
-
-The data generated from each XRF scan is immediately hashed and pushed to the CHR. This ensures that the exact purity percentage—down to the decimal—is permanently attached to the specific batch of raw material before it even reaches the crucible.
-
-3. Sourcing Ethics & The Kimberley Process Traceability
-Ethical logistics protocols must rigidly adhere to standard international governance guidelines. Implementing block-by-block ledger verification secures diamond provenance, totally preventing conflict gemstones from entering retail pipelines. 
-
-Our operational model integrates a centralized digital certificate track that maps Kimberley invoices with active carat density certifications. Such strategies shield brands from systemic sourcing vulnerabilities while guaranteeing uncompromised product authenticity.
-
-4. Implementation of the Cryptographic Hallmark Registry
-The CHR is designed as a permissioned blockchain. Only vetted assay laboratories and certified wholesale suppliers are granted writing privileges. When a batch of rough diamonds is processed, the system generates a unique non-fungible token (NFT) representing the physical asset.
-
-As the gemstone moves from the cutter to the setter to the final retail display, the token is transferred across the network. Retailers can eventually provide end-consumers with a QR code. Scanning this code reveals the entire lifecycle of the piece, from the exact mine of origin to the date of the final polish.
-
-5. Machine Learning in Supply Chain Optimization
-The "Neural" aspect of our proposed structure involves predictive modeling. By analyzing years of logistical data, shipping delays, and assay testing times, our neural network can predict the optimal routing for raw materials.
-
-For example, if a specific assay lab in Antwerp is experiencing a backlog, the system automatically reroutes shipments to an available facility in Mumbai, factoring in shipping costs, insurance premiums, and turnaround times. This reduces the overall time-to-market by an estimated 14%.
-
-6. Consumer Trust and the Verification Interface
-Enhancing customer engagement hinges on absolute corporate transparency. Discerning clientele require vetted proof of hallmark credentials before finalizing transactions. Clearly displaying gold assays, Kimberley certifications, and carat metrics inside custom jewelry concierge dashboards significantly advances buyer trust index ratings.
-
-Future developments aim to empower buyers with direct QR scans of the assay certificate log, establishing a direct emotional link between custom craftsmanship, material authenticity, and ethical production values.
-
-7. Conclusion
-The integration of Neural Sourcing Structures and Cryptographic Hallmark Registries represents a paradigm shift in jewelry manufacturing. It transforms a historically opaque industry into a model of transparency and efficiency.
-
-8. References
-[1] Moss, E. (2025). Decentralized Ledgers in Luxury Goods. Journal of Supply Chain Tech.
-[2] Chen, L. & Smith, R. (2024). XRF Spectrometry in Modern Assaying. Metallurgy Today.
-[3] The Kimberley Process Certification Scheme: A Review. (2023). Global Trade Reports.
-[4] AI Routing Protocols. (2026). Logistics Weekly.`;
-    const docUrl = file ? URL.createObjectURL(file) : "data:text/plain;charset=utf-8," + encodeURIComponent(fallbackText);
-    
-    const newArticle: Article = {
-      id: `custom-paper-${Date.now()}`,
-      title: file ? file.name : "mock_document.txt",
-      author: {
-        name: "DR. EVELYN MOSS",
-        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
-        role: "AUTHOR"
-      },
-      publishedAt: "MAY 2026",
-      excerpt: "Custom uploaded paper.",
-      content: "Uploaded custom paper full text.",
-      category: "Research",
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
+    // Show the processing animation immediately with a placeholder.
+    const placeholder: Article = {
+      id: `upload-${Date.now()}`,
+      title: picked.name,
+      author: { name: 'You', avatar: '', role: 'Uploaded' },
+      publishedAt: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      excerpt: 'Processing your document...',
+      content: '',
+      category: 'Computer Sciences',
+      imageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800',
       likes: 0,
-      readTime: "15 min read",
-      isBookmarked: true,
-      documentUrl: docUrl
+      readTime: '',
+      isBookmarked: false,
     };
-    
-    onStartProcessing(newArticle);
+    onStartProcessing(placeholder);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not signed in');
+
+      // 1) Upload to Storage (own folder) and get a public URL.
+      const path = `${user.id}/${Date.now()}-${picked.name}`;
+      const { error: upErr } = await supabase.storage.from('uploads').upload(path, picked);
+      if (upErr) throw upErr;
+      const fileUrl = supabase.storage.from('uploads').getPublicUrl(path).data.publicUrl;
+
+      // 2) Process with Gemini via the edge function.
+      const { data: fields, error: fnErr } = await supabase.functions.invoke('process-upload', {
+        body: { fileUrl },
+      });
+      const f = fields as { title?: string; author?: string; excerpt?: string; content?: string; category?: string; subTopic?: string; readTime?: string; cueCards?: { term: string; desc: string }[]; error?: string } | null;
+      if (fnErr || !f || f.error) throw new Error(f?.error || fnErr?.message || 'Processing failed');
+
+      // 3) Persist as a private paper so it is categorized + searchable.
+      const { data: row, error: insErr } = await supabase
+        .from('papers')
+        .insert({
+          title: f.title || picked.name,
+          excerpt: f.excerpt || '',
+          content: f.content || '',
+          category: f.category || 'Computer Sciences',
+          sub_topic: f.subTopic || 'General',
+          read_time: f.readTime || '10 min read',
+          document_url: fileUrl,
+          image_url: placeholder.imageUrl,
+          author_name: f.author || 'Unknown author',
+          author_role: 'Your upload',
+          author_avatar: '',
+          uploaded_by: user.id,
+          cue_cards: f.cueCards ?? null,
+          likes: 0,
+          published_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (insErr || !row) throw insErr || new Error('Could not save upload');
+
+      // 4) Reveal the real, persisted article.
+      onProcessingComplete(assembleArticle(row));
+    } catch (err) {
+      console.error('Upload failed', err);
+      onProcessingComplete({
+        ...placeholder,
+        excerpt: 'Upload saved (summary unavailable).',
+      });
+    }
   };
 
   const handleOpenSubscriptionModal = () => {
@@ -694,6 +700,7 @@ The integration of Neural Sourcing Structures and Cryptographic Hallmark Registr
                                       <span>{getArticleSource(article.id)}</span>
                                       <span>{article.readTime}</span>
                                     </div>
+                                    {article.uploadedBy && (<span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-400/10 px-2 py-0.5 rounded-full mb-1 w-fit">★ Your Upload</span>)}
                                     <h3 className="text-[14px] md:text-[15px] font-sans font-bold text-[#1c1c1c] dark:text-gray-100 leading-tight line-clamp-3">
                                       {article.title}
                                     </h3>
@@ -798,6 +805,7 @@ The integration of Neural Sourcing Structures and Cryptographic Hallmark Registr
                                           <span>{getArticleSource(article.id)} • {article.author.name}</span>
                                           <span>{article.publishedAt}</span>
                                         </div>
+                                        {article.uploadedBy && (<span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-400/10 px-2 py-0.5 rounded-full mb-1 w-fit">★ Your Upload</span>)}
                                         <h4 
                                           className="text-xs sm:text-sm font-serif font-black text-neutral-900 dark:text-gray-100 group-hover:text-amber-900 leading-normal sm:leading-relaxed transition-colors"
                                         >
@@ -869,10 +877,17 @@ The integration of Neural Sourcing Structures and Cryptographic Hallmark Registr
                       onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
                       onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
                       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(); }}
-                      onClick={handleFileUpload}
+                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(e); }}
+                      onClick={() => uploadInputRef.current?.click()}
                       style={{ cursor: 'pointer' }}
                     >
+                      <input
+                        ref={uploadInputRef}
+                        type="file"
+                        accept=".pdf,.txt,.pptx"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
                       <div className={`p-4 rounded-full mb-4 transition-all duration-200 group-hover:scale-105 ${isDragActive ? 'bg-indigo-100 text-indigo-600 dark:bg-[#27272A] dark:text-white scale-105' : 'bg-stone-200/50 text-stone-500 dark:bg-[#27272A] dark:text-white'}`}>
                         <UploadCloud size={32} />
                       </div>

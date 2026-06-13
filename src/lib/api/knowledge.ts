@@ -23,6 +23,8 @@ export function assembleArticle(row: PaperRow): Article {
     content: row.content ?? '',
     category: row.category,
     subTopic: row.sub_topic ?? undefined,
+    uploadedBy: row.uploaded_by ?? null,
+    cueCards: (row.cue_cards as { term: string; desc: string }[] | null) ?? undefined,
     readTime: row.read_time ?? '',
     author: {
       name: row.author_name ?? '',

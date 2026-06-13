@@ -44,18 +44,14 @@ export default function App() {
   }, [user]);
 
 
-  React.useEffect(() => {
-    if (processingArticle) {
-      const timer = setTimeout(() => {
-        setArticles(prev => [processingArticle, ...prev]);
-        setProcessingArticle(null);
-        setSelectedArticle(processingArticle);
-        setActiveSubTopic(null);
-        setActiveTab('hud');
-      }, 6000);
-      return () => clearTimeout(timer);
-    }
-  }, [processingArticle]);
+  // Called by the upload flow once the document has really been processed.
+  const handleProcessingComplete = (article: Article) => {
+    setArticles((prev) => [article, ...prev]);
+    setProcessingArticle(null);
+    setSelectedArticle(article);
+    setActiveSubTopic(null);
+    setActiveTab('hud');
+  };
 
   // Toggle bookmark function
   const handleToggleBookmark = (articleId: string) => {
@@ -200,6 +196,7 @@ export default function App() {
                 onStartProcessing={(newArticle) => {
                   setProcessingArticle(newArticle);
                 }}
+                onProcessingComplete={handleProcessingComplete}
                 setIsEditingProfile={setIsEditingProfile}
               />
             )}
