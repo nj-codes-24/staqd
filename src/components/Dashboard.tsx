@@ -231,13 +231,58 @@ export default function Dashboard({
   const searchResults = useMemo(() => {
     if (!isSearching || !searchQuery.trim()) return null;
     const query = searchQuery.toLowerCase();
-    return articles.filter(a => 
+
+    // 1. Text match
+    let results = articles.filter(a =>
       a.title.toLowerCase().includes(query) ||
       a.category.toLowerCase().includes(query) ||
       a.author.name.toLowerCase().includes(query) ||
       getArticleSource(a.id).toLowerCase().includes(query)
     );
-  }, [isSearching, searchQuery, articles]);
+
+    // 2. Publisher filter
+    if (filters.publishers.length > 0) {
+      results = results.filter(a =>
+        filters.publishers.some(pub => getArticleSource(a.id).toLowerCase().includes(pub.toLowerCase()))
+      );
+    }
+
+    // 3. Sub-topic / category filter
+    if (filters.subTopics.length > 0) {
+      results = results.filter(a =>
+        filters.subTopics.some(st =>
+          a.category.toLowerCase().includes(st.toLowerCase()) ||
+          (a.subTopic && a.subTopic.toLowerCase().includes(st.toLowerCase()))
+        )
+      );
+    }
+
+    // 4. Attributes filter
+    if (filters.attributes['Includes Code']) {
+      results = results.filter(a =>
+        a.content?.toLowerCase().includes('github') ||
+        a.content?.toLowerCase().includes('code') ||
+        a.content?.toLowerCase().includes('repository')
+      );
+    }
+    if (filters.attributes['Includes Dataset']) {
+      results = results.filter(a =>
+        a.content?.toLowerCase().includes('dataset') ||
+        a.content?.toLowerCase().includes('data set') ||
+        a.content?.toLowerCase().includes('benchmark')
+      );
+    }
+
+    // 5. Sort
+    if (filters.sortBy === 'Newest First') {
+      results = [...results].sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+    } else if (filters.sortBy === 'Most Cited') {
+      results = [...results].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    }
+    // 'Relevance' keeps the original text-match order.
+
+    return results;
+  }, [isSearching, searchQuery, articles, filters]);
 
   return (
     <div id="magazine-mockup-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] md:py-8 font-sans antialiased text-[#1c1c1c] dark:text-[#F3F4F6] selection:bg-[#c2b29f]">

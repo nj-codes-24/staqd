@@ -414,16 +414,23 @@ export default function ArticleView({
   // Custom stacked card system index
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
 
-  // Audio chapter tracklist details
-  const chapters = [
-    { title: "Chapter 1: Metal Sourcing & Fineness", duration: "03:15", startSec: 0, endSec: 195 },
-    { title: "Chapter 2: Spectroscopic Testing Methodologies", duration: "04:30", startSec: 195, endSec: 465 },
-    { title: "Chapter 3: Kimberley Process Ledger Trace", duration: "03:35", startSec: 465, endSec: 680 },
-    { title: "Chapter 4: Customer Dashboard Integration Specs", duration: "04:10", startSec: 680, endSec: 930 }
-  ];
+  // Audio chapter tracklist — derived from article content headings.
+  const chapters = React.useMemo(() => {
+    const headings = (article.content || '')
+      .split('\n').map(l => l.trim())
+      .filter(l => l.startsWith('#')).map(l => l.replace(/^#+\s*/, ''))
+      .filter(Boolean);
+    if (headings.length === 0) return [{ title: article.title, duration: '—', startSec: 0, endSec: 1 }];
+    const secPerChapter = Math.round(600 / headings.length);
+    return headings.map((h, i) => ({
+      title: `Section ${i + 1}: ${h}`,
+      duration: `${String(Math.floor(secPerChapter / 60)).padStart(2, '0')}:${String(secPerChapter % 60).padStart(2, '0')}`,
+      startSec: i * secPerChapter,
+      endSec: (i + 1) * secPerChapter,
+    }));
+  }, [article.id, article.content, article.title]);
 
-  // Helper to get active chapter index based on audio progress (totalDurationSeconds = 930)
-  const totalDurationSeconds = 930; // 15:30
+  const totalDurationSeconds = chapters.length > 0 ? chapters[chapters.length - 1].endSec : 1;
   const getChapterIndexFromProgress = (progress: number) => {
     const elapsed = (progress / 100) * totalDurationSeconds;
     const idx = chapters.findIndex(ch => elapsed >= ch.startSec && elapsed <= ch.endSec);
@@ -555,27 +562,26 @@ export default function ArticleView({
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Generate chatbot reply based on query matching
+  // Generate chatbot reply — context-aware using the article's real content.
   const generateResponse = (userText: string) => {
     const textLower = userText.toLowerCase();
+    const articleTitle = article.title;
+    const articleExcerpt = article.excerpt || '';
+    const articleCategory = article.category || 'Research';
 
-    if (textLower.includes('summar') || textLower.includes('order') || textLower.includes('custom') || textLower.includes('last month')) {
-      return `### Sourcing & Custom Orders Summary\n\nLast month, we registered **12 custom orders** with approved assays:\n\n* **Gold Purity validation:** 5 orders (all matching standard gold purity compliance specs).\n* **Carat Density analysis:** 3 orders (certified under standard laboratory scales).\n* **Custom designs:** 4 orders verified conflict-free compliant.\n\nAll sourcing reports indicate pristine quality levels. What other aspects of our operations should we check?`;
+    if (textLower.includes('summar') || textLower.includes('overview') || textLower.includes('about')) {
+      return `### Paper Summary\n\n**${articleTitle}**\n\n${articleExcerpt}\n\n* **Category:** ${articleCategory}\n* **Read Time:** ${article.readTime || 'N/A'}\n* **Author:** ${article.author?.name || 'Unknown'}\n\nWould you like me to explain a specific section in more detail?`;
     }
 
-    if (textLower.includes('gold') || textLower.includes('purity') || textLower.includes('assay') || textLower.includes('hallmark')) {
-      return `### Material Verification Logs\n\nMaterial testing results from our decentralized registries:\n\n1. **XRF Spectrometer Audits:** Standard gold purity was measured consistently above catalog thresholds.\n2. **Official Hallmarking:** Verification labels have been minted across all approved batches.\n3. **Vendor Compliance:** Suppliers certified ethical logs align with our sustainability metrics.\n\nWould you like me to display the **Operational Strategies** text summary or review other **Cue Cards**?`;
+    if (textLower.includes('help') || textLower.includes('what can you do')) {
+      return `### [ STΛQD ] Study Assistant\n\nI can help you understand this paper. Try asking:\n* **"Summarize this paper"** for a quick overview\n* **"Key findings"** for the main takeaways\n* **"Explain the methodology"** for how the research was done\n* Or ask any specific question about **${articleTitle}**\n\n_Note: Full AI responses via Gemini coming soon._`;
     }
 
-    if (textLower.includes('conflict') || textLower.includes('diamond') || textLower.includes('ethical') || textLower.includes('sourcing')) {
-      return `### Sourcing Ethics & Traceability Report\n\n* **Kimberley Process Tracking:** Zero conflict materials entered the processing network.\n* **Ledger Validation:** Blockchain verification checks confirm high integrity for 100% of gemstone imports.\n* **Audit Interval:** Checks are scheduled fortnightly in compliance with global trade boards.\n\nLet me know if you would like to run another database analysis.`;
+    if (textLower.includes('key') || textLower.includes('finding') || textLower.includes('result') || textLower.includes('conclusion')) {
+      return `### Key Findings\n\nFrom **${articleTitle}**:\n\n${articleExcerpt}\n\nFor deeper analysis, check the **Cue Cards** panel on the right — they highlight the core concepts from this paper.\n\n_Full AI-powered analysis coming soon._`;
     }
 
-    if (textLower.includes('help') || textLower.includes('concierge') || textLower.includes('what can you do')) {
-      return `### Welcome to the Jewelry Concierge AI Assistant\n\nI can analyze logistical operations, material assays, and diamond provenance logs instantly. Common triggers:\n* Type **"summarize orders"** for custom order highlights.\n* Type **"gold purity"** for XRF metal assay details.\n* Type **"conflict diamonds"** to retrieve Kimberley Process compliance sheets.\n\nHow can I facilitate your work today?`;
-    }
-
-    return `### Concierge Analysis Insight\n\nRegarding your question on **"${userText}"**:\n\nI've run a keyword query through last month's operational records. We are keeping high-fidelity logs of:\n* **Gold Purity Standards** (Ethical sourcing active)\n* **Carat Density Audits** (All assays finalized)\n* **Traceability ledgers** (Block-by-block secure origin tracks)\n\nLet me know if I should summarize these categories further, or outline our customer engagement models.`;
+    return `### Analysis\n\nRegarding your question about **"${userText}"** in the context of:\n\n**${articleTitle}** (${articleCategory})\n\n${articleExcerpt}\n\nFor a more detailed response, try the **Cue Cards** panel or rephrase your question. Full Gemini-powered answers are coming soon.`;
   };
 
   const handleSend = (e?: React.FormEvent) => {
