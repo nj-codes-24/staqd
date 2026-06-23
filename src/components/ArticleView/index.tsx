@@ -57,14 +57,16 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
-import { Article, UserProfile } from '../types';
-import BookmarkButton from './BookmarkButton';
-import AuthModal from './AuthModal';
-import SubscriptionModal from './SubscriptionModal';
+import { Article, ChatMessage, CueCardItem } from '../../types';
+import BookmarkButton from '../BookmarkButton';
+import AuthModal from '../AuthModal';
+import SubscriptionModal from '../SubscriptionModal';
+import ChatPanel from './ChatPanel';
 import { Download, ZoomIn, ZoomOut, Type } from 'lucide-react';
-import { useBookmark } from '../contexts/BookmarkContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useUser } from '../contexts/UserContext';
+import { useBookmark } from '../../contexts/BookmarkContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useUser } from '../../contexts/UserContext';
+import { supabase } from '../../lib/supabase';
 
 interface ArticleViewProps {
   article: Article;
@@ -74,25 +76,7 @@ interface ArticleViewProps {
   onToggleBookmark: (articleId: string) => void;
 }
 
-interface ChatMessage {
-  id: string;
-  sender: 'user' | 'assistant';
-  text: string;
-  timestamp: Date;
-}
 
-interface CueCardItem {
-  id: number;
-  term: string;
-  desc: string;
-  status: string;
-  colorName: string;
-  bgColor: string;
-  borderColor: string;
-  textColor: string;
-  tagColor: string;
-  icon: React.ComponentType<any>;
-}
 
 function renderInlineMarkdown(text: string) {
   return text.split(/\*\*(.*?)\*\*/g).map((part, j) =>
@@ -555,28 +539,29 @@ export default function ArticleView({
   };
 
   // Generate chatbot reply — context-aware using the article's real content.
-  const generateResponse = (userText: string) => {
-    const textLower = userText.toLowerCase();
-    const articleTitle = article.title;
-    const articleExcerpt = article.excerpt || '';
-    const articleCategory = article.category || 'Research';
-
-    if (textLower.includes('summar') || textLower.includes('overview') || textLower.includes('about')) {
-      return `### Paper Summary\n\n**${articleTitle}**\n\n${articleExcerpt}\n\n* **Category:** ${articleCategory}\n* **Read Time:** ${article.readTime || 'N/A'}\n* **Author:** ${article.author?.name || 'Unknown'}\n\nWould you like me to explain a specific section in more detail?`;
+  // Helper to call Supabase Edge Function for Gemini chat
+  const fetchChatResponse = async (userText: string, currentHistory: ChatMessage[]) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
+          articleContent: article.content || '',
+          articleTitle: article.title,
+          message: userText,
+          history: currentHistory.map(m => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            text: m.text
+          }))
+        }
+      });
+      if (error) throw error;
+      return data.response;
+    } catch (err) {
+      console.error("Chat API error:", err);
+      return "I'm having trouble connecting to the AI service right now. Please try again later.";
     }
-
-    if (textLower.includes('help') || textLower.includes('what can you do')) {
-      return `### [ STΛQD ] Study Assistant\n\nI can help you understand this paper. Try asking:\n* **"Summarize this paper"** for a quick overview\n* **"Key findings"** for the main takeaways\n* **"Explain the methodology"** for how the research was done\n* Or ask any specific question about **${articleTitle}**\n\n_Note: Full AI responses via Gemini coming soon._`;
-    }
-
-    if (textLower.includes('key') || textLower.includes('finding') || textLower.includes('result') || textLower.includes('conclusion')) {
-      return `### Key Findings\n\nFrom **${articleTitle}**:\n\n${articleExcerpt}\n\nFor deeper analysis, check the **Cue Cards** panel on the right — they highlight the core concepts from this paper.\n\n_Full AI-powered analysis coming soon._`;
-    }
-
-    return `### Analysis\n\nRegarding your question about **"${userText}"** in the context of:\n\n**${articleTitle}** (${articleCategory})\n\n${articleExcerpt}\n\nFor a more detailed response, try the **Cue Cards** panel or rephrase your question. Full Gemini-powered answers are coming soon.`;
   };
 
-  const handleSend = (e?: React.FormEvent) => {
+  const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputValue.trim() || isTyping) return;
 
@@ -589,23 +574,23 @@ export default function ArticleView({
       text: userQuery,
       timestamp: new Date()
     };
-    setMessages(prev => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setIsTyping(true);
 
-    setTimeout(() => {
-      const responseText = generateResponse(userQuery);
-      const botMsg: ChatMessage = {
-        id: `bot-${Date.now()}`,
-        sender: 'assistant',
-        text: responseText,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 850);
+    const responseText = await fetchChatResponse(userQuery, messages);
+    
+    const botMsg: ChatMessage = {
+      id: `bot-${Date.now()}`,
+      sender: 'assistant',
+      text: responseText,
+      timestamp: new Date()
+    };
+    setMessages([...newMessages, botMsg]);
+    setIsTyping(false);
   };
 
-  const handleTriggerTag = (tagLabel: string, userText: string) => {
+  const handleTriggerTag = async (tagLabel: string, userText: string) => {
     if (isTyping) return;
     
     const userMsg: ChatMessage = {
@@ -614,20 +599,20 @@ export default function ArticleView({
       text: tagLabel,
       timestamp: new Date()
     };
-    setMessages(prev => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setIsTyping(true);
 
-    setTimeout(() => {
-      const responseText = generateResponse(userText);
-      const botMsg: ChatMessage = {
-        id: `bot-tag-${Date.now()}`,
-        sender: 'assistant',
-        text: responseText,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 850);
+    const responseText = await fetchChatResponse(userText, messages);
+    
+    const botMsg: ChatMessage = {
+      id: `bot-tag-${Date.now()}`,
+      sender: 'assistant',
+      text: responseText,
+      timestamp: new Date()
+    };
+    setMessages([...newMessages, botMsg]);
+    setIsTyping(false);
   };
 
   // Create a custom cue card
@@ -847,7 +832,7 @@ export default function ArticleView({
 
             {/* Auth Login Trigger */}
             <div className="flex items-center pl-3 border-l border-neutral-200 dark:border-[rgba(255,255,255,0.08)] h-8 shrink-0 gap-3">
-              {!isAuthenticated ? (
+              {!user ? (
                 <div className="flex items-center gap-4">
                   <button
                     onClick={toggleDarkMode}
@@ -1327,109 +1312,19 @@ export default function ArticleView({
         </main>
       </div>
 
-      {/* Squeezed side-by-side Chat Panel */}
-      <div 
-        id="chatbot-drawer-container"
-        className={`transition-all duration-500 ease-in-out flex flex-col shrink-0 bg-white dark:bg-[#1C1C1E] ${isChatOpen ? 'border-l border-r border-b border-[#F3F3F3] dark:border-0' : 'border-none'} ${isFocusMode ? 'z-[70] relative shadow-2xl' : 'z-10'}`}
-        style={{
-          width: isChatOpen ? '340px' : '0px',
-          minWidth: isChatOpen ? '340px' : '0px',
-          maxWidth: isChatOpen ? '340px' : '0px',
-          opacity: isChatOpen ? 1 : 0,
-          pointerEvents: isChatOpen ? 'auto' : 'none',
-          height: '100vh',
-          position: 'sticky',
-          top: '0px',
-          borderRadius: '0px',
-          boxShadow: isChatOpen ? '0 4px 24px rgba(0, 0, 0, 0.02)' : 'none',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Drawer Header */}
-        <div className="p-4 flex items-center justify-between select-none h-20 bg-white dark:bg-transparent">
-          <div className="flex items-center space-x-2.5">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-sans text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#888888]">RESEARCH ASSISTANT</span>
-          </div>
-
-          <button 
-            onClick={() => setIsChatOpen(false)}
-            className="p-1.5 hover:bg-black/5 text-neutral-600 cursor-pointer flex items-center justify-center dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-full"
-            title="Minimize concierge drawer"
-          >
-            <X className="h-4.5 w-4.5" />
-          </button>
-        </div>
-
-        {/* Chat Message Logs Body & Empty State */}
-        <div 
-          className="flex-1 overflow-y-auto p-4 flex flex-col bg-white dark:bg-transparent"
-          style={messages.length === 0 ? { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' } : undefined}
-        >
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center p-6 select-none">
-              <Sparkles className="h-10 w-10 text-[#D1D1D6]" strokeWidth={1.5} />
-              <p className="font-sans font-medium text-[13px] text-[#8E8E93] mt-3 leading-relaxed max-w-[240px]">
-                Ask me anything about this paper, audio or the cue cards, I got your back
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4 w-full">
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
-                >
-                  <div 
-                    className={`leading-[1.5] ${
-                      msg.sender === 'user' 
-                        ? 'max-w-[85%] text-[13px] text-white dark:text-gray-300 bg-[#2C2C2E] dark:bg-white/10 rounded-[12px] px-4 py-3 border-0' 
-                        : 'w-full text-sm bg-neutral-100 dark:bg-white/5 border dark:border-white/10 rounded-2xl p-4 text-neutral-900 dark:text-gray-300'
-                    }`}
-                  >
-                    {msg.sender === 'assistant' ? (
-                      <div className="space-y-2">{renderChatMessageContent(msg.text)}</div>
-                    ) : (
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono text-neutral-400 mt-1 px-1">
-                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              ))}
-
-              {isTyping && (
-                <div className="flex items-center space-x-1.5 text-neutral-400 text-xs pl-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 animate-bounce duration-300" style={{ animationDelay: '0ms' }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 animate-bounce duration-300" style={{ animationDelay: '150ms' }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 animate-bounce duration-300" style={{ animationDelay: '300ms' }} />
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Form Input query field sitting perfectly flush */}
-        <form onSubmit={handleSend} className="p-4 bg-white dark:bg-transparent flex items-center space-x-2 shrink-0">
-          <input 
-            type="text" 
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask the concierge..."
-            className="flex-1 bg-white dark:bg-white/5 rounded-full outline-none text-[12px] leading-none transition placeholder-neutral-400 dark:placeholder-gray-500 font-sans border border-[#EAEAEA] dark:border-white/10"
-            style={{ padding: '10px 14px' }}
-          />
-          <button 
-            type="submit" 
-            className="h-9 w-9 bg-neutral-900 hover:bg-neutral-950 text-white flex items-center justify-center active:scale-95 cursor-pointer shadow-3xs shrink-0 dark:bg-transparent dark:text-white dark:border dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/40 dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 rounded-full"
-            title="Send query"
-          >
-            <Send className="h-3.5 w-3.5" />
-          </button>
-        </form>
-      </div>
+      <ChatPanel
+        article={article}
+        isChatOpen={isChatOpen}
+        setIsChatOpen={setIsChatOpen}
+        isFocusMode={isFocusMode}
+        messages={messages}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        isTyping={isTyping}
+        handleSend={handleSend}
+        renderChatMessageContent={renderChatMessageContent}
+        chatEndRef={chatEndRef}
+      />
 
     </div> {/* Close reader-workspace-wrapper */}
 
@@ -1438,7 +1333,7 @@ export default function ArticleView({
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
-        onAuthSuccess={() => setIsAuthenticated(true)}
+        onAuthSuccess={() => {}}
       />
 
       <SubscriptionModal 

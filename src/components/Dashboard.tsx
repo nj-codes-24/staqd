@@ -309,7 +309,7 @@ export default function Dashboard({
 
           {/* Far Right widgets */}
           <div className="flex-1 flex items-center justify-end space-x-4 md:space-x-6 relative z-10">
-            {!isAuthenticated ? (
+            {!user ? (
               <div className="flex items-center gap-4">
                 <button
                   onClick={toggleDarkMode}
@@ -912,7 +912,7 @@ export default function Dashboard({
                       onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
                       onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
                       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
-                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(e); }}
+                      onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); handleFileUpload(e as any); }}
                       onClick={() => uploadInputRef.current?.click()}
                       style={{ cursor: 'pointer' }}
                     >

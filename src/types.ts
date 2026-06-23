@@ -65,3 +65,22 @@ export interface HubCategory {
   name: string;
   iconName: string;
 }
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: Date;
+}
+
+export interface CueCardItem {
+  id: number;
+  term: string;
+  desc: string;
+  status?: string;
+  colorName?: string;
+  bgColor?: string;
+  borderColor?: string;
+  textColor?: string;
+  tagColor?: string;
+  icon?: any;
+}
