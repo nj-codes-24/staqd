@@ -29,7 +29,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { User } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { UserProfile, Article } from '../types';
-import { INITIAL_USER } from '../data';
+
 import { groupIntoFeed, assembleArticle } from '../lib/api/knowledge';
 import { supabase } from '../lib/supabase';
 import BookmarkButton from './BookmarkButton';
@@ -87,25 +87,15 @@ export default function Dashboard({
   
 
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
 
   // Custom Paper Upload Feature States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  // Auth Modal State
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-    if (isAuth) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
   const handleAuthGuardedAction = (actionFn: () => void) => {
-    if (isAuthenticated) {
+    if (user) {
       actionFn();
     } else {
       setIsAuthModalOpen(true);
@@ -990,22 +980,9 @@ export default function Dashboard({
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
           onAuthSuccess={(isSignup) => {
-            setIsAuthenticated(true);
-            if (isSignup) {
-              const authName = localStorage.getItem('authName') || 'MEMBER';
-              updateUser(user ? {
-                ...user,
-                name: authName,
-                bio: '',
-                avatarUrl: ''
-              } : {
-                ...INITIAL_USER,
-                name: authName,
-                bio: '',
-                avatarUrl: ''
-              });
+            if (activeTab === 'profile') {
               setActiveTab('profile');
-              setIsEditingProfile(false); // Make sure modal does NOT auto-open
+              setIsEditingProfile(false);
             } else {
               setActiveTab('hud');
             }

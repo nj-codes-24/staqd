@@ -121,7 +121,6 @@ export default function ArticleView({
   const hasSavedUpload = uploadedArticles.some(a => a.id === article.id);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isCheckRevealed, setIsCheckRevealed] = useState(false);
@@ -378,15 +377,8 @@ export default function ArticleView({
   
   const { isDarkMode, toggleDarkMode } = useTheme();
 
-  useEffect(() => {
-    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-    if (isAuth) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
   const handleAuthGuardedAction = (actionFn: () => void) => {
-    if (isAuthenticated) {
+    if (user) {
       actionFn();
     } else {
       setIsAuthModalOpen(true);

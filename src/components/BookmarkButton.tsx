@@ -2,6 +2,7 @@ import React from 'react';
 import { Bookmark } from 'lucide-react';
 import { Article } from '../types';
 import { useBookmark } from '../contexts/BookmarkContext';
+import { useUser } from '../contexts/UserContext';
 
 interface BookmarkButtonProps {
   article: Article;
@@ -12,6 +13,7 @@ interface BookmarkButtonProps {
 
 export default function BookmarkButton({ article, className = '', size = 20, onSaveAuthError }: BookmarkButtonProps) {
   const { isSaved, toggleSave } = useBookmark();
+  const { user } = useUser();
   const saved = isSaved(article.id);
 
   return (
@@ -19,8 +21,7 @@ export default function BookmarkButton({ article, className = '', size = 20, onS
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-        if (!isAuth) {
+        if (!user) {
           if (onSaveAuthError) onSaveAuthError();
           return;
         }

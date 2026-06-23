@@ -11,11 +11,12 @@ import ArticleView from './components/ArticleView';
 import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
 import { UserProfile, Article } from './types';
-import { INITIAL_USER } from './data';
+
 import { getAllArticles, markPaperSeen } from './lib/api/knowledge';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import GlobalToast from './components/GlobalToast';
 import { useUser } from './contexts/UserContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
   const { user, updateUser, handleLogout } = useUser();
@@ -23,26 +24,25 @@ export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
-  // Load the live Knowledge Hub feed from Supabase.
-  React.useEffect(() => {
-    getAllArticles()
-      .then(setArticles)
-      .catch((e) => console.error('Failed to load articles', e));
+  // Load live data from Supabase
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const liveArticles = await getAllArticles();
+        setArticles(liveArticles);
+      } catch (err) {
+        console.error('Failed to load articles:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
   }, []);
-
-  // Open an article and record it as seen (powers the fresh feed + articlesRead).
-  const openArticle = (article: Article) => {
-    setSelectedArticle(article);
-    markPaperSeen(article.id).catch((e) => console.error('Failed to mark seen', e));
-  };
-  
-  React.useEffect(() => {
-    console.log("Current Auth State:", user);
-  }, [user]);
-
 
   // Called by the upload flow once the document has really been processed.
   const handleProcessingComplete = (article: Article) => {
@@ -51,6 +51,120 @@ export default function App() {
     setSelectedArticle(article);
     setActiveSubTopic(null);
     setActiveTab('hud');
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[#ded9d0] dark:bg-[#09090B]">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-neutral-300 dark:border-neutral-700 border-t-black dark:border-t-white rounded-full animate-spin mb-4"></div>
+            <p className="text-neutral-500 font-mono text-sm uppercase tracking-widest">Initializing Environment</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (processingArticle) {
+      return (
+        <ErrorBoundary>
+          <StudyView 
+            isGenerating={true}
+            onBack={() => setProcessingArticle(null)}
+          />
+        </ErrorBoundary>
+      );
+    }
+
+    if (activeSubTopic) {
+      return (
+        <ErrorBoundary>
+          <SubTopicIndex 
+            subTopic={activeSubTopic}
+            onBack={() => {
+              setActiveSubTopic(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onSelectArticle={(article) => {
+              setSelectedArticle(article);
+              if (user) {
+                markPaperSeen(article.id).catch(err => console.error("Failed to mark paper seen:", err));
+              }
+            }}
+            onToggleBookmark={handleToggleBookmark}
+            articles={articles}
+            setActiveTab={(tab) => {
+              setActiveSubTopic(null);
+              setActiveTab(tab);
+            }}
+          />
+        </ErrorBoundary>
+      );
+    }
+
+    if (selectedArticle) {
+      return (
+        <ErrorBoundary>
+          <ArticleView 
+            article={selectedArticle} 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onBack={() => {
+              setSelectedArticle(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onToggleBookmark={handleToggleBookmark}
+          />
+        </ErrorBoundary>
+      );
+    }
+
+    if (activeTab === 'profile') {
+      return (
+        <ErrorBoundary>
+          <ProfileView 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            articles={articles}
+            onAddCustomArticle={handleAddCustomArticle}
+            onSelectArticle={(article) => {
+              setSelectedArticle(article);
+              if (user) {
+                markPaperSeen(article.id).catch(err => console.error("Failed to mark paper seen:", err));
+              }
+            }}
+            isEditingProfile={isEditingProfile}
+            setIsEditingProfile={setIsEditingProfile}
+          />
+        </ErrorBoundary>
+      );
+    }
+
+    return (
+      <ErrorBoundary>
+        <Dashboard 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onSelectArticle={(article) => {
+            setSelectedArticle(article);
+            if (user) {
+              markPaperSeen(article.id).catch(err => console.error("Failed to mark paper seen:", err));
+            }
+          }}
+          articles={articles}
+          onToggleBookmark={handleToggleBookmark}
+          onViewSubTopicAll={(subTopic) => {
+            setActiveSubTopic(subTopic);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onStartProcessing={(newArticle) => {
+            setProcessingArticle(newArticle);
+          }}
+          onProcessingComplete={handleProcessingComplete}
+          setIsEditingProfile={setIsEditingProfile}
+        />
+      </ErrorBoundary>
+    );
   };
 
   // Toggle bookmark function
