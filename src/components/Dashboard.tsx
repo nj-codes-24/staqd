@@ -219,9 +219,54 @@ export default function Dashboard({
   ];
 
 
+  const filteredArticles = useMemo(() => {
+    try {
+      if (!articles || !Array.isArray(articles)) return [];
+      
+      let result = [...articles];
+
+      if (filters?.publishers?.length > 0) {
+        result = result.filter(a => a?.id && filters.publishers.includes(getArticleSource(a.id)));
+      }
+
+      if (filters?.subTopics?.length > 0) {
+        result = result.filter(a => filters.subTopics.includes(a?.subTopic || 'General'));
+      }
+
+      if (filters?.attributes && filters.attributes['Includes Code']) {
+        result = result.filter(a => 
+          (a?.excerpt && a.excerpt.toLowerCase().includes('code')) ||
+          (a?.title && a.title.toLowerCase().includes('code'))
+        );
+      }
+      if (filters?.attributes && filters.attributes['Includes Dataset']) {
+        result = result.filter(a => 
+          (a?.excerpt && a.excerpt.toLowerCase().includes('dataset')) ||
+          (a?.title && a.title.toLowerCase().includes('dataset'))
+        );
+      }
+
+      if (filters?.sortBy === 'Newest First') {
+        result.sort((a, b) => {
+          if (!a?.publishedAt || !b?.publishedAt) return 0;
+          const dateA = new Date(a.publishedAt).getTime();
+          const dateB = new Date(b.publishedAt).getTime();
+          if (isNaN(dateA) || isNaN(dateB)) return 0;
+          return dateB - dateA;
+        });
+      } else if (filters?.sortBy === 'Most Cited') {
+        result.sort((a, b) => (b?.likes || 0) - (a?.likes || 0));
+      }
+
+      return result;
+    } catch (e) {
+      console.error("Filter error:", e);
+      return articles || [];
+    }
+  }, [articles, filters]);
 
   // Build the category → sub-topic feed from the live articles.
-  const knowledgeFeed = useMemo(() => groupIntoFeed(articles), [articles]);
+  const knowledgeFeed = useMemo(() => groupIntoFeed(filteredArticles), [filteredArticles]);
 
   // Dynamically get the sub-topics for the currently selected category
   const currentSubTopics = useMemo(() => {
@@ -229,15 +274,17 @@ export default function Dashboard({
   }, [selectedCategory, knowledgeFeed]);
 
   const searchResults = useMemo(() => {
-    if (!isSearching || !searchQuery.trim()) return null;
+    if (!isSearching || !searchQuery.trim() || !filteredArticles) return null;
     const query = searchQuery.toLowerCase();
-    return articles.filter(a => 
-      a.title.toLowerCase().includes(query) ||
-      a.category.toLowerCase().includes(query) ||
-      a.author.name.toLowerCase().includes(query) ||
-      getArticleSource(a.id).toLowerCase().includes(query)
-    );
-  }, [isSearching, searchQuery, articles]);
+    return filteredArticles.filter(a => {
+      if (!a) return false;
+      const titleMatch = a.title?.toLowerCase().includes(query);
+      const categoryMatch = a.category?.toLowerCase().includes(query);
+      const authorMatch = a.author?.name?.toLowerCase().includes(query);
+      const sourceMatch = a.id ? getArticleSource(a.id).toLowerCase().includes(query) : false;
+      return titleMatch || categoryMatch || authorMatch || sourceMatch;
+    });
+  }, [isSearching, searchQuery, filteredArticles]);
 
   return (
     <div id="magazine-mockup-wrapper" className="min-h-screen bg-[#ded9cf] dark:bg-[#09090B] md:py-8 font-sans antialiased text-[#1c1c1c] dark:text-[#F3F4F6] selection:bg-[#c2b29f]">
