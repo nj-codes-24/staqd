@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Dashboard from './components/Dashboard';
-import StudyView from './components/StudyView';
 import ArticleView from './components/ArticleView';
 import ProfileView from './components/ProfileView';
 import SubTopicIndex from './components/SubTopicIndex';
@@ -23,7 +22,6 @@ export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [activeSubTopic, setActiveSubTopic] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [processingArticle, setProcessingArticle] = React.useState<Article | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   // Load the live Knowledge Hub feed from Supabase.
@@ -36,7 +34,9 @@ export default function App() {
   // Open an article and record it as seen (powers the fresh feed + articlesRead).
   const openArticle = (article: Article) => {
     setSelectedArticle(article);
-    markPaperSeen(article.id).catch((e) => console.error('Failed to mark seen', e));
+    if (!article.id.startsWith('upload-')) {
+      markPaperSeen(article.id).catch((e) => console.error('Failed to mark seen', e));
+    }
   };
   
   React.useEffect(() => {
@@ -44,13 +44,29 @@ export default function App() {
   }, [user]);
 
 
+  const handleStartProcessing = (newArticle: Article) => {
+    setArticles((prev) => [newArticle, ...prev]);
+    setSelectedArticle(newArticle);
+  };
+
   // Called by the upload flow once the document has really been processed.
   const handleProcessingComplete = (article: Article) => {
-    setArticles((prev) => [article, ...prev]);
-    setProcessingArticle(null);
-    setSelectedArticle(article);
-    setActiveSubTopic(null);
-    setActiveTab('hud');
+    setArticles((prev) => {
+      const idx = prev.findIndex(a => a.id.startsWith('upload-'));
+      if (idx !== -1) {
+        const newArr = [...prev];
+        newArr[idx] = article;
+        return newArr;
+      }
+      return [article, ...prev];
+    });
+    
+    setSelectedArticle((prevSelected) => {
+      if (prevSelected && prevSelected.id.startsWith('upload-')) {
+        return article;
+      }
+      return prevSelected;
+    });
   };
 
   // Toggle bookmark function
@@ -132,21 +148,7 @@ export default function App() {
           className="w-full"
         >
           {/* Conditional Subtree Routing */}
-            {processingArticle ? (
-              <motion.div
-                key="processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="w-full"
-              >
-                <StudyView 
-                  isGenerating={true}
-                  onBack={() => setProcessingArticle(null)}
-                />
-              </motion.div>
-            ) : selectedArticle ? (
+            {selectedArticle ? (
               <ArticleView 
                 article={selectedArticle}
                 activeTab={activeTab}
@@ -193,9 +195,7 @@ export default function App() {
                   setActiveSubTopic(subTopic);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onStartProcessing={(newArticle) => {
-                  setProcessingArticle(newArticle);
-                }}
+                onStartProcessing={handleStartProcessing}
                 onProcessingComplete={handleProcessingComplete}
                 setIsEditingProfile={setIsEditingProfile}
               />

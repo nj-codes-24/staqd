@@ -120,6 +120,7 @@ export default function ArticleView({
   const { saveUpload, uploadedArticles } = useBookmark();
   const isUploadedDocument = article.id.startsWith('custom-paper');
   const hasSavedUpload = uploadedArticles.some(a => a.id === article.id);
+  const isProcessing = article.id.startsWith('upload-');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1151,7 +1152,19 @@ export default function ArticleView({
               {/* Long Summary content with clear white, crisp background and high contrast text */}
               <div className="font-serif text-base font-normal leading-relaxed text-neutral-950 dark:text-gray-300 space-y-6">
                 
-{article.content && article.content.trim()
+{isProcessing ? (
+                  <div className="space-y-4 pt-2">
+                    <div className="w-full h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-11/12 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-10/12 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-full h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded mt-6"></div>
+                    <div className="w-3/4 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-5/6 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-4/5 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                    <div className="w-full h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded mt-6"></div>
+                    <div className="w-11/12 h-4 bg-neutral-300 dark:bg-white/10 animate-pulse rounded"></div>
+                  </div>
+                ) : article.content && article.content.trim()
                   ? article.content.split('\n').filter((l) => l.trim()).map((line, idx) => {
                       const t = line.trim();
                       if (t.startsWith('#')) {

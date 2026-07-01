@@ -12,6 +12,7 @@ import BookmarkButton from './BookmarkButton';
 import { Heart, MessageCircle, Send, Bookmark, X, ThumbsUp, Share2, Reply, ChevronLeft, ChevronRight, UploadCloud, Pencil, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
 import EditProfileModal from './EditProfileModal';
 import { useUser } from '../contexts/UserContext';
+import { supabase } from '../lib/supabase';
 
 interface ProfileViewProps {
   activeTab: 'hud' | 'saved' | 'profile';
@@ -220,6 +221,17 @@ export default function ProfileView({
   const handleSaveEdit = () => {
     if (editingUpload) {
       saveUpload({ ...editingUpload, title: editTitle, excerpt: editDesc });
+      
+      // Background Supabase Update
+      if (!editingUpload.id.startsWith('upload-') && !editingUpload.id.startsWith('custom-')) {
+        supabase.from('papers').update({ 
+          title: editTitle, 
+          excerpt: editDesc 
+        }).eq('id', editingUpload.id).then(({ error }) => {
+          if (error) console.error("Failed to update custom upload title:", error);
+        });
+      }
+
       setEditingUpload(null);
     }
   };
