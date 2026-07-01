@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+import { supabase } from '../lib/supabase';
 import { 
   ArrowLeft, 
   Bookmark, 
@@ -555,30 +556,43 @@ export default function ArticleView({
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Generate chatbot reply based on query matching
-  const generateResponse = (userText: string) => {
-    const textLower = userText.toLowerCase();
-
-    if (textLower.includes('summar') || textLower.includes('order') || textLower.includes('custom') || textLower.includes('last month')) {
-      return `### Sourcing & Custom Orders Summary\n\nLast month, we registered **12 custom orders** with approved assays:\n\n* **Gold Purity validation:** 5 orders (all matching standard gold purity compliance specs).\n* **Carat Density analysis:** 3 orders (certified under standard laboratory scales).\n* **Custom designs:** 4 orders verified conflict-free compliant.\n\nAll sourcing reports indicate pristine quality levels. What other aspects of our operations should we check?`;
+  const invokeChat = async (query: string, chatHistory: ChatMessage[]) => {
+    setIsTyping(true);
+    try {
+      const documentText = txtContent || article.content || article.excerpt || '';
+      
+      const { data, error } = await supabase.functions.invoke('chat-document', {
+        body: {
+          userQuery: query,
+          documentText: documentText,
+          chatHistory: chatHistory
+        }
+      });
+      
+      if (error) throw error;
+      
+      const botMsg: ChatMessage = {
+        id: `bot-${Date.now()}`,
+        sender: 'assistant',
+        text: data?.reply ?? 'I am unable to answer right now.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMsg]);
+    } catch (e) {
+      console.error('Chat error', e);
+      const botMsg: ChatMessage = {
+        id: `bot-${Date.now()}`,
+        sender: 'assistant',
+        text: 'Sorry, I encountered an error while trying to generate a response.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMsg]);
+    } finally {
+      setIsTyping(false);
     }
-
-    if (textLower.includes('gold') || textLower.includes('purity') || textLower.includes('assay') || textLower.includes('hallmark')) {
-      return `### Material Verification Logs\n\nMaterial testing results from our decentralized registries:\n\n1. **XRF Spectrometer Audits:** Standard gold purity was measured consistently above catalog thresholds.\n2. **Official Hallmarking:** Verification labels have been minted across all approved batches.\n3. **Vendor Compliance:** Suppliers certified ethical logs align with our sustainability metrics.\n\nWould you like me to display the **Operational Strategies** text summary or review other **Cue Cards**?`;
-    }
-
-    if (textLower.includes('conflict') || textLower.includes('diamond') || textLower.includes('ethical') || textLower.includes('sourcing')) {
-      return `### Sourcing Ethics & Traceability Report\n\n* **Kimberley Process Tracking:** Zero conflict materials entered the processing network.\n* **Ledger Validation:** Blockchain verification checks confirm high integrity for 100% of gemstone imports.\n* **Audit Interval:** Checks are scheduled fortnightly in compliance with global trade boards.\n\nLet me know if you would like to run another database analysis.`;
-    }
-
-    if (textLower.includes('help') || textLower.includes('concierge') || textLower.includes('what can you do')) {
-      return `### Welcome to the Jewelry Concierge AI Assistant\n\nI can analyze logistical operations, material assays, and diamond provenance logs instantly. Common triggers:\n* Type **"summarize orders"** for custom order highlights.\n* Type **"gold purity"** for XRF metal assay details.\n* Type **"conflict diamonds"** to retrieve Kimberley Process compliance sheets.\n\nHow can I facilitate your work today?`;
-    }
-
-    return `### Concierge Analysis Insight\n\nRegarding your question on **"${userText}"**:\n\nI've run a keyword query through last month's operational records. We are keeping high-fidelity logs of:\n* **Gold Purity Standards** (Ethical sourcing active)\n* **Carat Density Audits** (All assays finalized)\n* **Traceability ledgers** (Block-by-block secure origin tracks)\n\nLet me know if I should summarize these categories further, or outline our customer engagement models.`;
   };
 
-  const handleSend = (e?: React.FormEvent) => {
+  const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputValue.trim() || isTyping) return;
 
@@ -591,23 +605,13 @@ export default function ArticleView({
       text: userQuery,
       timestamp: new Date()
     };
-    setMessages(prev => [...prev, userMsg]);
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const responseText = generateResponse(userQuery);
-      const botMsg: ChatMessage = {
-        id: `bot-${Date.now()}`,
-        sender: 'assistant',
-        text: responseText,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 850);
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
+    
+    await invokeChat(userQuery, messages);
   };
 
-  const handleTriggerTag = (tagLabel: string, userText: string) => {
+  const handleTriggerTag = async (tagLabel: string, userText: string) => {
     if (isTyping) return;
     
     const userMsg: ChatMessage = {
@@ -616,20 +620,10 @@ export default function ArticleView({
       text: tagLabel,
       timestamp: new Date()
     };
-    setMessages(prev => [...prev, userMsg]);
-    setIsTyping(true);
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
 
-    setTimeout(() => {
-      const responseText = generateResponse(userText);
-      const botMsg: ChatMessage = {
-        id: `bot-tag-${Date.now()}`,
-        sender: 'assistant',
-        text: responseText,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 850);
+    await invokeChat(userText, messages);
   };
 
   // Create a custom cue card

@@ -414,3 +414,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.daily-pipeline]
 verify_jwt = false
+
+[functions.chat-document]
+verify_jwt = false
